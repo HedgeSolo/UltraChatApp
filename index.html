@@ -152,6 +152,11 @@
       <i id="serverMenuIcon" class="fa-solid fa-chevron-down text-[10px] text-discord-textMuted transition-transform duration-300"></i>
 
       <div id="serverDropdownMenu" class="hidden absolute top-14 left-2 right-2 bg-discord-black border border-discord-hover/50 rounded-lg p-1.5 shadow-2xl z-50 text-sm font-medium">
+        <button id="btnInvitePeople" onclick="openInviteModal()" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-blurple transition-colors hidden">
+          <span>Invite People</span>
+          <i class="fa-solid fa-user-plus text-xs"></i>
+        </button>
+        <div id="inviteDivider" class="h-[1px] bg-discord-hover my-1 hidden"></div>
         <button id="btnServerSettings" onclick="openServerSettings()" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
           <span>Server Settings & Mod</span>
           <i class="fa-solid fa-gear text-xs"></i>
@@ -508,6 +513,28 @@
     </div>
   </div>
 
+  <!-- INVITE MODAL -->
+  <div id="inviteModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-discord-sidebar w-full max-w-md rounded-lg shadow-2xl relative p-6 border border-discord-hover">
+      <h2 class="text-xl font-bold text-discord-textHeader mb-2">Invite Friends</h2>
+      <p class="text-xs text-discord-textMuted mb-4">Share this link or send it directly to your friends.</p>
+      
+      <div class="flex space-x-2 mb-6">
+        <input type="text" id="inviteCodeInput" readonly class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:ring-1 focus:ring-discord-blurple" />
+        <button onclick="copyInviteCode()" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-4 py-2 rounded text-sm font-bold transition-colors">Copy</button>
+      </div>
+
+      <h3 class="text-xs font-bold text-discord-textMuted uppercase mb-2">Send to Friends</h3>
+      <div id="inviteFriendsList" class="space-y-2 max-h-48 overflow-y-auto pr-2">
+         <!-- Populated via JS -->
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button onclick="closeModal('inviteModal')" class="text-sm font-bold text-discord-textMuted hover:underline">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // =========================================================================
     // 1. SUPABASE & CORE STATE
@@ -565,8 +592,8 @@
         needsInvite: false,
         settings: { strictMode: true, blockedWords: 'spamword, badword' },
         roles: [
-            { id: 'admin', name: 'Admin', color: '#f59e0b', bypassSlowmode: true, canKick: true },
-            { id: 'member', name: 'Member', color: '#949ba4', bypassSlowmode: false, canKick: false }
+            { id: 'admin', name: 'Admin', color: '#f59e0b', bypassSlowmode: true, canKick: true, canCreateInvite: true },
+            { id: 'member', name: 'Member', color: '#949ba4', bypassSlowmode: false, canKick: false, canCreateInvite: false }
         ],
         mockMembers: [
             { id: 'mock1', name: 'ld0113', role: 'admin', isGuest: false },
@@ -770,6 +797,8 @@
         document.getElementById('serverOwnerBadge').classList.add('hidden');
         document.getElementById('btnServerSettings').classList.add('hidden');
         document.getElementById('btnCreateChannel').classList.add('hidden');
+        document.getElementById('btnInvitePeople').classList.add('hidden');
+        document.getElementById('inviteDivider').classList.add('hidden');
         
         fetchFriendsFromDB();
         renderDMList();
@@ -781,9 +810,23 @@
         document.getElementById('serverTitleText').innerText = srv.name;
         
         const isOwner = (srv.owner_id === currentUser.id) || currentUser.isCEO;
+        
+        let canInvite = isOwner;
+        if (!canInvite && srv.roles && srv.mockMembers) {
+            const myMemberRec = srv.mockMembers.find(m => m.id === currentUser.id);
+            if (myMemberRec) {
+                const myRole = srv.roles.find(r => r.id === myMemberRec.role);
+                if (myRole && myRole.canCreateInvite) canInvite = true;
+            }
+        }
+
         document.getElementById('serverOwnerBadge').classList.toggle('hidden', !isOwner);
         document.getElementById('btnServerSettings').classList.toggle('hidden', !isOwner);
         document.getElementById('btnCreateChannel').classList.toggle('hidden', !isOwner);
+        
+        const showInvite = canInvite && srv.needsInvite;
+        document.getElementById('btnInvitePeople').classList.toggle('hidden', !showInvite);
+        document.getElementById('inviteDivider').classList.toggle('hidden', !showInvite);
 
         renderChannelsList(srv.channels);
         if (srv.channels.length > 0) {
@@ -898,6 +941,7 @@
                 <div class="flex space-x-4 text-[10px] uppercase font-bold text-discord-textMuted">
                   <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" ${r.bypassSlowmode?'checked':''} disabled class="accent-discord-blurple"> <span>Bypass Slowmode</span></label>
                   <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" ${r.canKick?'checked':''} disabled class="accent-discord-blurple"> <span>Kick/Ban</span></label>
+                  <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" ${r.canCreateInvite?'checked':''} disabled class="accent-discord-blurple"> <span>Invites</span></label>
                 </div>
             `;
             c.appendChild(d);
@@ -914,7 +958,8 @@
             name: 'New Role ' + (srv.roles.length + 1),
             color: colors[srv.roles.length % colors.length],
             bypassSlowmode: false,
-            canKick: false
+            canKick: false,
+            canCreateInvite: false
         });
         saveState();
         renderRolesList(srv);
@@ -1060,6 +1105,26 @@
       const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
       const ytMatch = safeText.match(ytRegex);
       if (ytMatch) formattedText = safeText.replace(ytRegex, `<br><iframe class="yt-embed" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`);
+      
+      const inviteRegex = /\[INVITE:([A-Za-z0-9+/=%\-]+)\]/g;
+      formattedText = formattedText.replace(inviteRegex, (match, b64) => {
+          try {
+              const srvData = JSON.parse(decodeURIComponent(atob(b64)));
+              return `
+              <div class="mt-2 p-3 bg-discord-black border border-discord-hover/50 rounded-md w-[320px] flex flex-col gap-2 shadow-sm">
+                  <div class="text-[10px] font-bold text-discord-textMuted uppercase tracking-wider">You've been invited to join a server</div>
+                  <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-xl bg-discord-sidebar flex items-center justify-center font-bold text-white shrink-0 shadow-inner overflow-hidden">
+                          ${srvData.icon && srvData.icon.startsWith('data:') ? `<img src="${srvData.icon}" class="w-full h-full object-cover"/>` : (srvData.icon || srvData.name[0])}
+                      </div>
+                      <div class="font-bold text-discord-textHeader truncate flex-1">${srvData.name}</div>
+                      <button onclick="joinServerViaInvite('${b64}')" class="bg-discord-green hover:bg-green-600 text-white px-4 py-1.5 rounded text-xs font-bold transition-colors">Join</button>
+                  </div>
+              </div>`;
+          } catch(e) {
+              return `<span class="text-red-500 font-bold">[Invalid Invite Code]</span>`;
+          }
+      });
 
       // Enforce Guest Tag on rendering
       const finalDisplayName = isMsgUserGuest ? `<span class="text-[10px] bg-discord-hover text-discord-textMuted px-1.5 rounded mr-1 font-black">[GUEST]</span>${resolvedName}` : resolvedName;
@@ -1552,6 +1617,97 @@
       
       closeModal('userSettingsModal');
       showToast("User settings saved");
+    }
+
+    function openInviteModal() {
+        const srv = servers.find(s => s.id === currentServerId);
+        if (!srv) return;
+        
+        // Use a lightweight copy of the server for the invite code payload
+        const srvLite = { id: srv.id, name: srv.name, icon: srv.icon };
+        const b64 = btoa(encodeURIComponent(JSON.stringify(srvLite)));
+        const inviteCode = `[INVITE:${b64}]`;
+        
+        document.getElementById('inviteCodeInput').value = inviteCode;
+        
+        const c = document.getElementById('inviteFriendsList');
+        c.innerHTML = '';
+        if (friends.length === 0) {
+            c.innerHTML = '<div class="text-xs text-discord-textMuted text-center py-4">No friends found. Add some to send direct invites!</div>';
+        } else {
+            friends.forEach(f => {
+                c.innerHTML += `
+                    <div class="flex items-center justify-between p-2 hover:bg-discord-hover/50 rounded-lg transition-colors border border-transparent hover:border-discord-hover">
+                        <div class="flex items-center space-x-3">
+                            <img src="${f.avatar_url || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-7 h-7 rounded-full object-cover" />
+                            <div class="text-sm font-bold text-discord-textHeader">${f.display_name}</div>
+                        </div>
+                        <button onclick="sendInviteToFriend('${f.friendId}', '${b64}')" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-4 py-1.5 rounded text-xs font-bold transition-colors">Send</button>
+                    </div>
+                `;
+            });
+        }
+        
+        openModal('inviteModal');
+    }
+
+    function copyInviteCode() {
+        const input = document.getElementById('inviteCodeInput');
+        input.select();
+        document.execCommand('copy');
+        showToast("Invite code copied to clipboard!");
+    }
+
+    async function sendInviteToFriend(friendId, b64) {
+        const sortedIds = [currentUser.id, friendId].sort();
+        const dmChannelId = 'dm_' + sortedIds.join('_');
+        
+        let msgData = {
+            text: `Hey, you should join this server! \n\n[INVITE:${b64}]`,
+            user_name: currentUser.name,
+            user_id: currentUser.id,
+            avatar_url: currentUser.avatar,
+            server_id: 'dm',
+            channel_id: dmChannelId
+        };
+        
+        await client.from('messages').insert([msgData]);
+        showToast("Invite sent directly via DM!");
+    }
+
+    function joinServerViaInvite(b64) {
+        try {
+            const srvData = JSON.parse(decodeURIComponent(atob(b64)));
+            if (servers.some(s => s.id === srvData.id)) {
+                showToast("You are already in this server.", "error");
+                switchServer(srvData.id);
+                return;
+            }
+            
+            // Reconstruct server structure from known public/default config or fallback generic setup
+            const fullSrv = defaultServers.find(s => s.id === srvData.id) || {
+                ...srvData,
+                owner_id: 'unknown',
+                needsInvite: true,
+                settings: { strictMode: false, blockedWords: '' },
+                roles: [],
+                channels: [{ id: 'general', name: 'general', type: 'text', slowmode: 0 }],
+                mockMembers: []
+            };
+            
+            // Add self to mock members seamlessly
+            if (!fullSrv.mockMembers.some(m => m.id === currentUser.id)) {
+                fullSrv.mockMembers.push({ id: currentUser.id, name: currentUser.name, role: 'none', isGuest: currentUser.isGuest, avatar: currentUser.avatar });
+            }
+            
+            servers.push(fullSrv);
+            saveState();
+            renderServerList();
+            switchServer(fullSrv.id);
+            showToast(`Successfully joined ${fullSrv.name}!`);
+        } catch(e) {
+            showToast("This invite link has expired or is invalid.", "error");
+        }
     }
 
     function toggleServerDropdown(e) {
