@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Supabase Guestbook</title>
-  <!-- Load the Supabase JS Library from CDN -->
-  <script src="https://jsdelivr.net"></script>
+  <!-- Loaded the full Supabase JS v2 library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
     form { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -59,6 +59,26 @@
         </div>
       `).join('');
     }
+
+    // Added event listener to capture form submit & insert message to database
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const messageText = input.value.trim();
+      if (!messageText) return;
+
+      const { error } = await client
+        .from('messages')
+        .insert([{ text: messageText }]);
+
+      if (error) {
+        console.error('Error inserting message:', error);
+        alert('Failed to send message.');
+        return;
+      }
+
+      input.value = '';
+      fetchMessages();
+    });
 
     fetchMessages();
   </script>
