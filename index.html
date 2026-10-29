@@ -1,2 +1,91 @@
-<!DOCTYPE=html>
-<body>hello world!</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Guestbook</title>
+  <!-- Alternative fallback CDN link -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; color: #333; }
+    form { display: flex; gap: 10px; margin-bottom: 20px; }
+    input { flex: 1; padding: 8px; }
+    button { padding: 8px 16px; cursor: pointer; }
+    .message { background: #f4f4f4; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+    .error { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h2>Send a Message</h2>
+  <form id="messageForm">
+    <input type="text" id="messageInput" placeholder="Type a message..." required />
+    <button type="submit">Send</button>
+  </form>
+
+  <h2>Saved Messages</h2>
+  <div id="messagesList">Loading messages...</div>
+
+  <script>
+    const SUPABASE_URL = "https://unjvzzlwxpmiqyrovbce.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuanZ6emx3eHBtaXF5cm92YmNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODE1MDAsImV4cCI6MjEwODg1NzUwMH0.WKKvm2xkIJf8nJLy8eV4ndQZ7LF1qp5ExHGX6LL3a_A";
+
+    const list = document.getElementById('messagesList');
+    const form = document.getElementById('messageForm');
+    const input = document.getElementById('messageInput');
+
+    // Check if the CDN script loaded properly
+    if (typeof supabase === 'undefined') {
+      list.innerHTML = '<span class="error">Error: Supabase JS library could not be loaded. (Check your network or ad-blocker).</span>';
+    } else {
+      const { createClient } = supabase;
+      const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      async function fetchMessages() {
+        const { data, error } = await client
+          .from('messages')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Fetch error:', error);
+          list.innerHTML = `<span class="error">Database error: ${error.message}</span>`;
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          list.innerHTML = 'No messages yet.';
+          return;
+        }
+
+        list.innerHTML = data.map(msg => `
+          <div class="message">
+            <strong>${msg.user_name || 'Anonymous'}:</strong> ${msg.text || ''}
+          </div>
+        `).join('');
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const messageText = input.value.trim();
+        if (!messageText) return;
+
+        const { error } = await client
+          .from('messages')
+          .insert([{ text: messageText }]);
+
+        if (error) {
+          console.error('Insert error:', error);
+          alert('Failed to send message: ' + error.message);
+          return;
+        }
+
+        input.value = '';
+        fetchMessages();
+      });
+
+      fetchMessages();
+    }
+  </script>
+</body>
+</html>
