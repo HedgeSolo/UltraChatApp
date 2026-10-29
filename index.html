@@ -1,29 +1,69 @@
-<!DOCTYPE=html>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Message Storer & Display</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    ul {
+      list-style-type: disc;
+      margin-top: 20px;
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
 <body>
 
-  <title>ChatApp 3000</title>
-
-  <h1>Ultimate Chat App</h1>
-  <p>Welcome. This is a WIP!</p>
-
-        <form action="/login-endpoint" method="POST">
-            
-            <!-- Username/Email Field -->
-            <div class="input-group">
-                <label for="username">Username or Email</label>
-                <input type="text" id="username" name="username" placeholder="Enter username" required>
-            </div>
-            
-            <!-- Password Field -->
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter password" required>
-            </div>
-            
-            <!-- Submit Button -->
-            <button type="submit" class="login-btn">Sign In</button>
-            
-        </form>
+  <h2>Message Box</h2>
+  <input type="text" id="messageInput" placeholder="Type a message and press Enter..." autocomplete="off">
   
+  <ul id="messageList"></ul>
+
+  <script>
+    const input = document.getElementById('messageInput');
+    const messageList = document.getElementById('messageList');
+
+    // Load saved messages from browser storage when page opens
+    let messages = JSON.parse(localStorage.getItem('savedMessages')) || [];
+
+    function renderMessages() {
+      messageList.innerHTML = '';
+      messages.forEach((msg) => {
+        const li = document.createElement('li');
+        li.textContent = msg;
+        messageList.appendChild(li);
+      });
+    }
+
+    // Listen for the "Enter" key press inside the textbox
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && input.value.trim() !== '') {
+        const textValue = input.value.trim();
+        messages.push(textValue);
+        localStorage.setItem('savedMessages', JSON.stringify(messages));
+        renderMessages();
+        input.value = ''; // Clear the box
+      }
+    });
+
+    // Display existing messages on load
+    renderMessages();
+  </script>
+
 </body>
+</html>
