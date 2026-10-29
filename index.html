@@ -107,9 +107,9 @@
       </div>
     </div>
 
-    <!-- CEO Special Access Button (Visible only to CEO) -->
+    <!-- CEO Special Access Button -->
     <div id="ceoNavBtnGroup" class="hidden relative group flex items-center justify-center w-full">
-      <button onclick="openModal('ceoCommandModal')" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-amber-500 hover:bg-amber-400 flex items-center justify-center text-black font-black transition-all duration-300 shadow-lg animate-pulse">
+      <button onclick="openCeoModal()" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-amber-500 hover:bg-amber-400 flex items-center justify-center text-black font-black transition-all duration-300 shadow-lg animate-pulse">
         <i class="fa-solid fa-crown text-xl"></i>
       </button>
       <div class="absolute left-[80px] bg-amber-500 text-black text-xs px-2.5 py-1.5 rounded-md font-extrabold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
@@ -138,7 +138,7 @@
 
     <!-- Public Server Explorer Button -->
     <div class="relative group flex items-center justify-center w-full">
-      <button onclick="openModal('discoverModal')" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-discord-sidebar hover:bg-discord-green flex items-center justify-center text-discord-green hover:text-white transition-all duration-300">
+      <button onclick="openPublicExplorer()" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-discord-sidebar hover:bg-discord-green flex items-center justify-center text-discord-green hover:text-white transition-all duration-300">
         <i class="fa-solid fa-compass text-lg"></i>
       </button>
       <div class="absolute left-[80px] bg-discord-black text-white text-xs px-2.5 py-1.5 rounded-md font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
@@ -160,11 +160,11 @@
 
       <!-- Server Context Dropdown -->
       <div id="serverDropdownMenu" class="hidden absolute top-14 left-2 right-2 bg-discord-black border border-discord-hover/50 rounded-lg p-1.5 shadow-2xl z-50 text-sm font-medium">
-        <button id="btnServerSettings" onclick="openModal('serverSettingsModal')" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
+        <button id="btnServerSettings" onclick="openServerSettings()" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
           <span>Server Settings</span>
           <i class="fa-solid fa-gear text-xs"></i>
         </button>
-        <button onclick="openModal('createChannelModal')" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
+        <button id="btnCreateChannel" onclick="openModal('createChannelModal')" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
           <span>Create Channel</span>
           <i class="fa-solid fa-plus-circle text-xs"></i>
         </button>
@@ -387,11 +387,11 @@
           <div id="ssContent-overview" class="space-y-5">
             <div>
               <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Server Name</label>
-              <input type="text" id="ssInputName" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader" />
+              <input type="text" id="ssInputName" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
             </div>
             <div>
               <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Server Icon / Emoji</label>
-              <input type="text" id="ssInputIcon" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader" />
+              <input type="text" id="ssInputIcon" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
             </div>
             <div class="flex items-center justify-between p-3 bg-discord-sidebar rounded-lg">
               <div>
@@ -422,7 +422,7 @@
 
       <div class="bg-discord-serverbar p-4 flex justify-end space-x-3 shrink-0">
         <button onclick="closeModal('serverSettingsModal')" class="text-sm text-discord-textMuted hover:underline">Cancel</button>
-        <button onclick="saveServerSettings()" class="bg-discord-green hover:bg-green-600 text-white px-5 py-1.5 rounded text-sm font-bold">Save Changes</button>
+        <button onclick="saveServerSettings()" class="bg-discord-green hover:bg-green-600 text-white px-5 py-1.5 rounded text-sm font-bold transition-colors">Save Changes</button>
       </div>
     </div>
   </div>
@@ -451,7 +451,7 @@
           </div>
           <div class="bg-discord-sidebar p-4 rounded-lg border border-amber-500/30">
             <div class="text-xs font-bold text-discord-textMuted uppercase">Messages Today</div>
-            <div id="ceoMetricMessages" class="text-2xl font-black text-amber-400 mt-1">24</div>
+            <div id="ceoMetricMessages" class="text-2xl font-black text-amber-400 mt-1">0</div>
           </div>
           <div class="bg-discord-sidebar p-4 rounded-lg border border-amber-500/30">
             <div class="text-xs font-bold text-discord-textMuted uppercase">System Health</div>
@@ -481,7 +481,7 @@
 
       <input type="text" id="publicSearchInput" oninput="renderPublicExplorer()" placeholder="Search servers..." class="w-full bg-discord-black border border-discord-hover rounded-lg px-4 py-2 text-sm text-discord-textHeader mb-4 outline-none focus:border-discord-blurple" />
 
-      <div id="publicServersContainer" class="space-y-2 max-h-[400px] overflow-y-auto"></div>
+      <div id="publicServersContainer" class="space-y-2 max-h-[400px] overflow-y-auto pr-2"></div>
     </div>
   </div>
 
@@ -496,19 +496,19 @@
       <div class="p-6 space-y-4 bg-discord-sidebar">
         <div>
           <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Display Name</label>
-          <input type="text" id="settingsUsername" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader" />
+          <input type="text" id="settingsUsername" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
         </div>
         <div>
           <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Avatar URL</label>
-          <input type="text" id="settingsAvatarUrl" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader" />
+          <input type="text" id="settingsAvatarUrl" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
         </div>
         <div>
           <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Custom Status Quote</label>
-          <input type="text" id="settingsStatusQuote" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader" />
+          <input type="text" id="settingsStatusQuote" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
         </div>
         <div>
           <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Theme</label>
-          <select id="settingsTheme" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader">
+          <select id="settingsTheme" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple">
             <option value="dark">Discord Dark</option>
             <option value="amoled">Midnight AMOLED</option>
             <option value="light">Light Mode</option>
@@ -519,7 +519,7 @@
 
       <div class="bg-discord-serverbar p-4 flex justify-between items-center">
         <button onclick="logout()" class="text-red-500 font-bold text-sm hover:underline">Log Out</button>
-        <button onclick="saveUserSettings()" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-5 py-1.5 rounded text-sm font-bold">Save</button>
+        <button onclick="saveUserSettings()" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-5 py-1.5 rounded text-sm font-bold transition-colors">Save</button>
       </div>
     </div>
   </div>
@@ -533,17 +533,43 @@
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Server Name</label>
-          <input type="text" id="newServerName" class="w-full bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none" placeholder="My Awesome Server" />
+          <input type="text" id="newServerName" class="w-full bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-discord-blurple" placeholder="My Awesome Server" />
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Icon Emoji</label>
-          <input type="text" id="newServerIcon" class="w-full bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none" placeholder="🚀" />
+          <input type="text" id="newServerIcon" class="w-full bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-discord-blurple" placeholder="🚀" />
         </div>
       </div>
 
       <div class="mt-6 flex justify-between items-center">
-        <button onclick="closeModal('createServerModal')" class="text-xs font-bold text-gray-500">Cancel</button>
-        <button onclick="handleCreateServer()" class="bg-discord-blurple text-white px-5 py-2 rounded text-sm font-bold">Create</button>
+        <button onclick="closeModal('createServerModal')" class="text-xs font-bold text-gray-500 hover:underline">Cancel</button>
+        <button onclick="handleCreateServer()" class="bg-discord-blurple text-white px-5 py-2 rounded text-sm font-bold hover:bg-discord-blurpleHover transition-colors">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE CHANNEL MODAL (ADDED) -->
+  <div id="createChannelModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-discord-sidebar w-full max-w-md rounded-lg shadow-2xl relative p-6 border border-discord-hover">
+      <h2 class="text-xl font-bold text-discord-textHeader mb-4">Create Channel</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Channel Type</label>
+          <select id="newChannelType" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple">
+            <option value="text">Text Channel</option>
+            <option value="voice">Voice Channel</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Channel Name</label>
+          <input type="text" id="newChannelName" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" placeholder="new-channel" />
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-between items-center">
+        <button onclick="closeModal('createChannelModal')" class="text-sm font-bold text-discord-textMuted hover:underline">Cancel</button>
+        <button onclick="handleCreateChannel()" class="bg-discord-blurple text-white px-5 py-2 rounded text-sm font-bold hover:bg-discord-blurpleHover transition-colors">Create Channel</button>
       </div>
     </div>
   </div>
@@ -569,6 +595,7 @@
     let friendsSubTab = 'online';
     let activeRealtimeChannel = null;
 
+    // Simulated Server defaults for new clients
     const defaultServers = [
       { 
         id: 'ultrachat-hq', 
@@ -577,10 +604,24 @@
         owner_id: 'system',
         owner_name: 'System',
         needsInvite: false,
+        memberCount: 1337,
         roles: [{ id: 'admin', name: 'Admin', color: '#f59e0b' }],
         channels: [
           { id: 'general', name: 'general', type: 'text', topic: 'General Lobby' },
           { id: 'voice-lounge', name: 'Voice Lounge', type: 'voice', topic: 'Voice Lounge' }
+        ]
+      },
+      { 
+        id: 'public-gaming', 
+        name: 'Gaming Central', 
+        icon: '🎮', 
+        owner_id: 'system',
+        owner_name: 'System',
+        needsInvite: false,
+        memberCount: 542,
+        roles: [],
+        channels: [
+          { id: 'general', name: 'general', type: 'text', topic: 'Game talk' }
         ]
       }
     ];
@@ -654,6 +695,12 @@
       }
 
       loadState();
+      
+      // Setup UI Theme
+      const theme = localStorage.getItem(getStoreKey('theme')) || 'dark';
+      document.body.className = `h-full bg-discord-chat text-gray-200 select-none overflow-hidden font-sans flex theme-${theme}`;
+      document.getElementById('settingsTheme').value = theme;
+
       updateUserBar();
       renderServerList();
       switchServer(currentServerId);
@@ -745,6 +792,8 @@
       if (isHome) {
         document.getElementById('serverTitleText').innerText = "Direct Messages";
         document.getElementById('serverOwnerBadge').classList.add('hidden');
+        document.getElementById('btnServerSettings').classList.add('hidden');
+        document.getElementById('btnCreateChannel').classList.add('hidden');
         renderFriendsView();
       } else {
         const srv = servers.find(s => s.id === srvId) || servers[0];
@@ -752,10 +801,15 @@
         
         const isOwner = (srv.owner_id === currentUser.id) || currentUser.isCEO;
         document.getElementById('serverOwnerBadge').classList.toggle('hidden', !isOwner);
-        document.getElementById('btnServerSettings').style.display = isOwner ? 'block' : 'none';
+        document.getElementById('btnServerSettings').classList.toggle('hidden', !isOwner);
+        document.getElementById('btnCreateChannel').classList.toggle('hidden', !isOwner);
 
         renderChannelsList(srv.channels);
-        if (srv.channels.length > 0) switchChannel(srv.channels[0].id, srv.channels[0].name);
+        if (srv.channels.length > 0) {
+            switchChannel(srv.channels[0].id, srv.channels[0].name);
+        } else {
+            document.getElementById('messagesContainer').innerHTML = '<div class="flex h-full items-center justify-center text-discord-textMuted">No channels exist.</div>';
+        }
       }
 
       renderServerList();
@@ -772,6 +826,7 @@
         owner_id: currentUser.id,
         owner_name: currentUser.name,
         needsInvite: false,
+        memberCount: 1, // Start with 1
         roles: [],
         channels: [{ id: 'general', name: 'general', type: 'text', topic: 'Welcome!' }]
       };
@@ -781,6 +836,143 @@
       closeModal('createServerModal');
       switchServer(newSrv.id);
       showToast(`Created server ${name}`);
+    }
+
+    function leaveCurrentServer() {
+        if(currentServerId === 'home') return;
+        const srv = servers.find(s => s.id === currentServerId);
+        if(srv.id === 'ultrachat-hq') {
+            showToast("Cannot leave the HQ server.", 'error');
+            return;
+        }
+        servers = servers.filter(s => s.id !== currentServerId);
+        saveState();
+        switchServer('home');
+        showToast("Left server.");
+    }
+
+    // --- Server Settings Functions ---
+    function openServerSettings() {
+        const srv = servers.find(s => s.id === currentServerId);
+        if(!srv) return;
+        
+        document.getElementById('ssInputName').value = srv.name;
+        document.getElementById('ssInputIcon').value = srv.icon;
+        document.getElementById('ssCheckNeedsInvite').checked = !!srv.needsInvite;
+
+        setServerSettingsTab('overview');
+        renderRolesList(srv);
+        renderMembersManager(srv);
+        openModal('serverSettingsModal');
+    }
+
+    function setServerSettingsTab(tab) {
+        ['overview', 'roles', 'members'].forEach(t => {
+            document.getElementById('ssContent-' + t).classList.toggle('hidden', t !== tab);
+            const btn = document.getElementById('sstab-' + t);
+            if(t === tab) {
+                btn.className = "w-full text-left px-3 py-2 rounded bg-discord-hover text-white";
+            } else {
+                btn.className = "w-full text-left px-3 py-2 rounded text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors";
+            }
+        });
+    }
+
+    function saveServerSettings() {
+        const srv = servers.find(s => s.id === currentServerId);
+        if(!srv) return;
+        
+        srv.name = document.getElementById('ssInputName').value.trim() || srv.name;
+        srv.icon = document.getElementById('ssInputIcon').value.trim() || srv.icon;
+        srv.needsInvite = document.getElementById('ssCheckNeedsInvite').checked;
+        
+        saveState();
+        renderServerList();
+        document.getElementById('serverTitleText').innerText = srv.name;
+        closeModal('serverSettingsModal');
+        showToast("Server settings updated.");
+    }
+
+    function renderRolesList(srv) {
+        const c = document.getElementById('rolesListContainer');
+        c.innerHTML = '';
+        if(!srv.roles) srv.roles = [];
+        
+        if (srv.roles.length === 0) {
+            c.innerHTML = '<div class="text-xs text-discord-textMuted italic">No custom roles created.</div>';
+            return;
+        }
+
+        srv.roles.forEach((r, idx) => {
+            const d = document.createElement('div');
+            d.className = 'flex items-center justify-between p-3 bg-discord-black rounded border border-discord-hover';
+            d.innerHTML = `
+                <span class="font-bold" style="color:${r.color}">${r.name}</span>
+                <button onclick="deleteRole(${idx})" class="text-red-400 hover:text-red-500 text-xs px-2"><i class="fa-solid fa-trash"></i></button>
+            `;
+            c.appendChild(d);
+        });
+    }
+
+    function addCustomRole() {
+        const srv = servers.find(s => s.id === currentServerId);
+        if(!srv) return;
+        if(!srv.roles) srv.roles = [];
+        const colors = ['#f59e0b', '#3b82f6', '#ef4444', '#10b981', '#a855f7'];
+        srv.roles.push({
+            id: 'role_' + Date.now(),
+            name: 'New Role ' + (srv.roles.length + 1),
+            color: colors[srv.roles.length % colors.length]
+        });
+        saveState();
+        renderRolesList(srv);
+    }
+
+    function deleteRole(idx) {
+        const srv = servers.find(s => s.id === currentServerId);
+        if(srv && srv.roles) {
+            srv.roles.splice(idx, 1);
+            saveState();
+            renderRolesList(srv);
+        }
+    }
+
+    function renderMembersManager(srv) {
+        const c = document.getElementById('membersManagerContainer');
+        c.innerHTML = `
+            <div class="text-xs text-discord-textMuted p-4 bg-discord-black rounded text-center border border-discord-hover">
+                Global member sync depends on live tracking. Currently showing yourself.<br><br>
+                <div class="flex items-center justify-between mt-2">
+                    <span class="font-bold text-white">${currentUser.name} (You)</span>
+                    <span class="text-discord-textMuted italic">Cannot kick self</span>
+                </div>
+            </div>`;
+    }
+
+    // --- Channel Creation ---
+    function handleCreateChannel() {
+        const nameInput = document.getElementById('newChannelName');
+        const typeInput = document.getElementById('newChannelType');
+        const name = nameInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+        
+        if (!name) return;
+
+        const srv = servers.find(s => s.id === currentServerId);
+        if (!srv) return;
+
+        srv.channels.push({
+            id: 'chan_' + Date.now(),
+            name: name,
+            type: typeInput.value,
+            topic: ''
+        });
+
+        saveState();
+        renderChannelsList(srv.channels);
+        
+        nameInput.value = '';
+        closeModal('createChannelModal');
+        showToast(`Created channel #${name}`);
     }
 
     // =========================================================================
@@ -867,22 +1059,37 @@
     // =========================================================================
     // 5. CHANNELS & MESSAGING ENGINE
     // =========================================================================
+    function toggleCategory(listId, chevronId) {
+        const list = document.getElementById(listId);
+        const chev = document.getElementById(chevronId);
+        list.classList.toggle('hidden');
+        chev.classList.toggle('-rotate-90');
+    }
+
     function renderChannelsList(channels) {
       const txtDiv = document.getElementById('textChannelsList');
+      const voiceDiv = document.getElementById('voiceChannelsList');
       txtDiv.innerHTML = '';
+      voiceDiv.innerHTML = '';
 
       channels.forEach(chan => {
         const btn = document.createElement('button');
         btn.onclick = () => switchChannel(chan.id, chan.name);
         btn.className = `w-full flex items-center px-2 py-1.5 rounded text-sm font-medium text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors`;
-        btn.innerHTML = `<i class="fa-solid fa-hashtag text-xs mr-2 opacity-60"></i><span class="truncate">${chan.name}</span>`;
-        txtDiv.appendChild(btn);
+        const icon = chan.type === 'voice' ? 'fa-volume-high' : 'fa-hashtag';
+        btn.innerHTML = `<i class="fa-solid ${icon} text-xs mr-2 opacity-60"></i><span class="truncate">${chan.name}</span>`;
+        
+        if (chan.type === 'voice') {
+            voiceDiv.appendChild(btn);
+        } else {
+            txtDiv.appendChild(btn);
+        }
       });
     }
 
     function switchChannel(chanId, chanName) {
       currentChannelId = chanId;
-      document.getElementById('channelHeaderName').innerText = `#${chanName}`;
+      document.getElementById('channelHeaderName').innerText = chanName.includes('@') ? chanName : `#${chanName}`;
       fetchMessages(currentServerId, chanId);
     }
 
@@ -1034,10 +1241,8 @@
     }
 
     async function deleteMessage(msgId) {
-      // Bypassing browser 'confirm()' intentionally for seamless UI
       await client.from('messages').delete().eq('id', msgId);
       showToast("Message deleted", "error");
-      // Note: Supabase Realtime 'DELETE' event handles removing it globally
     }
 
     async function submitMessage() {
@@ -1063,7 +1268,98 @@
     }
 
     // =========================================================================
-    // 6. MODALS & UTILS
+    // 6. PUBLIC EXPLORER & CEO
+    // =========================================================================
+    function openPublicExplorer() {
+        document.getElementById('publicSearchInput').value = '';
+        renderPublicExplorer();
+        openModal('discoverModal');
+    }
+
+    function renderPublicExplorer() {
+        const search = document.getElementById('publicSearchInput').value.toLowerCase();
+        const container = document.getElementById('publicServersContainer');
+        container.innerHTML = '';
+        
+        // Mock global servers fetch (in a real app, query Supabase)
+        let publicServers = [
+            ...defaultServers,
+            ...servers.filter(s => !s.needsInvite && !defaultServers.some(ds => ds.id === s.id))
+        ];
+
+        // Ensure fake member counts for discovery logic
+        publicServers.forEach(s => {
+            if(!s.memberCount) s.memberCount = Math.floor(Math.random() * 50) + 1;
+        });
+
+        if (search) {
+            publicServers = publicServers.filter(s => s.name.toLowerCase().includes(search));
+        }
+
+        // Sort descending by members
+        publicServers.sort((a, b) => b.memberCount - a.memberCount);
+
+        if (publicServers.length === 0) {
+            container.innerHTML = '<div class="text-discord-textMuted text-sm text-center py-4">No public servers found matching search.</div>';
+            return;
+        }
+
+        publicServers.forEach(s => {
+            const isJoined = servers.some(myS => myS.id === s.id);
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between p-3 bg-discord-black rounded-lg border border-discord-hover/50 hover:border-discord-blurple/50 transition-colors';
+            div.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-discord-sidebar flex items-center justify-center font-bold text-white text-lg">${s.icon || s.name[0]}</div>
+                    <div>
+                        <div class="font-bold text-sm text-discord-textHeader">${s.name}</div>
+                        <div class="text-xs text-discord-textMuted"><i class="fa-solid fa-users mr-1"></i>${s.memberCount} Members</div>
+                    </div>
+                </div>
+                ${isJoined 
+                    ? `<button disabled class="bg-discord-hover text-discord-textMuted px-4 py-1.5 rounded text-xs font-bold">Joined</button>` 
+                    : `<button onclick="joinPublicServer('${s.id}')" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-4 py-1.5 rounded text-xs font-bold transition-colors">Join</button>`
+                }
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function joinPublicServer(id) {
+        // Mock join logic pulling from default public array
+        const srvToJoin = defaultServers.find(s => s.id === id);
+        if (srvToJoin && !servers.some(s => s.id === srvToJoin.id)) {
+            servers.push(JSON.parse(JSON.stringify(srvToJoin)));
+            saveState();
+            renderServerList();
+            renderPublicExplorer(); // Update button to 'Joined'
+            showToast(`Joined ${srvToJoin.name}!`);
+        }
+    }
+
+    function openCeoModal() {
+        document.getElementById('ceoMetricUsers').innerText = Math.floor(Math.random() * 500) + 100;
+        document.getElementById('ceoMetricServers').innerText = servers.length + 15;
+        document.getElementById('ceoMetricMessages').innerText = Math.floor(Math.random() * 10000);
+        
+        const listContainer = document.getElementById('ceoServerList');
+        listContainer.innerHTML = '';
+        
+        servers.forEach(s => {
+            const d = document.createElement('div');
+            d.className = 'flex justify-between items-center bg-discord-black p-2 rounded text-sm';
+            d.innerHTML = `
+                <div class="text-white"><span class="font-bold">${s.name}</span> <span class="text-discord-textMuted text-xs ml-2">ID: ${s.id}</span></div>
+                <div class="text-xs text-amber-400">Owner: ${s.owner_name}</div>
+            `;
+            listContainer.appendChild(d);
+        });
+        
+        openModal('ceoCommandModal');
+    }
+
+    // =========================================================================
+    // 7. MODALS & UTILS
     // =========================================================================
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -1080,7 +1376,8 @@
       currentUser.statusQuote = document.getElementById('settingsStatusQuote').value.trim() || currentUser.statusQuote;
       
       const theme = document.getElementById('settingsTheme').value;
-      document.body.className = `h-full select-none overflow-hidden font-sans flex theme-${theme}`;
+      localStorage.setItem(getStoreKey('theme'), theme);
+      document.body.className = `h-full bg-discord-chat text-gray-200 select-none overflow-hidden font-sans flex theme-${theme}`;
       
       saveState();
       updateUserBar();
@@ -1093,6 +1390,22 @@
       document.getElementById('serverDropdownMenu').classList.toggle('hidden');
     }
     document.addEventListener('click', () => document.getElementById('serverDropdownMenu')?.classList.add('hidden'));
+
+    let isMuted = false, isDeafened = false;
+    function toggleMute() {
+        isMuted = !isMuted;
+        document.getElementById('micBtn').innerHTML = `<i class="fa-solid fa-microphone${isMuted ? '-slash text-red-500' : ''} text-sm"></i>`;
+        showToast(isMuted ? "Muted Microphone" : "Unmuted Microphone");
+    }
+    function toggleDeafen() {
+        isDeafened = !isDeafened;
+        document.getElementById('deafenBtn').innerHTML = `<i class="fa-solid fa-headphones${isDeafened ? '-slash text-red-500' : ''} text-sm"></i>`;
+        showToast(isDeafened ? "Deafened Audio" : "Undeafened Audio");
+    }
+
+    function toggleMemberList() {
+        document.getElementById('memberSidebar').classList.toggle('hidden');
+    }
 
     function showToast(msg, type='success') {
       const c = document.getElementById('toastContainer');
