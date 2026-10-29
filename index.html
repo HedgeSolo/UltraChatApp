@@ -76,6 +76,8 @@
     body.theme-hacker .text-discord-textHeader { color: #00ff66 !important; }
     body.theme-hacker .text-discord-textMuted { color: #008833 !important; }
     body.theme-hacker .bg-discord-input { background-color: #021a08 !important; color: #00ff66 !important; }
+
+    .yt-embed { width: 100%; max-width: 400px; aspect-ratio: 16/9; border-radius: 8px; margin-top: 8px; border: none; }
   </style>
 </head>
 <body class="h-full bg-discord-chat text-gray-200 select-none overflow-hidden font-sans flex">
@@ -127,7 +129,7 @@
     <div class="w-8 h-[2px] bg-discord-sidebar rounded my-1"></div>
 
     <!-- Add Server Button -->
-    <div class="relative group flex items-center justify-center w-full">
+    <div id="createServerBtnWrapper" class="relative group flex items-center justify-center w-full">
       <button onclick="openModal('createServerModal')" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-discord-sidebar hover:bg-discord-green flex items-center justify-center text-discord-green hover:text-white transition-all duration-300">
         <i class="fa-solid fa-plus text-lg"></i>
       </button>
@@ -390,8 +392,9 @@
               <input type="text" id="ssInputName" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
             </div>
             <div>
-              <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Server Icon / Emoji</label>
-              <input type="text" id="ssInputIcon" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
+              <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Server Icon (Upload Image)</label>
+              <input type="file" id="ssInputIconFile" accept="image/*" class="w-full bg-discord-black border border-discord-hover rounded p-1.5 text-sm text-discord-textHeader outline-none file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-discord-blurple file:text-white hover:file:bg-discord-blurpleHover" />
+              <input type="hidden" id="ssInputIcon" />
             </div>
             <div class="flex items-center justify-between p-3 bg-discord-sidebar rounded-lg">
               <div>
@@ -499,8 +502,9 @@
           <input type="text" id="settingsUsername" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Avatar URL</label>
-          <input type="text" id="settingsAvatarUrl" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
+          <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Avatar (Upload Image)</label>
+          <input type="file" id="settingsAvatarFile" accept="image/*" class="w-full bg-discord-black border border-discord-hover rounded p-1.5 text-sm text-discord-textHeader outline-none file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-discord-blurple file:text-white hover:file:bg-discord-blurpleHover" />
+          <input type="hidden" id="settingsAvatarUrl" />
         </div>
         <div>
           <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Custom Status Quote</label>
@@ -536,8 +540,9 @@
           <input type="text" id="newServerName" class="w-full bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-discord-blurple" placeholder="My Awesome Server" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Icon Emoji</label>
-          <input type="text" id="newServerIcon" class="w-full bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-discord-blurple" placeholder="🚀" />
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Icon (Upload Image)</label>
+          <input type="file" id="newServerIconFile" accept="image/*" class="w-full bg-gray-100 rounded p-1.5 text-sm text-gray-900 outline-none file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-discord-blurple file:text-white hover:file:bg-discord-blurpleHover" />
+          <input type="hidden" id="newServerIcon" />
         </div>
       </div>
 
@@ -585,7 +590,7 @@
 
     const CEO_EMAIL = "ld0113@ncmcs.net";
 
-    let currentUser = { id: null, email: '', name: 'User', avatar: '', statusQuote: 'Online', isCEO: false };
+    let currentUser = { id: null, email: '', name: 'User', avatar: '', statusQuote: 'Online', isCEO: false, isGuest: false };
     let servers = [];
     let friends = [];
     let dms = [];
@@ -594,6 +599,28 @@
     let currentChannelId = null;
     let friendsSubTab = 'online';
     let activeRealtimeChannel = null;
+    let lastMessageTime = 0; // For Guest Slowmode
+
+    // Convert file input to Base64
+    function handleFileUpload(inputId, hiddenInputId) {
+      const fileInput = document.getElementById(inputId);
+      const hiddenInput = document.getElementById(hiddenInputId);
+      fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            hiddenInput.value = evt.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+    
+    // Attach listeners
+    handleFileUpload('settingsAvatarFile', 'settingsAvatarUrl');
+    handleFileUpload('ssInputIconFile', 'ssInputIcon');
+    handleFileUpload('newServerIconFile', 'newServerIcon');
 
     // Simulated Server defaults for new clients
     const defaultServers = [
@@ -694,6 +721,12 @@
         document.getElementById('ceoUserBadge').classList.remove('hidden');
       }
 
+      if (currentUser.isGuest) {
+        document.getElementById('createServerBtnWrapper').classList.add('hidden');
+      } else {
+        document.getElementById('createServerBtnWrapper').classList.remove('hidden');
+      }
+
       loadState();
       
       // Setup UI Theme
@@ -746,10 +779,19 @@
       currentUser.id = 'guest_' + Math.floor(Math.random() * 999999);
       currentUser.email = 'guest@local';
       currentUser.name = 'Guest_' + Math.floor(Math.random() * 999);
+      currentUser.isGuest = true;
       localStorage.setItem('uc_guest_id', currentUser.id);
       localStorage.setItem('uc_guest_name', currentUser.name);
+      
+      // Auto-join HQ for guest
+      if (!servers.some(s => s.id === 'ultrachat-hq')) {
+        servers.push(defaultServers[0]);
+        saveState();
+      }
+
       closeModal('authModal');
       finalizeInit();
+      switchServer('ultrachat-hq');
     }
 
     async function logout() {
@@ -1156,14 +1198,24 @@
       // Secure text formatting for display
       const safeText = msg.text ? msg.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
 
+      // Check for YouTube URLs and auto-embed
+      const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+      let formattedText = safeText;
+      const ytMatch = safeText.match(ytRegex);
+      if (ytMatch) {
+          formattedText = safeText.replace(ytRegex, `<br><iframe class="yt-embed" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`);
+      }
+
+      const displayName = msg.user_name.startsWith('Guest_') ? `<span class="text-xs bg-discord-hover text-discord-textMuted px-1 rounded mr-1 font-black">[GUEST]</span>${msg.user_name}` : msg.user_name;
+
       div.innerHTML = `
         <img src="${msg.avatar_url || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5 shadow-sm" />
         <div class="flex-1 min-w-0">
           <div class="flex items-baseline space-x-2">
-            <span class="font-bold text-sm text-discord-textHeader">${msg.user_name}</span>
+            <span class="font-bold text-sm text-discord-textHeader">${displayName}</span>
             <span class="text-[10px] text-discord-textMuted">${new Date(msg.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
           </div>
-          <div id="msg_text_${msg.id}" class="text-sm text-gray-200 mt-0.5 break-words whitespace-pre-wrap leading-relaxed">${safeText}</div>
+          <div id="msg_text_${msg.id}" class="text-sm text-gray-200 mt-0.5 break-words whitespace-pre-wrap leading-relaxed">${formattedText}</div>
         </div>
         ${actionsHtml}
       `;
@@ -1246,6 +1298,15 @@
     }
 
     async function submitMessage() {
+      if (currentUser.isGuest) {
+          const now = Date.now();
+          if (now - lastMessageTime < 10000) {
+              showToast(`Guest Slowmode: Wait ${Math.ceil((10000 - (now - lastMessageTime))/1000)}s`, 'error');
+              return;
+          }
+          lastMessageTime = now;
+      }
+
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
       if (!text) return;
@@ -1253,14 +1314,23 @@
       input.value = '';
       input.style.height = 'auto'; // Reset text area height
       
-      await client.from('messages').insert([{
+      let msgData = {
         text,
         user_name: currentUser.name,
         user_id: currentUser.id,
         avatar_url: currentUser.avatar,
         server_id: currentServerId,
         channel_id: currentChannelId || 'general'
-      }]);
+      };
+
+      // DM check
+      if (currentServerId.startsWith('dm_')) {
+          const ids = currentServerId.replace('dm_', '').split('_');
+          const recipientId = ids.find(id => id !== currentUser.id);
+          msgData.recipient_id = recipientId;
+      }
+
+      await client.from('messages').insert([msgData]);
     }
 
     function handleInputKeydown(e) {
