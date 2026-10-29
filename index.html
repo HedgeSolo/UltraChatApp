@@ -1,526 +1,355 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UltraChatApp 3000 - MSN Messenger Edition</title>
-  
+  <title>UltraChatApp 3000</title>
+
   <!-- Supabase JS Library v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Tailwind CSS for utility layouting -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome 6 Retro Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
+
   <style>
-    /* ----------------------------------------------------------------------
-       EARLY 2000s RETRO WINDOWS XP & MSN MESSENGER THEME ENGINE
-       ---------------------------------------------------------------------- */
-    @import url('https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&family=Verdana:wght@400;700&family=Courier+Prime:wght@400;700&display=swap');
-
-    :root {
-      --win-bg: #ece9d8;
-      --win-border-light: #ffffff;
-      --win-border-dark: #716f64;
-      --win-title-from: #0058ee;
-      --win-title-to: #3a93ff;
-      --win-title-text: #ffffff;
-      --win-accent: #225ad6;
-      --chat-bg: #ffffff;
-      --chat-text: #000000;
-      --panel-bg: #f5f4ea;
-      --status-online: #10b981;
-      --font-main: 'Tahoma', 'Verdana', sans-serif;
-    }
-
-    /* Theme Presets */
-    body.theme-xp-luna {
-      --win-bg: #ece9d8;
-      --win-title-from: #0058ee;
-      --win-title-to: #3a93ff;
-      --win-accent: #0f40b3;
-      --panel-bg: #f7f5ed;
-    }
-
-    body.theme-msn-classic {
-      --win-bg: #e2f0f9;
-      --win-title-from: #1f6b9c;
-      --win-title-to: #3f92cb;
-      --win-accent: #15557d;
-      --panel-bg: #f0f7fc;
-    }
-
-    body.theme-matrix {
-      --win-bg: #0d1117;
-      --win-border-light: #2ea043;
-      --win-border-dark: #0f5323;
-      --win-title-from: #003b00;
-      --win-title-to: #008f11;
-      --win-title-text: #00ff66;
-      --win-accent: #00ff66;
-      --chat-bg: #050a05;
-      --chat-text: #00ff66;
-      --panel-bg: #0a150a;
-      --font-main: 'Courier Prime', monospace;
-    }
-
-    body.theme-y2k-pink {
-      --win-bg: #fde8f3;
-      --win-title-from: #ff1493;
-      --win-title-to: #ff69b4;
-      --win-accent: #d0006f;
-      --panel-bg: #fff0f7;
-    }
-
-    body.theme-aol-dark {
-      --win-bg: #1e1b2e;
-      --win-border-light: #4c4669;
-      --win-border-dark: #0f0d17;
-      --win-title-from: #312e81;
-      --win-title-to: #4338ca;
-      --win-title-text: #e0e7ff;
-      --win-accent: #6366f1;
-      --chat-bg: #12101d;
-      --chat-text: #e2e8f0;
-      --panel-bg: #181528;
+    /* BASIC OLD-SCHOOL HTML/CSS AESTHETIC */
+    * {
+      box-sizing: border-box;
+      font-family: Tahoma, Verdana, Arial, sans-serif;
     }
 
     body {
-      font-family: var(--font-main);
-      background-color: var(--win-bg);
-      color: var(--chat-text);
-      background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 80%);
-    }
-
-    /* Classic Windows 3D Bevels */
-    .win-outset {
-      border: 2px solid;
-      border-color: var(--win-border-light) var(--win-border-dark) var(--win-border-dark) var(--win-border-light);
-      box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #888;
-    }
-
-    .win-inset {
-      border: 2px solid;
-      border-color: var(--win-border-dark) var(--win-border-light) var(--win-border-light) var(--win-border-dark);
-      background-color: var(--chat-bg);
-    }
-
-    /* XP Title Bar Gradient */
-    .xp-titlebar {
-      background: linear-gradient(90deg, var(--win-title-from) 0%, var(--win-title-to) 100%);
-      color: var(--win-title-text);
-      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
-    }
-
-    /* XP Windows Control Buttons */
-    .xp-btn-close {
-      background: linear-gradient(135deg, #e36a5c 0%, #b82d1b 100%);
-      border: 1px solid #fff;
-      box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    }
-    .xp-btn-close:hover {
-      background: #f03a24;
-    }
-
-    .xp-btn-ctrl {
-      background: linear-gradient(135deg, #3c8efc 0%, #0050d0 100%);
-      border: 1px solid #fff;
-      box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    }
-
-    /* Classic XP Button Style */
-    .retro-btn {
-      background: linear-gradient(180deg, #ffffff 0%, #ece9d8 45%, #d8d0c0 100%);
-      border: 1px solid #707070;
-      border-radius: 3px;
-      box-shadow: inset 1px 1px 0 #fff;
-      font-weight: bold;
+      background-color: #e5e5e5;
       color: #000;
-      cursor: pointer;
-    }
-    .retro-btn:active {
-      background: linear-gradient(180deg, #d8d0c0 0%, #ece9d8 100%);
-      box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.4);
-    }
-    .retro-btn-accent {
-      background: linear-gradient(180deg, #4fa4ff 0%, #1e62d0 100%);
-      color: #fff;
-      border: 1px solid #0a3d91;
-      text-shadow: 1px 1px 1px #000;
+      margin: 0;
+      padding: 10px;
+      font-size: 13px;
     }
 
-    /* Nudge Screen Shake Animation */
-    @keyframes nudgeShake {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      15% { transform: translate(-14px, -10px) rotate(-1.5deg); }
-      30% { transform: translate(14px, 10px) rotate(1.5deg); }
-      45% { transform: translate(-12px, 8px) rotate(-1deg); }
-      60% { transform: translate(12px, -8px) rotate(1deg); }
-      75% { transform: translate(-6px, 4px); }
-      90% { transform: translate(6px, -4px); }
-      100% { transform: translate(0, 0); }
+    /* Container Box */
+    #appContainer {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 2px solid #666;
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
     }
 
-    .animate-nudge {
-      animation: nudgeShake 0.5s ease-in-out;
+    /* Top Header Bar */
+    header {
+      background: #2b4f81;
+      color: #ffffff;
+      padding: 8px 12px;
+      border-bottom: 2px solid #112544;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    /* Custom Retro Scrollbars */
-    ::-webkit-scrollbar {
-      width: 14px;
-      height: 14px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--win-bg);
-      border: 1px solid var(--win-border-dark);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #fff 0%, var(--win-bg) 100%);
-      border: 1px solid var(--win-border-dark);
-      box-shadow: inset 1px 1px 0 #fff;
+    header h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: bold;
     }
 
-    /* Marquee Styling */
-    .retro-marquee {
-      background: #000;
-      color: #00ff66;
-      font-family: 'Courier Prime', monospace;
+    .user-status-bar {
       font-size: 11px;
-      border-bottom: 1px solid #333;
+    }
+
+    /* Main Workspace Layout (Sidebar + Chat) */
+    .main-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar - Server List & Joining */
+    aside {
+      width: 210px;
+      background: #f0f0f0;
+      border-right: 2px solid #ccc;
+      padding: 10px;
+      display: flex;
+      flex-direction: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar-section {
+      border: 1px solid #aaa;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .sidebar-section h3 {
+      margin: 0 0 6px 0;
+      font-size: 12px;
+      color: #333;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 3px;
+    }
+
+    .server-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .server-item {
+      padding: 5px 8px;
+      margin-bottom: 3px;
+      background: #e8e8e8;
+      border: 1px solid #bbb;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .server-item.active {
+      background: #2b4f81;
+      color: #fff;
+      border-color: #112544;
+    }
+
+    /* Main Chat Area */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+    }
+
+    .chat-header {
+      background: #e9edf4;
+      border-bottom: 1px solid #bbb;
+      padding: 8px 12px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .msg-row {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+      word-break: break-word;
+    }
+
+    .msg-header {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 2px;
+    }
+
+    .msg-author {
+      font-weight: bold;
+      color: #2b4f81;
+    }
+
+    .msg-text {
+      font-size: 13px;
+      color: #111;
+    }
+
+    /* @Mentions Styling */
+    .mention {
+      background: #fff3cd;
+      color: #856404;
+      padding: 1px 4px;
+      border: 1px solid #ffeeba;
+      border-radius: 2px;
+      font-weight: bold;
+    }
+
+    .mention-me {
+      background: #ff3333;
+      color: #ffffff;
+      border: 1px solid #cc0000;
+    }
+
+    /* Message Input Box */
+    .chat-input-area {
+      padding: 10px;
+      border-top: 2px solid #ccc;
+      background: #f0f0f0;
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input-area textarea {
+      flex: 1;
+      height: 40px;
+      border: 1px solid #888;
+      padding: 6px;
+      font-size: 12px;
+      resize: none;
+    }
+
+    /* Basic HTML Form Controls */
+    input[type="text"], input[type="email"], input[type="password"] {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #777;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    button {
+      background: #e1e1e1;
+      border: 1px solid #777;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #d0d0d0;
+    }
+
+    button.primary {
+      background: #2b4f81;
+      color: white;
+      border-color: #112544;
+    }
+
+    button.primary:hover {
+      background: #1e3a63;
+    }
+
+    /* Authentication Modal Overlay */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .auth-box {
+      background: #fff;
+      border: 2px solid #2b4f81;
+      padding: 20px;
+      width: 320px;
+      box-shadow: 4px 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .auth-box h2 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #2b4f81;
+      border-bottom: 2px solid #2b4f81;
+      padding-bottom: 5px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .error-text {
+      color: #c00;
+      font-size: 11px;
+      margin-top: 4px;
     }
   </style>
 </head>
-<body class="h-full flex items-center justify-center p-2 sm:p-4 select-none theme-xp-luna overflow-hidden">
+<body>
 
-  <!-- RETRO TOAST NOTIFICATION CONTAINER (REPLACES ALERT/CONFIRM) -->
-  <div id="retroToast" class="hidden fixed bottom-6 right-6 z-50 win-outset p-3 max-w-xs text-xs shadow-2xl flex items-center space-x-2 transition-all duration-300 bg-yellow-100 text-yellow-900 border-yellow-500">
-    <i class="fa-solid fa-bell text-yellow-600 text-sm flex-shrink-0"></i>
-    <span id="retroToastText" class="flex-1 font-bold">Notification text</span>
-    <button onclick="hideToast()" class="text-gray-500 hover:text-black font-bold ml-1">✕</button>
-  </div>
-
-  <!-- MAIN WINDOW APPLICATION CONTAINER -->
-  <div id="appWindow" class="w-full max-w-5xl h-[95vh] max-h-[820px] win-outset flex flex-col rounded-t-lg overflow-hidden shadow-2xl relative">
-
-    <!-- 1. WINDOW TITLE BAR -->
-    <div class="xp-titlebar h-8 px-3 flex items-center justify-between flex-shrink-0 cursor-move">
-      <div class="flex items-center space-x-2">
-        <!-- MSN Messenger Buddy Icon -->
-        <div class="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] text-black font-bold border border-white shadow">
-          <i class="fa-solid fa-user-group text-[8px]"></i>
-        </div>
-        <span class="text-xs font-bold tracking-wide truncate">UltraChatApp 3000 - MSN Messenger [Supabase Live]</span>
+  <!-- MAIN APP CONTAINER -->
+  <div id="appContainer">
+    
+    <!-- HEADER -->
+    <header>
+      <h1>UltraChatApp 3000</h1>
+      <div class="user-status-bar">
+        <span id="userStatusText">Not Logged In</span>
+        <button id="authBtn" onclick="openAuthModal()" style="margin-left:8px;">Log In / Register</button>
       </div>
+    </header>
 
-      <!-- Window Control Buttons (Minimize, Maximize, Close) -->
-      <div class="flex items-center space-x-1">
-        <button onclick="playRetroSound('click')" class="xp-btn-ctrl w-5 h-5 rounded flex items-center justify-center text-white text-[10px]" title="Minimize">_</button>
-        <button onclick="playRetroSound('click')" class="xp-btn-ctrl w-5 h-5 rounded flex items-center justify-center text-white text-[9px]" title="Maximize">▢</button>
-        <button onclick="showNotification('To close the window, simply close your browser tab.', false)" class="xp-btn-close w-5 h-5 rounded flex items-center justify-center text-white text-[10px] font-bold" title="Close Application">✕</button>
-      </div>
-    </div>
+    <!-- MAIN WORKSPACE -->
+    <div class="main-body">
 
-    <!-- 2. RETRO MARQUEE HEADER BANNER -->
-    <div class="retro-marquee px-2 py-0.5 overflow-hidden whitespace-nowrap flex-shrink-0">
-      <marquee behavior="scroll" direction="left" scrollamount="4">
-        ★ WELCOME TO ULTRACHAT 3000 ★ NO BOTS - 100% REAL HUMAN CHAT ★ POWERED BY SUPABASE REALTIME & PRESENCE ★ NUDGE YOUR FRIENDS LIVE ★
-      </marquee>
-    </div>
-
-    <!-- 3. MSN TOP TOOLBAR MENU -->
-    <div class="bg-[var(--win-bg)] border-b border-[var(--win-border-dark)] px-2 py-1 flex items-center justify-between text-xs flex-shrink-0">
-      <div class="flex items-center space-x-3">
-        <button onclick="openModal('modalAuth')" class="hover:underline flex items-center space-x-1">
-          <i class="fa-solid fa-key text-blue-600"></i>
-          <span id="navAuthLabel">Sign In / Account</span>
-        </button>
-        <span>|</span>
-        <button onclick="openModal('modalSql')" class="hover:underline flex items-center space-x-1 text-emerald-700 font-bold">
-          <i class="fa-solid fa-database"></i>
-          <span>SQL DB Helper</span>
-        </button>
-        <span>|</span>
-        <button onclick="triggerNudge()" class="hover:underline flex items-center space-x-1 text-red-600 font-bold">
-          <i class="fa-solid fa-hand-pointer animate-bounce"></i>
-          <span>NUDGE!</span>
-        </button>
-      </div>
-
-      <!-- Theme Selector Dropdown -->
-      <div class="flex items-center space-x-1">
-        <span class="text-[11px] text-gray-600">Theme:</span>
-        <select id="themeSelect" onchange="applyTheme(this.value)" class="text-xs border border-gray-400 rounded px-1 bg-white">
-          <option value="theme-xp-luna">Windows XP Luna Blue</option>
-          <option value="theme-msn-classic">MSN Messenger Classic</option>
-          <option value="theme-matrix">Matrix Cyber Green</option>
-          <option value="theme-y2k-pink">Y2K Hot Pink</option>
-          <option value="theme-aol-dark">AOL Dark Room</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- 4. MAIN WORKSPACE CONTAINER (3 COLUMNS) -->
-    <div class="flex-1 flex overflow-hidden p-2 gap-2 bg-[var(--panel-bg)]">
-
-      <!-- COLUMN A: ROOMS & SERVERS RAIL -->
-      <aside class="w-48 bg-[var(--win-bg)] win-outset flex flex-col flex-shrink-0 p-2 space-y-3">
-        <div class="text-xs font-bold text-gray-700 border-b border-gray-400 pb-1 flex items-center justify-between">
-          <span><i class="fa-solid fa-comments text-blue-600 mr-1"></i> Chatrooms</span>
-          <button onclick="openModal('modalCreateRoom')" class="text-[10px] text-blue-700 hover:underline">+ New</button>
+      <!-- SIDEBAR: SERVERS -->
+      <aside>
+        <div class="sidebar-section">
+          <h3>My Servers</h3>
+          <ul id="serverList" class="server-list">
+            <!-- Dynamically populated servers -->
+          </ul>
         </div>
 
-        <div id="roomList" class="flex-1 overflow-y-auto space-y-1 pr-1">
-          <!-- Dynamically Rendered Rooms -->
-        </div>
-
-        <!-- Connection Status Box -->
-        <div class="win-inset p-2 text-[10px] space-y-1 bg-white">
-          <div class="font-bold flex items-center justify-between">
-            <span>Supabase Live:</span>
-            <span id="statusIndicator" class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow"></span>
-          </div>
-          <div id="statusText" class="text-gray-600 truncate">Connecting to live DB...</div>
+        <div class="sidebar-section">
+          <h3>Join / Create Server</h3>
+          <input type="text" id="serverInput" placeholder="Server ID (e.g. tech-lounge)" />
+          <button onclick="joinServerFromInput()" class="primary" style="width:100%;">Join / Create</button>
         </div>
       </aside>
 
-      <!-- COLUMN B: MAIN CHAT MESSENGER WINDOW -->
-      <main class="flex-1 flex flex-col bg-[var(--win-bg)] win-outset p-2 min-w-0">
-        
-        <!-- Active Room Header & MSN Profile Banner -->
-        <div class="win-inset p-2 mb-2 flex items-center justify-between bg-white">
-          <div class="flex items-center space-x-2.5 overflow-hidden">
-            <div id="activeRoomAvatar" class="w-9 h-9 rounded bg-blue-600 text-white font-bold flex items-center justify-center text-base shadow border">
-              #
-            </div>
-            <div class="overflow-hidden">
-              <div id="activeRoomTitle" class="font-bold text-sm truncate">#MSN-Lounge</div>
-              <div id="activeRoomDesc" class="text-[11px] text-gray-500 truncate">Official MSN Supabase Public Lounge</div>
-            </div>
-          </div>
+      <!-- MAIN CHAT PANEL -->
+      <main>
+        <div class="chat-header">
+          <span id="currentServerTitle">Select or Join a Server</span>
+          <span id="realtimeIndicator" style="font-size: 10px; color: #888;">● Offline</span>
+        </div>
 
-          <div class="flex items-center space-x-2">
-            <button onclick="triggerNudge()" class="retro-btn text-xs px-2.5 py-1 flex items-center space-x-1" title="Send a Nudge!">
-              <i class="fa-solid fa-bell text-yellow-600"></i>
-              <span class="hidden sm:inline">Nudge</span>
-            </button>
-            <button onclick="fetchMessages()" class="retro-btn text-xs px-2.5 py-1" title="Refresh Feed">
-              <i class="fa-solid fa-rotate-right"></i>
-            </button>
+        <div id="chatMessages" class="chat-messages">
+          <div style="text-align:center; color:#777; margin-top:20px;">
+            Please log in and join a server to view and send messages.
           </div>
         </div>
 
-        <!-- Chat Feed Box -->
-        <div id="chatFeed" class="flex-1 win-inset p-3 overflow-y-auto space-y-2.5">
-          <div class="text-center text-xs text-gray-500 py-4">
-            <i class="fa-solid fa-spinner fa-spin text-base text-blue-600 mb-1"></i>
-            <div>Loading live messages from Supabase...</div>
-          </div>
+        <!-- INPUT AREA (DISABLED IF GUEST) -->
+        <div class="chat-input-area">
+          <textarea id="messageTextarea" placeholder="Type a message... Use @username to tag people." disabled></textarea>
+          <button id="sendBtn" onclick="sendMessage()" class="primary" disabled>Send</button>
         </div>
-
-        <!-- Emoticon Toolbar & Action Bar -->
-        <div class="pt-2 flex items-center justify-between text-xs">
-          <div class="flex items-center space-x-1">
-            <button onclick="insertEmoticon(':-)')" class="px-1.5 py-0.5 hover:bg-gray-300 rounded" title="Happy">😊</button>
-            <button onclick="insertEmoticon(';-)')" class="px-1.5 py-0.5 hover:bg-gray-300 rounded" title="Wink">😉</button>
-            <button onclick="insertEmoticon(':-D')" class="px-1.5 py-0.5 hover:bg-gray-300 rounded" title="Laugh">😃</button>
-            <button onclick="insertEmoticon('<3')" class="px-1.5 py-0.5 hover:bg-gray-300 rounded" title="Heart">❤️</button>
-            <button onclick="insertEmoticon(':O')" class="px-1.5 py-0.5 hover:bg-gray-300 rounded" title="Gasp">😮</button>
-            <button onclick="insertEmoticon('(H)')" class="px-1.5 py-0.5 hover:bg-gray-300 rounded" title="Cool Sunglasses">😎</button>
-          </div>
-          <span class="text-[10px] text-gray-500">Press Enter to Send</span>
-        </div>
-
-        <!-- Message Input Box -->
-        <div class="mt-1 flex space-x-2">
-          <textarea id="msgInput" rows="2" placeholder="Type a message or paste link..." class="flex-1 win-inset p-2 text-xs focus:outline-none resize-none" onkeydown="handleInputKeydown(event)"></textarea>
-          <button onclick="sendMessage()" class="retro-btn retro-btn-accent px-5 flex flex-col items-center justify-center text-xs">
-            <span>Send</span>
-            <i class="fa-solid fa-paper-plane text-[10px] mt-0.5"></i>
-          </button>
-        </div>
-
       </main>
 
-      <!-- COLUMN C: REAL-TIME BUDDY LIST & USER PROFILE (NO BOTS) -->
-      <aside class="w-52 bg-[var(--win-bg)] win-outset flex flex-col flex-shrink-0 p-2 space-y-3 hidden lg:flex">
-        
-        <!-- User Profile Card -->
-        <div class="win-inset p-2 bg-white space-y-2">
-          <div class="flex items-center space-x-2">
-            <div id="userAvatar" class="w-9 h-9 rounded bg-emerald-600 text-white font-bold flex items-center justify-center text-sm shadow">
-              G
-            </div>
-            <div class="overflow-hidden flex-1">
-              <div id="userNameDisplay" class="font-bold text-xs truncate">Guest_User</div>
-              
-              <!-- Status Selector -->
-              <select id="userStatusSelect" onchange="updateUserStatus(this.value)" class="text-[10px] border border-gray-300 rounded bg-white text-emerald-700 font-bold focus:outline-none">
-                <option value="Online">🟢 Online</option>
-                <option value="Busy">🔴 Busy</option>
-                <option value="Away">🟡 Away</option>
-              </select>
-            </div>
-          </div>
-          
-          <input type="text" id="userQuoteInput" placeholder="Set status quote..." class="w-full text-[10px] border border-gray-300 rounded px-1.5 py-1 bg-yellow-50 focus:outline-none" onchange="updateUserQuote(this.value)" value="Listening to Linkin Park - In The End">
-        </div>
-
-        <!-- Real-Time Online Buddies Section -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-          <div class="text-xs font-bold text-gray-700 border-b border-gray-400 pb-1 mb-1 flex items-center justify-between">
-            <span><i class="fa-solid fa-users text-emerald-600 mr-1"></i> Live Buddies</span>
-            <span id="onlineCountBadge" class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 rounded-full">0 Online</span>
-          </div>
-
-          <div id="buddyList" class="flex-1 overflow-y-auto space-y-1 pr-1">
-            <div class="text-[11px] text-gray-500 italic p-2 text-center">
-              Scanning for real online users...
-            </div>
-          </div>
-        </div>
-
-      </aside>
-
-    </div>
-
-    <!-- 5. WINDOW STATUS FOOTER BAR -->
-    <div class="bg-[var(--win-bg)] border-t border-[var(--win-border-dark)] px-3 py-1 text-[11px] text-gray-600 flex items-center justify-between flex-shrink-0">
-      <div class="flex items-center space-x-3">
-        <span id="footerUserRole"><i class="fa-solid fa-user text-blue-600"></i> Logged in as: Guest</span>
-        <span>|</span>
-        <span id="footerRoomCount">Active Rooms: 4</span>
-      </div>
-      <div class="flex items-center space-x-2">
-        <button onclick="toggleAudio()" id="audioToggleBtn" class="hover:underline">🔊 Sound: ON</button>
-        <span>|</span>
-        <span>UltraChat 3000 v3.0</span>
-      </div>
-    </div>
-
-  </div>
-
-
-  <!-- ======================================================================
-       MODALS CONTAINER
-       ====================================================================== -->
-
-  <!-- MODAL 1: AUTHENTICATION (SIGN UP / LOGIN) -->
-  <div id="modalAuth" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="win-outset w-full max-w-sm bg-[var(--win-bg)] p-4 space-y-4 shadow-2xl rounded-t">
-      <div class="xp-titlebar -mx-4 -mt-4 p-2 px-3 flex items-center justify-between font-bold text-xs">
-        <span>MSN Passport - Sign In / Register</span>
-        <button onclick="closeModal('modalAuth')" class="xp-btn-close w-4 h-4 rounded text-[9px]">✕</button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold mb-1">Email Address:</label>
-          <input type="email" id="authEmail" placeholder="user@msn.com" class="w-full win-inset p-1.5 focus:outline-none">
-        </div>
-        <div>
-          <label class="block font-bold mb-1">Password:</label>
-          <input type="password" id="authPassword" placeholder="••••••••" class="w-full win-inset p-1.5 focus:outline-none">
-        </div>
-        <div>
-          <label class="block font-bold mb-1">Display Screen Name:</label>
-          <input type="text" id="authScreenName" placeholder="xX_Neo_2004_Xx" class="w-full win-inset p-1.5 focus:outline-none">
-        </div>
-
-        <div class="flex space-x-2 pt-2">
-          <button onclick="handleLogin()" class="flex-1 retro-btn retro-btn-accent py-1.5">Sign In</button>
-          <button onclick="handleSignUp()" class="flex-1 retro-btn py-1.5">Sign Up</button>
-        </div>
-
-        <div class="relative flex py-1 items-center">
-          <div class="flex-grow border-t border-gray-400"></div>
-          <span class="flex-shrink mx-2 text-gray-500 text-[10px]">OR</span>
-          <div class="flex-grow border-t border-gray-400"></div>
-        </div>
-
-        <button onclick="handleGoogleLogin()" class="w-full retro-btn py-1.5 flex items-center justify-center space-x-2">
-          <i class="fa-brands fa-google text-red-500"></i>
-          <span>Sign In with Google</span>
-        </button>
-
-        <button onclick="handleGuestMode()" class="w-full text-center text-blue-700 hover:underline text-[11px] pt-1">
-          Continue as Guest Anonymous User
-        </button>
-
-        <button id="signOutBtn" onclick="handleSignOut()" class="hidden w-full retro-btn bg-red-100 text-red-800 py-1 font-bold mt-2">
-          Sign Out
-        </button>
-      </div>
     </div>
   </div>
 
+  <!-- AUTHENTICATION MODAL (STRICT ACCOUNT REQUIREMENT) -->
+  <div id="authModal" class="auth-overlay">
+    <div class="auth-box">
+      <h2>Account Sign In / Register</h2>
+      <p style="font-size:11px; color:#555;">You must be logged in with a real account to post messages.</p>
 
-  <!-- MODAL 2: SQL DATABASE HELPER -->
-  <div id="modalSql" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="win-outset w-full max-w-lg bg-[var(--win-bg)] p-4 space-y-3 shadow-2xl rounded-t">
-      <div class="xp-titlebar -mx-4 -mt-4 p-2 px-3 flex items-center justify-between font-bold text-xs">
-        <span>Supabase SQL Table & RLS Setup Helper</span>
-        <button onclick="closeModal('modalSql')" class="xp-btn-close w-4 h-4 rounded text-[9px]">✕</button>
+      <label style="font-size:11px; font-weight:bold;">Email:</label>
+      <input type="email" id="authEmail" placeholder="yourname@domain.com" />
+
+      <label style="font-size:11px; font-weight:bold;">Password:</label>
+      <input type="password" id="authPassword" placeholder="••••••••" />
+
+      <label style="font-size:11px; font-weight:bold;">Username / Screen Name:</label>
+      <input type="text" id="authUsername" placeholder="e.g. Alex99" />
+
+      <div style="display:flex; gap:6px; margin-top:10px;">
+        <button onclick="handleSignIn()" class="primary" style="flex:1;">Log In</button>
+        <button onclick="handleSignUp()" style="flex:1;">Register</button>
       </div>
 
-      <p class="text-xs text-gray-700 leading-relaxed">
-        UltraChatApp 3000 reads and writes directly to your Supabase table. If you encounter schema errors, copy and run this in your <strong>Supabase Dashboard > SQL Editor</strong>:
-      </p>
-
-      <div class="win-inset p-2 bg-black text-green-400 font-mono text-[10px] overflow-x-auto space-y-1">
-<pre>
--- 1. Create messages table with all schema fields
-CREATE TABLE IF NOT EXISTS public.messages (
-  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  text TEXT,
-  user_name TEXT DEFAULT 'Anonymous',
-  room TEXT DEFAULT 'MSN-Lounge',
-  server_id TEXT DEFAULT 'msn-lounge',
-  channel_id TEXT DEFAULT 'general',
-  is_nudge BOOLEAN DEFAULT false
-);
-
--- 2. Enable Realtime & RLS Policies
-ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow public select" ON public.messages FOR SELECT USING (true);
-CREATE POLICY "Allow public insert" ON public.messages FOR INSERT WITH CHECK (true);
-</pre>
-      </div>
-
-      <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="copySqlSnippet()" class="retro-btn px-4 py-1.5 text-xs">Copy SQL Code</button>
-        <button onclick="closeModal('modalSql')" class="retro-btn retro-btn-accent px-4 py-1.5 text-xs">Done</button>
-      </div>
+      <div id="authError" class="error-text"></div>
     </div>
   </div>
 
-
-  <!-- MODAL 3: CREATE NEW ROOM -->
-  <div id="modalCreateRoom" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="win-outset w-full max-w-xs bg-[var(--win-bg)] p-4 space-y-3 shadow-2xl rounded-t">
-      <div class="xp-titlebar -mx-4 -mt-4 p-2 px-3 flex items-center justify-between font-bold text-xs">
-        <span>Create New Chatroom</span>
-        <button onclick="closeModal('modalCreateRoom')" class="xp-btn-close w-4 h-4 rounded text-[9px]">✕</button>
-      </div>
-
-      <div class="space-y-2 text-xs">
-        <div>
-          <label class="block font-bold mb-1">Room Name:</label>
-          <input type="text" id="newRoomNameInput" placeholder="e.g. Retro-Gamers" class="w-full win-inset p-1.5 focus:outline-none">
-        </div>
-        <button onclick="createNewRoom()" class="w-full retro-btn retro-btn-accent py-1.5 font-bold">Create & Join</button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ======================================================================
-       APPLICATION JAVASCRIPT & SUPABASE REALTIME PRESENCE LOGIC
-       ====================================================================== -->
+  <!-- SCRIPT LOGIC -->
   <script>
     /* ----------------------------------------------------------------------
-       1. SUPABASE CLIENT & APPLICATION CONFIGURATION
+       1. SUPABASE INITIALIZATION
        ---------------------------------------------------------------------- */
     const SUPABASE_URL = "https://unjvzzlwxpmiqyrovbce.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuanZ6emx3eHBtaXF5cm92YmNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODE1MDAsImV4cCI6MjEwODg1NzUwMH0.WKKvm2xkIJf8nJLy8eV4ndQZ7LF1qp5ExHGX6LL3a_A";
@@ -528,634 +357,343 @@ CREATE POLICY "Allow public insert" ON public.messages FOR INSERT WITH CHECK (tr
     const { createClient } = supabase;
     const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Dynamic App State
-    let currentUser = {
-      id: 'usr_' + Math.floor(Math.random() * 899999 + 100000),
-      name: 'Guest_' + Math.floor(Math.random() * 899 + 100),
-      status: 'Online',
-      quote: 'Listening to Linkin Park - In The End',
-      isGuest: true
-    };
-
-    let rooms = [
-      { id: 'MSN-Lounge', name: 'MSN-Lounge', desc: 'Main public hangout lounge', icon: '💬' },
-      { id: 'Retro-Tech', name: 'Retro-Tech', desc: 'Windows XP, Pentium 4, CRT displays', icon: '💻' },
-      { id: 'Music-Y2K', name: 'Music-Y2K', desc: 'Nu-metal, Pop-punk, MP3s, Limewire', icon: '🎧' },
-      { id: 'Gaming-Zone', name: 'Gaming-Zone', desc: 'Counter-Strike 1.6, Halo CE, Starcraft', icon: '🎮' }
-    ];
-
-    let currentRoomId = 'MSN-Lounge';
-    let audioEnabled = true;
+    /* ----------------------------------------------------------------------
+       2. APP STATE
+       ---------------------------------------------------------------------- */
+    let currentUser = null; // { id, email, name }
+    let joinedServers = JSON.parse(localStorage.getItem('ultrachat_servers') || '[]');
+    let activeServerId = null;
     let realtimeChannel = null;
-    let presenceChannel = null;
 
     /* ----------------------------------------------------------------------
-       2. INITIALIZATION & SUPABASE REALTIME PRESENCE SUBSCRIPTION
+       3. INITIALIZATION & AUTH LISTENERS
        ---------------------------------------------------------------------- */
     window.addEventListener('DOMContentLoaded', async () => {
-      renderRooms();
-      updateUserUI();
-
-      // Check current Supabase Auth Session
+      // Check auth session
       const { data: { session } } = await client.auth.getSession();
       if (session && session.user) {
-        currentUser.id = session.user.id;
-        currentUser.name = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-        currentUser.isGuest = false;
-        updateUserUI();
+        setLoggedInUser(session.user);
+      } else {
+        openAuthModal();
       }
 
-      // Initial Fetch, Realtime Messages & Realtime Presence
-      fetchMessages();
-      subscribeToRealtimeMessages();
-      subscribeToRealtimePresence();
+      renderServerList();
+
+      // Keyboard enter key to send message
+      document.getElementById('messageTextarea').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
     });
 
-    /* --- REALTIME MESSAGES SUBSCRIPTION --- */
-    function subscribeToRealtimeMessages() {
-      if (realtimeChannel) {
-        client.removeChannel(realtimeChannel);
-      }
-
-      realtimeChannel = client.channel('public:messages')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-          const newMsg = payload.new;
-          if (!newMsg.room || newMsg.room === currentRoomId) {
-            appendMessageToFeed(newMsg);
-            
-            if (newMsg.is_nudge || (newMsg.text && newMsg.text.includes('[NUDGE!]'))) {
-              triggerScreenShake();
-            } else {
-              playRetroSound('message');
-            }
-          }
-        })
-        .subscribe((status) => {
-          const statusDot = document.getElementById('statusIndicator');
-          const statusTxt = document.getElementById('statusText');
-          if (status === 'SUBSCRIBED') {
-            statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow';
-            statusTxt.innerText = 'Connected & Live!';
-          } else {
-            statusDot.className = 'w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block shadow';
-            statusTxt.innerText = 'Connecting...';
-          }
-        });
-    }
-
-    /* --- REALTIME PRESENCE SUBSCRIPTION (100% REAL USERS, ZERO BOTS) --- */
-    function subscribeToRealtimePresence() {
-      if (presenceChannel) {
-        client.removeChannel(presenceChannel);
-      }
-
-      presenceChannel = client.channel('msn-online-presence', {
-        config: {
-          presence: {
-            key: currentUser.id
-          }
-        }
-      });
-
-      presenceChannel
-        .on('presence', { event: 'sync' }, () => {
-          const state = presenceChannel.presenceState();
-          renderPresenceBuddies(state);
-        })
-        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-          const joinedUser = newPresences[0];
-          if (joinedUser && joinedUser.id !== currentUser.id) {
-            showNotification(`${joinedUser.name || 'A buddy'} signed online!`);
-            playRetroSound('login');
-          }
-        })
-        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-          const leftUser = leftPresences[0];
-          if (leftUser && leftUser.id !== currentUser.id) {
-            showNotification(`${leftUser.name || 'A buddy'} signed off.`);
-          }
-        });
-
-      presenceChannel.subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await presenceChannel.track({
-            id: currentUser.id,
-            name: currentUser.name,
-            status: currentUser.status,
-            quote: currentUser.quote,
-            onlineAt: new Date().toISOString()
-          });
-        }
-      });
-    }
-
-    async function updatePresenceState() {
-      if (presenceChannel) {
-        await presenceChannel.track({
-          id: currentUser.id,
-          name: currentUser.name,
-          status: currentUser.status,
-          quote: currentUser.quote,
-          onlineAt: new Date().toISOString()
-        });
-      }
-    }
-
-    function renderPresenceBuddies(state) {
-      const buddyListEl = document.getElementById('buddyList');
-      const badgeEl = document.getElementById('onlineCountBadge');
-      const onlineUsers = [];
-
-      for (const key in state) {
-        const presences = state[key];
-        if (presences && presences.length > 0) {
-          onlineUsers.push(presences[presences.length - 1]);
-        }
-      }
-
-      badgeEl.innerText = `${onlineUsers.length} Online`;
-
-      if (onlineUsers.length === 0) {
-        buddyListEl.innerHTML = `
-          <div class="text-[11px] text-gray-500 italic p-2 text-center">
-            No active buddies online right now.
-          </div>
-        `;
-        return;
-      }
-
-      buddyListEl.innerHTML = onlineUsers.map(u => {
-        const isSelf = u.id === currentUser.id;
-        const statusColor = u.status === 'Busy' ? 'bg-red-500' : u.status === 'Away' ? 'bg-yellow-500' : 'bg-emerald-500';
-        
-        return `
-          <div class="p-1.5 win-inset bg-white rounded text-xs flex items-center space-x-2">
-            <div class="w-2.5 h-2.5 rounded-full ${statusColor} flex-shrink-0 shadow-xs"></div>
-            <div class="overflow-hidden flex-1">
-              <div class="font-bold text-gray-800 truncate">
-                ${escapeHtml(u.name || 'Anonymous')} ${isSelf ? '<span class="text-[9px] text-blue-600 font-normal">(You)</span>' : ''}
-              </div>
-              <div class="text-[9px] text-gray-500 truncate">${escapeHtml(u.quote || 'No status set')}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    /* ----------------------------------------------------------------------
-       3. FETCH & RENDER MESSAGES
-       ---------------------------------------------------------------------- */
-    async function fetchMessages() {
-      const feed = document.getElementById('chatFeed');
-      feed.innerHTML = `
-        <div class="text-center text-xs text-gray-500 py-4">
-          <i class="fa-solid fa-spinner fa-spin text-base text-blue-600 mb-1"></i>
-          <div>Fetching live messages...</div>
-        </div>
-      `;
-
-      try {
-        let { data, error } = await client
-          .from('messages')
-          .select('*')
-          .order('created_at', { ascending: true })
-          .limit(80);
-
-        if (error) {
-          console.error('Supabase fetch error:', error);
-          feed.innerHTML = `
-            <div class="p-3 bg-red-100 border border-red-300 rounded text-red-700 text-xs space-y-1">
-              <div class="font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Could not fetch messages</div>
-              <div>${error.message}</div>
-              <button onclick="openModal('modalSql')" class="underline font-bold text-red-900 mt-1">Click here to run SQL setup script</button>
-            </div>
-          `;
-          return;
-        }
-
-        const filtered = (data || []).filter(m => !m.room || m.room === currentRoomId);
-
-        if (filtered.length === 0) {
-          feed.innerHTML = `
-            <div class="text-center text-xs text-gray-500 py-6">
-              <i class="fa-regular fa-comment-dots text-2xl text-gray-400 mb-2"></i>
-              <div>No messages in <strong>#${currentRoomId}</strong> yet!</div>
-              <div class="text-[10px] text-blue-600 mt-1">Be the first to post a message below!</div>
-            </div>
-          `;
-          return;
-        }
-
-        feed.innerHTML = '';
-        filtered.forEach(msg => appendMessageToFeed(msg, false));
-        feed.scrollTop = feed.scrollHeight;
-
-      } catch (err) {
-        console.error('Fetch error:', err);
-      }
-    }
-
-    function appendMessageToFeed(msg, autoScroll = true) {
-      const feed = document.getElementById('chatFeed');
-      
-      if (feed.querySelector('.fa-spinner') || feed.querySelector('.fa-comment-dots')) {
-        feed.innerHTML = '';
-      }
-
-      const isNudge = msg.is_nudge || (msg.text && msg.text.includes('[NUDGE!]'));
-      const formattedText = parseEmoticons(escapeHtml(msg.text || ''));
-      const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now';
-      const sender = msg.user_name || 'Anonymous';
-
-      const msgEl = document.createElement('div');
-      
-      if (isNudge) {
-        msgEl.className = 'win-outset p-2 bg-yellow-100 border-yellow-400 text-xs font-bold text-center text-yellow-900 my-1 rounded shadow-xs';
-        msgEl.innerHTML = `
-          <i class="fa-solid fa-hand-pointer text-red-600 mr-1 animate-bounce"></i>
-          <span>${escapeHtml(sender)} just sent a NUDGE to everyone!</span>
-        `;
-      } else {
-        msgEl.className = 'text-xs space-y-0.5 hover:bg-gray-50 p-1.5 rounded transition border-b border-gray-100';
-        msgEl.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-blue-800 flex items-center space-x-1">
-              <i class="fa-solid fa-user text-[10px] text-blue-500"></i>
-              <span>${escapeHtml(sender)}</span>
-            </span>
-            <span class="text-[10px] text-gray-400 font-mono">${timeStr}</span>
-          </div>
-          <div class="text-gray-800 leading-relaxed pl-3 border-l-2 border-blue-400 mt-0.5 break-words">
-            ${formattedText}
-          </div>
-        `;
-      }
-
-      feed.appendChild(msgEl);
-
-      if (autoScroll) {
-        feed.scrollTop = feed.scrollHeight;
-      }
-    }
-
-    /* ----------------------------------------------------------------------
-       4. SEND MESSAGE & NUDGE ACTIONS
-       ---------------------------------------------------------------------- */
-    async function sendMessage() {
-      const input = document.getElementById('msgInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      input.value = '';
-
-      const payload = {
-        text: text,
-        user_name: currentUser.name,
-        room: currentRoomId,
-        server_id: 'msn-lounge',
-        channel_id: currentRoomId.toLowerCase(),
-        is_nudge: false
+    function setLoggedInUser(user) {
+      const username = user.user_metadata?.username || user.email.split('@')[0];
+      currentUser = {
+        id: user.id,
+        email: user.email,
+        name: username
       };
 
-      const { error } = await client
-        .from('messages')
-        .insert([payload]);
+      document.getElementById('userStatusText').innerText = `Logged in as: ${currentUser.name}`;
+      document.getElementById('authBtn').innerText = 'Log Out';
+      document.getElementById('authBtn').onclick = handleSignOut;
 
-      if (error) {
-        console.error('Send message error:', error);
-        showNotification('Failed to send: ' + error.message, true);
-      } else {
-        playRetroSound('click');
+      // Enable messaging inputs
+      document.getElementById('messageTextarea').disabled = false;
+      document.getElementById('sendBtn').disabled = false;
+
+      closeAuthModal();
+
+      // If user has saved servers, auto-join the first
+      if (joinedServers.length > 0 && !activeServerId) {
+        selectServer(joinedServers[0]);
       }
-    }
-
-    async function triggerNudge() {
-      triggerScreenShake();
-      playRetroSound('nudge');
-
-      const payload = {
-        text: '[NUDGE!]',
-        user_name: currentUser.name,
-        room: currentRoomId,
-        server_id: 'msn-lounge',
-        channel_id: currentRoomId.toLowerCase(),
-        is_nudge: true
-      };
-
-      const { error } = await client
-        .from('messages')
-        .insert([payload]);
-
-      if (error) {
-        console.error('Nudge error:', error);
-        showNotification('Nudge failed: ' + error.message, true);
-      }
-    }
-
-    function triggerScreenShake() {
-      const app = document.getElementById('appWindow');
-      app.classList.remove('animate-nudge');
-      void app.offsetWidth;
-      app.classList.add('animate-nudge');
-      playRetroSound('nudge');
     }
 
     /* ----------------------------------------------------------------------
-       5. USER AUTHENTICATION & PROFILE HANDLERS
+       4. AUTHENTICATION HANDLERS
        ---------------------------------------------------------------------- */
-    async function handleLogin() {
+    async function handleSignIn() {
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value.trim();
+      const errorEl = document.getElementById('authError');
+      errorEl.innerText = '';
 
       if (!email || !password) {
-        showNotification('Please enter both email and password.', true);
+        errorEl.innerText = 'Please enter both email and password.';
         return;
       }
 
       const { data, error } = await client.auth.signInWithPassword({ email, password });
       if (error) {
-        showNotification('Login failed: ' + error.message, true);
+        errorEl.innerText = error.message;
       } else if (data.user) {
-        currentUser.id = data.user.id;
-        currentUser.name = data.user.user_metadata?.full_name || email.split('@')[0];
-        currentUser.isGuest = false;
-        updateUserUI();
-        updatePresenceState();
-        closeModal('modalAuth');
-        showNotification(`Welcome back, ${currentUser.name}!`);
-        playRetroSound('login');
+        setLoggedInUser(data.user);
       }
     }
 
     async function handleSignUp() {
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value.trim();
-      const screenName = document.getElementById('authScreenName').value.trim() || email.split('@')[0];
+      const username = document.getElementById('authUsername').value.trim() || email.split('@')[0];
+      const errorEl = document.getElementById('authError');
+      errorEl.innerText = '';
 
       if (!email || !password) {
-        showNotification('Please enter email and password.', true);
+        errorEl.innerText = 'Please enter email and password.';
         return;
       }
 
       const { data, error } = await client.auth.signUp({
         email,
         password,
-        options: { data: { full_name: screenName } }
+        options: { data: { username: username } }
       });
 
       if (error) {
-        showNotification('Registration failed: ' + error.message, true);
-      } else {
-        showNotification('Account created successfully!');
-        currentUser.id = data.user?.id || currentUser.id;
-        currentUser.name = screenName;
-        currentUser.isGuest = false;
-        updateUserUI();
-        updatePresenceState();
-        closeModal('modalAuth');
-        playRetroSound('login');
+        errorEl.innerText = error.message;
+      } else if (data.user) {
+        setLoggedInUser(data.user);
       }
-    }
-
-    async function handleGoogleLogin() {
-      const { error } = await client.auth.signInWithOAuth({
-        provider: 'google'
-      });
-      if (error) showNotification('Google Auth Error: ' + error.message, true);
     }
 
     async function handleSignOut() {
       await client.auth.signOut();
-      currentUser.isGuest = true;
-      currentUser.name = 'Guest_' + Math.floor(Math.random() * 899 + 100);
-      updateUserUI();
-      updatePresenceState();
-      closeModal('modalAuth');
-      showNotification('Signed out.');
+      currentUser = null;
+      document.getElementById('userStatusText').innerText = 'Not Logged In';
+      document.getElementById('authBtn').innerText = 'Log In / Register';
+      document.getElementById('authBtn').onclick = openAuthModal;
+
+      document.getElementById('messageTextarea').disabled = true;
+      document.getElementById('sendBtn').disabled = true;
+
+      openAuthModal();
     }
 
-    function handleGuestMode() {
-      currentUser.name = 'Guest_' + Math.floor(Math.random() * 899 + 100);
-      currentUser.isGuest = true;
-      updateUserUI();
-      updatePresenceState();
-      closeModal('modalAuth');
-      showNotification(`Signed in as ${currentUser.name}`);
-      playRetroSound('login');
+    function openAuthModal() {
+      document.getElementById('authModal').classList.remove('hidden');
     }
 
-    function updateUserUI() {
-      document.getElementById('userNameDisplay').innerText = currentUser.name;
-      document.getElementById('userAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
-      document.getElementById('navAuthLabel').innerText = currentUser.isGuest ? 'Sign In / Account' : currentUser.name + ' (Account)';
-      document.getElementById('footerUserRole').innerHTML = `<i class="fa-solid fa-user text-blue-600"></i> User: <strong>${escapeHtml(currentUser.name)}</strong> (${currentUser.isGuest ? 'Guest' : 'Authenticated'})`;
-      
-      const signOutBtn = document.getElementById('signOutBtn');
-      if (currentUser.isGuest) {
-        signOutBtn.classList.add('hidden');
-      } else {
-        signOutBtn.classList.remove('hidden');
-      }
-    }
-
-    function updateUserQuote(val) {
-      currentUser.quote = val;
-      updatePresenceState();
-    }
-
-    function updateUserStatus(val) {
-      currentUser.status = val;
-      updatePresenceState();
+    function closeAuthModal() {
+      document.getElementById('authError').innerText = '';
+      document.getElementById('authModal').classList.add('hidden');
     }
 
     /* ----------------------------------------------------------------------
-       6. ROOMS RENDERERS
+       5. SERVER MANAGEMENT (NO PRE-MADE PLACEHOLDERS)
        ---------------------------------------------------------------------- */
-    function renderRooms() {
-      const list = document.getElementById('roomList');
-      list.innerHTML = rooms.map(r => `
-        <button onclick="switchRoom('${r.id}')" class="w-full text-left p-1.5 rounded text-xs flex items-center space-x-2 transition ${r.id === currentRoomId ? 'win-inset bg-white font-bold text-blue-800' : 'hover:bg-gray-200 text-gray-800'}">
-          <span class="text-sm">${r.icon}</span>
-          <span class="truncate">#${r.name}</span>
-        </button>
+    function joinServerFromInput() {
+      const input = document.getElementById('serverInput');
+      const serverId = input.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      
+      if (!serverId) return;
+
+      if (!joinedServers.includes(serverId)) {
+        joinedServers.push(serverId);
+        localStorage.setItem('ultrachat_servers', JSON.stringify(joinedServers));
+        renderServerList();
+      }
+
+      input.value = '';
+      selectServer(serverId);
+    }
+
+    function renderServerList() {
+      const listEl = document.getElementById('serverList');
+      if (joinedServers.length === 0) {
+        listEl.innerHTML = '<li style="font-size:11px; color:#777;">No servers joined. Type a server ID below to create or join one!</li>';
+        return;
+      }
+
+      listEl.innerHTML = joinedServers.map(s => `
+        <li class="server-item ${s === activeServerId ? 'active' : ''}" onclick="selectServer('${s}')">
+          # ${s}
+        </li>
       `).join('');
     }
 
-    function switchRoom(roomId) {
-      currentRoomId = roomId;
-      const room = rooms.find(r => r.id === roomId) || { name: roomId, desc: 'Custom Chatroom', icon: '💬' };
-      
-      document.getElementById('activeRoomTitle').innerText = '#' + room.name;
-      document.getElementById('activeRoomDesc').innerText = room.desc;
-      document.getElementById('activeRoomAvatar').innerText = room.icon;
+    function selectServer(serverId) {
+      activeServerId = serverId;
+      document.getElementById('currentServerTitle').innerText = `Server: #${serverId}`;
+      renderServerList();
 
-      renderRooms();
       fetchMessages();
-      playRetroSound('click');
-    }
-
-    function createNewRoom() {
-      const input = document.getElementById('newRoomNameInput');
-      const name = input.value.trim().replace(/\s+/g, '-');
-      if (!name) return;
-
-      const newRoom = { id: name, name: name, desc: 'User created room', icon: '⚡' };
-      rooms.push(newRoom);
-      input.value = '';
-      closeModal('modalCreateRoom');
-      switchRoom(name);
+      subscribeToRealtime();
     }
 
     /* ----------------------------------------------------------------------
-       7. RETRO WEB AUDIO SYNTHESIZER
+       6. REAL-TIME AUTO-UPDATES (SUPABASE SUBSCRIPTION)
        ---------------------------------------------------------------------- */
-    function playRetroSound(type) {
-      if (!audioEnabled) return;
+    async function fetchMessages() {
+      if (!activeServerId) return;
 
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = '<div style="color:#777; text-align:center;">Loading messages...</div>';
 
-        if (type === 'message') {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
-          gain.gain.setValueAtTime(0.15, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.3);
-        } else if (type === 'nudge') {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(160, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.4);
-          gain.gain.setValueAtTime(0.3, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.4);
-        } else if (type === 'login') {
-          [261.63, 329.63, 392.00, 523.25].forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.06));
-            gain.gain.setValueAtTime(0.1, ctx.currentTime + (idx * 0.06));
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (idx * 0.06) + 0.2);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(ctx.currentTime + (idx * 0.06));
-            osc.stop(ctx.currentTime + (idx * 0.06) + 0.2);
-          });
-        } else if (type === 'click') {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(400, ctx.currentTime);
-          gain.gain.setValueAtTime(0.05, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.05);
-        }
-      } catch (e) {
-        console.log('Audio playback prevented');
+      const { data, error } = await client
+        .from('messages')
+        .select('*')
+        .eq('server_id', activeServerId)
+        .order('created_at', { ascending: true })
+        .limit(100);
+
+      if (error) {
+        container.innerHTML = `<div class="error-text">Failed to load messages: ${error.message}</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div style="color:#777; text-align:center; margin-top:20px;">No messages in this server yet. Write the first message below!</div>';
+        return;
+      }
+
+      data.forEach(msg => appendMessage(msg, false));
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function subscribeToRealtime() {
+      if (!activeServerId) return;
+
+      if (realtimeChannel) {
+        client.removeChannel(realtimeChannel);
+      }
+
+      const indicator = document.getElementById('realtimeIndicator');
+
+      realtimeChannel = client.channel(`public:messages:${activeServerId}`)
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'messages',
+          filter: `server_id=eq.${activeServerId}`
+        }, payload => {
+          const newMsg = payload.new;
+          appendMessage(newMsg, true);
+          checkAndPlayMentionSound(newMsg);
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            indicator.innerText = '● Live Auto-Updating';
+            indicator.style.color = 'green';
+          } else {
+            indicator.innerText = '● Connecting...';
+            indicator.style.color = '#888';
+          }
+        });
+    }
+
+    /* ----------------------------------------------------------------------
+       7. SEND MESSAGE & MENTIONS SYSTEM
+       ---------------------------------------------------------------------- */
+    async function sendMessage() {
+      if (!currentUser) {
+        alert('You must log in to send messages.');
+        openAuthModal();
+        return;
+      }
+
+      if (!activeServerId) {
+        alert('Please create or select a server first.');
+        return;
+      }
+
+      const textarea = document.getElementById('messageTextarea');
+      const text = textarea.value.trim();
+      if (!text) return;
+
+      textarea.value = '';
+
+      const payload = {
+        text: text,
+        user_name: currentUser.name,
+        server_id: activeServerId,
+        channel_id: 'general',
+        room: activeServerId
+      };
+
+      const { error } = await client.from('messages').insert([payload]);
+
+      if (error) {
+        alert('Error sending message: ' + error.message);
       }
     }
 
-    function toggleAudio() {
-      audioEnabled = !audioEnabled;
-      document.getElementById('audioToggleBtn').innerText = audioEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+    function appendMessage(msg, autoScroll = true) {
+      const container = document.getElementById('chatMessages');
+
+      // Clear empty state text
+      if (container.querySelector('div')?.innerText.includes('No messages') || 
+          container.querySelector('div')?.innerText.includes('Loading messages')) {
+        container.innerHTML = '';
+      }
+
+      const dateStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      const formattedText = parseMentions(msg.text || '');
+
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'msg-row';
+      msgDiv.innerHTML = `
+        <div class="msg-header">
+          <span class="msg-author">${escapeHtml(msg.user_name || 'Anonymous')}</span>
+          <span style="font-size:10px; color:#888; margin-left:6px;">${dateStr}</span>
+        </div>
+        <div class="msg-text">${formattedText}</div>
+      `;
+
+      container.appendChild(msgDiv);
+
+      if (autoScroll) {
+        container.scrollTop = container.scrollHeight;
+      }
     }
 
-    /* ----------------------------------------------------------------------
-       8. UTILITY HELPERS & NOTIFICATIONS
-       ---------------------------------------------------------------------- */
-    function showNotification(msg, isError = false) {
-      const toast = document.getElementById('retroToast');
-      const toastText = document.getElementById('retroToastText');
-      toastText.innerText = msg;
-      toast.className = `fixed bottom-6 right-6 z-50 win-outset p-3 max-w-xs text-xs shadow-2xl flex items-center space-x-2 transition-all duration-300 ${isError ? 'bg-red-100 text-red-900 border-red-500' : 'bg-yellow-100 text-yellow-900 border-yellow-500'}`;
-      toast.classList.remove('hidden');
-
-      setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 4000);
+    /* Parses @username mentions */
+    function parseMentions(text) {
+      const escaped = escapeHtml(text);
+      return escaped.replace(/@([a-zA-Z0-9_\-]+)/g, (match, uname) => {
+        const isMe = currentUser && uname.toLowerCase() === currentUser.name.toLowerCase();
+        return `<span class="mention ${isMe ? 'mention-me' : ''}">@${uname}</span>`;
+      });
     }
 
-    function hideToast() {
-      document.getElementById('retroToast').classList.add('hidden');
+    /* Plays chime sound if logged-in user is tagged in @mention */
+    function checkAndPlayMentionSound(msg) {
+      if (!currentUser) return;
+
+      const mentionTag = `@${currentUser.name.toLowerCase()}`;
+      if (msg.text && msg.text.toLowerCase().includes(mentionTag) && msg.user_name !== currentUser.name) {
+        playChime();
+      }
     }
 
-    function applyTheme(themeClass) {
-      document.body.className = `h-full flex items-center justify-center p-2 sm:p-4 select-none ${themeClass} overflow-hidden`;
-    }
+    function playChime() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
-    function insertEmoticon(emo) {
-      const input = document.getElementById('msgInput');
-      input.value += ' ' + emo + ' ';
-      input.focus();
-    }
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1320, ctx.currentTime + 0.1);
 
-    function parseEmoticons(str) {
-      return str
-        .replace(/:-\)/g, '😊')
-        .replace(/;-\)/g, '😉')
-        .replace(/:-D/g, '😃')
-        .replace(/<3/g, '❤️')
-        .replace(/:O/g, '😮')
-        .replace(/\(H\)/g, '😎');
-    }
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
 
-    function handleInputKeydown(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {
+        // Audio playback error fallback
       }
     }
 
     function escapeHtml(str) {
       return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-    }
-
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    function copySqlSnippet() {
-      const sqlText = `CREATE TABLE IF NOT EXISTS public.messages (
-  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  text TEXT,
-  user_name TEXT DEFAULT 'Anonymous',
-  room TEXT DEFAULT 'MSN-Lounge',
-  server_id TEXT DEFAULT 'msn-lounge',
-  channel_id TEXT DEFAULT 'general',
-  is_nudge BOOLEAN DEFAULT false
-);
-ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public select" ON public.messages FOR SELECT USING (true);
-CREATE POLICY "Allow public insert" ON public.messages FOR INSERT WITH CHECK (true);`;
-
-      const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = sqlText;
-      document.body.appendChild(tempTextArea);
-      tempTextArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempTextArea);
-      showNotification('SQL code copied to clipboard!');
     }
   </script>
 </body>
