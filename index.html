@@ -79,7 +79,7 @@
     .yt-embed { width: 100%; max-width: 400px; aspect-ratio: 16/9; border-radius: 8px; margin-top: 8px; border: none; }
   </style>
 </head>
-<body class="h-full bg-discord-chat text-gray-200 select-none overflow-hidden font-sans flex">
+<body class="h-full bg-discord-chat text-gray-200 select-none overflow-hidden font-sans flex theme-dark">
 
   <!-- INITIALIZATION LOADING SCREEN -->
   <div id="loadingScreen" class="fixed inset-0 bg-discord-chat z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
@@ -127,7 +127,7 @@
         <i class="fa-solid fa-plus text-lg"></i>
       </button>
       <div class="absolute left-[80px] bg-discord-black text-white text-xs px-2.5 py-1.5 rounded-md font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-        Create a Server
+        Create or Join Server
       </div>
     </div>
 
@@ -157,11 +157,11 @@
           <i class="fa-solid fa-user-plus text-xs"></i>
         </button>
         <div id="inviteDivider" class="h-[1px] bg-discord-hover my-1 hidden"></div>
-        <button id="btnServerSettings" onclick="openServerSettings()" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
+        <button id="btnServerSettings" onclick="openServerSettings()" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors hidden">
           <span>Server Settings & Mod</span>
           <i class="fa-solid fa-gear text-xs"></i>
         </button>
-        <button id="btnCreateChannel" onclick="openModal('createChannelModal')" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
+        <button id="btnCreateChannel" onclick="openModal('createChannelModal')" class="w-full text-left px-2.5 py-2 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors hidden">
           <span>Create Channel</span>
           <i class="fa-solid fa-plus-circle text-xs"></i>
         </button>
@@ -312,11 +312,12 @@
         </div>
         <div>
           <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Display Name (For Signup)</label>
-          <input type="text" id="authUsername" class="w-full bg-discord-black border border-discord-hover/50 rounded p-2.5 text-base text-discord-textHeader outline-none focus:border-discord-blurple" />
+          <input type="text" id="authUsername" class="w-full bg-discord-black border border-discord-hover/50 rounded p-2.5 text-base text-discord-textHeader outline-none focus:border-discord-blurple" placeholder="Only needed for sign up" />
         </div>
         <div class="flex space-x-3 pt-2">
+          <!-- STRICT LOGIN / SIGNUP SPLIT -->
           <button onclick="handleLogin()" class="flex-1 bg-discord-blurple hover:bg-discord-blurpleHover text-white py-3 rounded font-bold text-sm transition-colors">Log In</button>
-          <button onclick="handleSignup()" class="flex-1 border border-discord-blurple text-discord-blurple hover:bg-discord-blurple/10 py-3 rounded font-bold text-sm transition-colors">Register</button>
+          <button onclick="handleSignup()" class="flex-1 border border-discord-blurple text-discord-blurple hover:bg-discord-blurple/10 py-3 rounded font-bold text-sm transition-colors">Sign Up</button>
         </div>
         <div class="text-center pt-2">
           <button onclick="guestLogin()" class="text-xs text-discord-textMuted hover:text-discord-textHeader hover:underline">Continue as Guest</button>
@@ -475,6 +476,14 @@
         <button onclick="closeModal('createServerModal')" class="text-xs font-bold text-gray-500 hover:underline">Cancel</button>
         <button onclick="handleCreateServer()" class="bg-discord-blurple text-white px-5 py-2 rounded text-sm font-bold hover:bg-discord-blurpleHover transition-colors">Create</button>
       </div>
+
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <h3 class="text-sm font-bold text-gray-700 mb-2">Have an invite code?</h3>
+        <div class="flex space-x-2">
+            <input type="text" id="joinInviteInput" placeholder="e.g. xY7z9AbC" class="flex-1 bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-discord-blurple" />
+            <button onclick="handleJoinServerByCode()" class="bg-discord-sidebar hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-bold transition-colors">Join</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -517,10 +526,10 @@
   <div id="inviteModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-discord-sidebar w-full max-w-md rounded-lg shadow-2xl relative p-6 border border-discord-hover">
       <h2 class="text-xl font-bold text-discord-textHeader mb-2">Invite Friends</h2>
-      <p class="text-xs text-discord-textMuted mb-4">Share this link or send it directly to your friends.</p>
+      <p class="text-xs text-discord-textMuted mb-4">Share this code or send it directly to your friends.</p>
       
       <div class="flex space-x-2 mb-6">
-        <input type="text" id="inviteCodeInput" readonly class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:ring-1 focus:ring-discord-blurple" />
+        <input type="text" id="inviteCodeInput" readonly class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:ring-1 focus:ring-discord-blurple text-center font-mono font-bold tracking-widest text-lg" />
         <button onclick="copyInviteCode()" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-4 py-2 rounded text-sm font-bold transition-colors">Copy</button>
       </div>
 
@@ -548,19 +557,20 @@
 
     let currentUser = { id: null, email: '', name: 'User', avatar: '', statusQuote: 'Online', isCEO: false, isGuest: false };
     
-    // Dynamic user cache for updating old messages visually
-    let knownUsers = {}; 
-
+    // In-memory state synchronized with DB
     let servers = [];
+    let currentServerChannels = [];
+    let currentServerMembers = [];
     let friends = [];
     let dms = [];
     
     let currentServerId = 'home';
     let currentChannelId = null;
     let friendsSubTab = 'online';
-    let activeRealtimeChannel = null;
+    let activeRealtimeMessages = null;
+    let activeRealtimeGlobal = null;
     
-    let lastMessageTimeMap = {}; // Tracks slowmode per channel
+    let lastMessageTimeMap = {}; 
 
     function handleFileUpload(inputId, hiddenInputId) {
       const fileInput = document.getElementById(inputId);
@@ -581,80 +591,39 @@
     handleFileUpload('ssInputIconFile', 'ssInputIcon');
     handleFileUpload('newServerIconFile', 'newServerIcon');
 
-    // Advanced Default Servers with Member Simulation & Mod Settings
-    const defaultServers = [
-      { 
-        id: 'ultrachat-hq', 
-        name: 'UltraChat HQ', 
-        icon: 'HQ', 
-        owner_id: 'system',
-        owner_name: 'System',
-        needsInvite: false,
-        settings: { strictMode: true, blockedWords: 'spamword, badword' },
-        roles: [
-            { id: 'admin', name: 'Admin', color: '#f59e0b', bypassSlowmode: true, canKick: true, canCreateInvite: true },
-            { id: 'member', name: 'Member', color: '#949ba4', bypassSlowmode: false, canKick: false, canCreateInvite: false }
-        ],
-        mockMembers: [
-            { id: 'mock1', name: 'ld0113', role: 'admin', isGuest: false },
-            { id: 'mock2', name: 'UltraFan', role: 'member', isGuest: false },
-            { id: 'mock3', name: 'Random', role: 'member', isGuest: true } // Guest
-        ],
-        channels: [
-          { id: 'general', name: 'general', type: 'text', topic: 'General Lobby', slowmode: 0 },
-          { id: 'rules', name: 'rules', type: 'text', topic: 'Read me', slowmode: 60 }
-        ]
-      }
-    ];
-
-    function getStoreKey(k) { return `uc3000_${k}_${currentUser.id}`; }
-
-    function loadState() {
-      if (!currentUser.id) return;
-      currentUser.name = localStorage.getItem(getStoreKey('name')) || currentUser.name;
-      currentUser.avatar = localStorage.getItem(getStoreKey('avatar')) || `https://placehold.co/80x80/5865f2/ffffff?text=${currentUser.name[0]}`;
-      
-      const stSrv = localStorage.getItem(getStoreKey('servers'));
-      servers = stSrv ? JSON.parse(stSrv) : JSON.parse(JSON.stringify(defaultServers));
-      
-      const stDms = localStorage.getItem(getStoreKey('dms'));
-      dms = stDms ? JSON.parse(stDms) : [];
-
-      currentServerId = localStorage.getItem(getStoreKey('last_srv')) || 'home';
-
-      // Load known users from localStorage to persist name updates
-      const stCache = localStorage.getItem('uc3000_user_cache');
-      if (stCache) knownUsers = JSON.parse(stCache);
-      
-      // Update cache with self
-      knownUsers[currentUser.id] = { name: currentUser.name, avatar: currentUser.avatar, isGuest: currentUser.isGuest };
-      localStorage.setItem('uc3000_user_cache', JSON.stringify(knownUsers));
+    // =========================================================================
+    // 2. THEMES & INITIALIZATION
+    // =========================================================================
+    function applyTheme(themeName) {
+        document.body.classList.remove('theme-dark', 'theme-amoled', 'theme-light', 'theme-hacker');
+        document.body.classList.add(`theme-${themeName}`);
+        localStorage.setItem('uca3000_theme', themeName);
+        document.getElementById('settingsTheme').value = themeName;
     }
 
-    function saveState() {
-      if (!currentUser.id) return;
-      localStorage.setItem(getStoreKey('name'), currentUser.name);
-      localStorage.setItem(getStoreKey('avatar'), currentUser.avatar);
-      localStorage.setItem(getStoreKey('servers'), JSON.stringify(servers));
-      localStorage.setItem(getStoreKey('dms'), JSON.stringify(dms));
-      localStorage.setItem(getStoreKey('last_srv'), currentServerId === 'dm' ? 'home' : currentServerId);
-      
-      knownUsers[currentUser.id] = { name: currentUser.name, avatar: currentUser.avatar, isGuest: currentUser.isGuest };
-      localStorage.setItem('uc3000_user_cache', JSON.stringify(knownUsers));
-    }
-
-    // =========================================================================
-    // 2. BOOTSTRAP & AUTH
-    // =========================================================================
     window.addEventListener('DOMContentLoaded', async () => {
       try {
+        const savedTheme = localStorage.getItem('uca3000_theme') || 'dark';
+        applyTheme(savedTheme);
+
         const { data: { session } } = await client.auth.getSession();
         if (session) {
           currentUser.id = session.user.id;
           currentUser.email = session.user.email;
-          currentUser.name = session.user.user_metadata?.display_name || session.user.email.split('@')[0];
+          
+          // Ensure profile exists in DB
+          const { data: profile } = await client.from('profiles').select('*').eq('id', currentUser.id).single();
+          if (profile) {
+              currentUser.name = profile.display_name;
+              currentUser.avatar = profile.avatar_url;
+              currentUser.isGuest = profile.is_guest;
+          } else {
+              currentUser.name = session.user.user_metadata?.display_name || session.user.email.split('@')[0];
+              await client.from('profiles').insert({ id: currentUser.id, display_name: currentUser.name, is_guest: false });
+          }
           finalizeInit();
         } else {
+          // Guest check fallback
           const gId = localStorage.getItem('uc_guest_id');
           if (gId) {
             currentUser.id = gId;
@@ -688,15 +657,11 @@
         document.getElementById('guestWarningBox').classList.remove('hidden');
       }
 
-      loadState();
+      currentServerId = localStorage.getItem(`uc3000_last_srv_${currentUser.id}`) || 'home';
       
-      const theme = localStorage.getItem(getStoreKey('theme')) || 'dark';
-      document.body.className = `h-full bg-discord-chat text-gray-200 select-none overflow-hidden font-sans flex theme-${theme}`;
-      document.getElementById('settingsTheme').value = theme;
-
       updateUserBar();
-      renderServerList();
-      switchServer(currentServerId);
+      setupGlobalRealtime();
+      loadServersFromDB().then(() => switchServer(currentServerId));
 
       setTimeout(() => {
         document.getElementById('loadingScreen').classList.add('opacity-0');
@@ -704,19 +669,23 @@
       }, 300);
     }
 
+    // =========================================================================
+    // 3. AUTH LOGIC (STRICT SEPARATION)
+    // =========================================================================
     async function handleLogin() {
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value.trim();
       if (!email || !password) return showToast("Email & password required", 'error');
 
+      // strictly login only
       const { data, error } = await client.auth.signInWithPassword({ email, password });
-      if (error) return showToast(error.message, 'error');
-
-      currentUser.id = data.user.id;
-      currentUser.email = data.user.email;
-      currentUser.name = data.user.email.split('@')[0];
-      closeModal('authModal');
-      finalizeInit();
+      
+      if (error) {
+          showToast("Login failed: " + error.message, 'error');
+      } else {
+          closeModal('authModal');
+          window.location.reload(); // Reload to run full initialization safely
+      }
     }
 
     async function handleSignup() {
@@ -725,32 +694,35 @@
       const name = document.getElementById('authUsername').value.trim() || email.split('@')[0];
       if (!email || !password) return showToast("Email & password required", 'error');
 
-      const { data, error } = await client.auth.signUp({ email, password, options: { data: { display_name: name } } });
-      if (error) return showToast(error.message, 'error');
-
-      currentUser.id = data.user?.id || 'temp_id';
-      currentUser.email = email;
-      currentUser.name = name;
-      closeModal('authModal');
-      finalizeInit();
+      // strictly sign up
+      const { data, error } = await client.auth.signUp({ 
+          email, 
+          password, 
+          options: { data: { display_name: name } } 
+      });
+      
+      if (error) {
+          showToast("Signup failed: " + error.message, 'error');
+      } else {
+          // Attempt to insert profile immediately
+          if (data.user) {
+              await client.from('profiles').insert({ id: data.user.id, display_name: name, is_guest: false });
+          }
+          closeModal('authModal');
+          window.location.reload();
+      }
     }
 
-    function guestLogin() {
-      currentUser.id = 'guest_' + Math.floor(Math.random() * 999999);
-      currentUser.email = 'guest@local';
-      currentUser.name = 'Guest_' + Math.floor(Math.random() * 999);
-      currentUser.isGuest = true;
-      localStorage.setItem('uc_guest_id', currentUser.id);
-      localStorage.setItem('uc_guest_name', currentUser.name);
+    async function guestLogin() {
+      const gId = 'guest_' + Math.floor(Math.random() * 999999);
+      const gName = 'Guest_' + Math.floor(Math.random() * 999);
+      localStorage.setItem('uc_guest_id', gId);
+      localStorage.setItem('uc_guest_name', gName);
       
-      if (!servers.some(s => s.id === 'ultrachat-hq')) {
-        servers.push(defaultServers[0]);
-        saveState();
-      }
-
+      await client.from('profiles').insert({ id: gId, display_name: gName, is_guest: true });
+      
       closeModal('authModal');
-      finalizeInit();
-      switchServer('ultrachat-hq');
+      window.location.reload();
     }
 
     async function logout() {
@@ -760,8 +732,70 @@
     }
 
     // =========================================================================
-    // 3. SERVER MANAGEMENT & GOVERNANCE
+    // 4. DATABASE SYNC & GLOBAL REALTIME
     // =========================================================================
+    function setupGlobalRealtime() {
+        if (activeRealtimeGlobal) client.removeChannel(activeRealtimeGlobal);
+
+        activeRealtimeGlobal = client.channel('global_structural_sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'channels' }, payload => {
+                if (currentServerId !== 'home' && currentServerId !== 'dm' && payload.new.server_id === currentServerId) {
+                    loadChannelsFromDB();
+                }
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'server_members' }, payload => {
+                if (payload.new.user_id === currentUser.id || payload.old?.user_id === currentUser.id) {
+                    loadServersFromDB();
+                }
+                if (payload.new.server_id === currentServerId) {
+                    loadMembersFromDB();
+                }
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'servers' }, payload => {
+                loadServersFromDB();
+            })
+            .subscribe();
+    }
+
+    async function loadServersFromDB() {
+        if (!currentUser.id) return;
+
+        // Get server IDs where user is member
+        const { data: memberData } = await client.from('server_members').select('server_id').eq('user_id', currentUser.id);
+        
+        if (memberData && memberData.length > 0) {
+            const serverIds = memberData.map(m => m.server_id);
+            const { data: srvData } = await client.from('servers').select('*').in('id', serverIds);
+            servers = srvData || [];
+        } else {
+            servers = [];
+        }
+        renderServerList();
+    }
+
+    async function loadChannelsFromDB() {
+        if (currentServerId === 'home' || currentServerId === 'dm') return;
+        
+        const { data: chanData } = await client.from('channels').select('*').eq('server_id', currentServerId).order('name', { ascending: true });
+        currentServerChannels = chanData || [];
+        renderChannelsList(currentServerChannels);
+    }
+
+    async function loadMembersFromDB() {
+        if (currentServerId === 'home' || currentServerId === 'dm') return;
+        
+        const { data: members } = await client.from('server_members')
+            .select(`
+                user_id,
+                role,
+                profiles ( display_name, avatar_url, is_guest )
+            `)
+            .eq('server_id', currentServerId);
+            
+        currentServerMembers = members || [];
+        renderMemberList();
+    }
+
     function renderServerList() {
       const container = document.getElementById('serverListContainer');
       container.innerHTML = '';
@@ -771,8 +805,7 @@
         const div = document.createElement('div');
         div.className = 'relative group flex items-center justify-center w-full my-1';
         
-        // Fix: Render image tag if it's a Base64 string, else fallback to text
-        let iconContent = srv.icon || srv.name.substring(0, 2);
+        let iconContent = srv.icon || (srv.name ? srv.name.substring(0, 2) : 'SV');
         if (srv.icon && srv.icon.startsWith('data:image')) {
             iconContent = `<img src="${srv.icon}" class="w-full h-full object-cover" alt="Server Icon" />`;
         }
@@ -787,14 +820,14 @@
       });
     }
 
-    function switchServer(srvId) {
+    async function switchServer(srvId) {
       currentServerId = srvId;
-      saveState();
+      localStorage.setItem(`uc3000_last_srv_${currentUser.id}`, srvId);
 
       const isHome = srvId === 'home';
       document.getElementById('dmListGroup').classList.toggle('hidden', !isHome);
       document.getElementById('serverChannelsGroup').classList.toggle('hidden', isHome);
-      document.getElementById('memberSidebar').classList.add('hidden'); // Default hide on switch
+      document.getElementById('memberSidebar').classList.add('hidden'); 
 
       if (isHome) {
         document.getElementById('friendsViewPanel').classList.remove('hidden');
@@ -813,31 +846,33 @@
         document.getElementById('friendsViewPanel').classList.add('hidden');
         document.getElementById('chatFeedPanel').classList.remove('hidden');
 
-        const srv = servers.find(s => s.id === srvId) || servers[0];
+        const srv = servers.find(s => s.id === srvId);
+        if (!srv) {
+            // fallback if server was deleted or user kicked
+            switchServer('home');
+            return;
+        }
+
         document.getElementById('serverTitleText').innerText = srv.name;
         
         const isOwner = (srv.owner_id === currentUser.id) || currentUser.isCEO;
         
-        let canInvite = isOwner;
-        if (!canInvite && srv.roles && srv.mockMembers) {
-            const myMemberRec = srv.mockMembers.find(m => m.id === currentUser.id);
-            if (myMemberRec) {
-                const myRole = srv.roles.find(r => r.id === myMemberRec.role);
-                if (myRole && myRole.canCreateInvite) canInvite = true;
-            }
-        }
+        // Wait to load members and roles to check permissions fully
+        await loadChannelsFromDB();
+        await loadMembersFromDB();
 
+        // Simple permission check (can expand later with server_roles table lookup)
+        let canInvite = isOwner; 
+        
         document.getElementById('serverOwnerBadge').classList.toggle('hidden', !isOwner);
         document.getElementById('btnServerSettings').classList.toggle('hidden', !isOwner);
         document.getElementById('btnCreateChannel').classList.toggle('hidden', !isOwner);
         
-        const showInvite = canInvite && srv.needsInvite;
-        document.getElementById('btnInvitePeople').classList.toggle('hidden', !showInvite);
-        document.getElementById('inviteDivider').classList.toggle('hidden', !showInvite);
+        document.getElementById('btnInvitePeople').classList.toggle('hidden', false); // Everyone can try to invite for now, or restrict later
+        document.getElementById('inviteDivider').classList.toggle('hidden', false);
 
-        renderChannelsList(srv.channels);
-        if (srv.channels.length > 0) {
-            switchChannel(srv.channels[0].id, srv.channels[0].name);
+        if (currentServerChannels.length > 0) {
+            switchChannel(currentServerChannels[0].id, currentServerChannels[0].name, currentServerChannels[0].slowmode);
         } else {
             document.getElementById('messagesContainer').innerHTML = '<div class="flex h-full items-center justify-center text-discord-textMuted">No channels exist.</div>';
         }
@@ -846,143 +881,41 @@
       renderServerList();
     }
 
-    function handleCreateServer() {
+    // =========================================================================
+    // 5. SERVER CREATION & INVITES (DB STRICT)
+    // =========================================================================
+    async function handleCreateServer() {
       const name = document.getElementById('newServerName').value.trim();
       if (!name) return;
 
-      const newSrv = {
-        id: 'srv_' + Date.now(),
-        name,
-        icon: document.getElementById('newServerIcon').value.trim() || name.substring(0, 2),
-        owner_id: currentUser.id,
-        owner_name: currentUser.name,
-        needsInvite: false,
-        settings: { strictMode: false, blockedWords: '' },
-        roles: [],
-        channels: [{ id: 'general', name: 'general', type: 'text', topic: 'Welcome!', slowmode: 0 }]
+      const newSrvId = 'srv_' + Date.now();
+      const srvData = {
+          id: newSrvId,
+          name: name,
+          icon: document.getElementById('newServerIcon').value.trim(),
+          owner_id: currentUser.id,
+          needs_invite: false,
+          strict_mode: false,
+          banned_words: ''
       };
 
-      servers.push(newSrv);
-      saveState();
+      // Insert Server
+      const { error: srvErr } = await client.from('servers').insert(srvData);
+      if (srvErr) return showToast(srvErr.message, "error");
+
+      // Join Server as Owner
+      await client.from('server_members').insert({ server_id: newSrvId, user_id: currentUser.id, role: 'admin' });
+      
+      // Create Default Channel
+      await client.from('channels').insert({ id: 'chan_' + Date.now(), server_id: newSrvId, name: 'general', type: 'text', slowmode: 0 });
+
       closeModal('createServerModal');
-      switchServer(newSrv.id);
+      await loadServersFromDB();
+      switchServer(newSrvId);
       showToast(`Created server ${name}`);
     }
 
-    function leaveCurrentServer() {
-        if(currentServerId === 'home' || currentServerId === 'dm') return;
-        if(currentServerId === 'ultrachat-hq') return showToast("Cannot leave HQ.", 'error');
-        servers = servers.filter(s => s.id !== currentServerId);
-        saveState();
-        switchServer('home');
-        showToast("Left server.");
-    }
-
-    // --- Server Settings Functions ---
-    function openServerSettings() {
-        const srv = servers.find(s => s.id === currentServerId);
-        if(!srv) return;
-        
-        if(!srv.settings) srv.settings = { strictMode: false, blockedWords: '' };
-
-        document.getElementById('ssInputName').value = srv.name;
-        document.getElementById('ssInputIcon').value = srv.icon || '';
-        document.getElementById('ssCheckNeedsInvite').checked = !!srv.needsInvite;
-        
-        document.getElementById('ssCheckStrictMode').checked = srv.settings.strictMode;
-        document.getElementById('ssInputBlockedWords').value = srv.settings.blockedWords;
-
-        setServerSettingsTab('overview');
-        renderRolesList(srv);
-        openModal('serverSettingsModal');
-    }
-
-    function setServerSettingsTab(tab) {
-        ['overview', 'roles', 'mod'].forEach(t => {
-            document.getElementById('ssContent-' + t).classList.toggle('hidden', t !== tab);
-            const btn = document.getElementById('sstab-' + t);
-            if(t === tab) {
-                btn.className = `w-full text-left px-3 py-2 rounded font-bold text-white ${t==='mod'?'bg-discord-danger':'bg-discord-hover'}`;
-            } else {
-                btn.className = `w-full text-left px-3 py-2 rounded transition-colors ${t==='mod'?'text-discord-danger hover:bg-discord-danger hover:text-white mt-4 font-bold':'text-discord-textMuted hover:bg-discord-hover hover:text-white'}`;
-            }
-        });
-    }
-
-    function saveServerSettings() {
-        const srv = servers.find(s => s.id === currentServerId);
-        if(!srv) return;
-        
-        srv.name = document.getElementById('ssInputName').value.trim() || srv.name;
-        srv.icon = document.getElementById('ssInputIcon').value.trim() || srv.icon;
-        srv.needsInvite = document.getElementById('ssCheckNeedsInvite').checked;
-        
-        srv.settings.strictMode = document.getElementById('ssCheckStrictMode').checked;
-        srv.settings.blockedWords = document.getElementById('ssInputBlockedWords').value;
-        
-        saveState();
-        renderServerList();
-        document.getElementById('serverTitleText').innerText = srv.name;
-        closeModal('serverSettingsModal');
-        showToast("Server settings updated.");
-    }
-
-    function renderRolesList(srv) {
-        const c = document.getElementById('rolesListContainer');
-        c.innerHTML = '';
-        if(!srv.roles) srv.roles = [];
-        
-        if (srv.roles.length === 0) {
-            c.innerHTML = '<div class="text-xs text-discord-textMuted italic">No custom roles created.</div>';
-            return;
-        }
-
-        srv.roles.forEach((r, idx) => {
-            const d = document.createElement('div');
-            d.className = 'flex flex-col p-3 bg-discord-black rounded border border-discord-hover space-y-2';
-            d.innerHTML = `
-                <div class="flex justify-between items-center">
-                  <span class="font-bold" style="color:${r.color}">${r.name}</span>
-                  <button onclick="deleteRole(${idx})" class="text-red-400 hover:text-red-500 text-xs px-2"><i class="fa-solid fa-trash"></i></button>
-                </div>
-                <div class="flex space-x-4 text-[10px] uppercase font-bold text-discord-textMuted">
-                  <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" ${r.bypassSlowmode?'checked':''} disabled class="accent-discord-blurple"> <span>Bypass Slowmode</span></label>
-                  <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" ${r.canKick?'checked':''} disabled class="accent-discord-blurple"> <span>Kick/Ban</span></label>
-                  <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" ${r.canCreateInvite?'checked':''} disabled class="accent-discord-blurple"> <span>Invites</span></label>
-                </div>
-            `;
-            c.appendChild(d);
-        });
-    }
-
-    function addCustomRole() {
-        const srv = servers.find(s => s.id === currentServerId);
-        if(!srv) return;
-        if(!srv.roles) srv.roles = [];
-        const colors = ['#f59e0b', '#3b82f6', '#ef4444', '#10b981', '#a855f7'];
-        srv.roles.push({
-            id: 'role_' + Date.now(),
-            name: 'New Role ' + (srv.roles.length + 1),
-            color: colors[srv.roles.length % colors.length],
-            bypassSlowmode: false,
-            canKick: false,
-            canCreateInvite: false
-        });
-        saveState();
-        renderRolesList(srv);
-    }
-
-    function deleteRole(idx) {
-        const srv = servers.find(s => s.id === currentServerId);
-        if(srv && srv.roles) {
-            srv.roles.splice(idx, 1);
-            saveState();
-            renderRolesList(srv);
-        }
-    }
-
-    // --- Channel Creation ---
-    function handleCreateChannel() {
+    async function handleCreateChannel() {
         const nameInput = document.getElementById('newChannelName');
         const typeInput = document.getElementById('newChannelType');
         const slowmodeInput = document.getElementById('newChannelSlowmode');
@@ -990,56 +923,142 @@
         
         if (!name) return;
 
-        const srv = servers.find(s => s.id === currentServerId);
-        if (!srv) return;
-
-        srv.channels.push({
+        const chanData = {
             id: 'chan_' + Date.now(),
+            server_id: currentServerId,
             name: name,
             type: typeInput.value,
             slowmode: parseInt(slowmodeInput.value) || 0
-        });
+        };
 
-        saveState();
-        renderChannelsList(srv.channels);
+        const { error } = await client.from('channels').insert(chanData);
+        if (error) return showToast(error.message, "error");
+
         nameInput.value = '';
         closeModal('createChannelModal');
         showToast(`Created channel #${name}`);
     }
 
-    // =========================================================================
-    // 4. CHANNELS, MESSAGING & MODERATION
-    // =========================================================================
-    function toggleCategory(listId, chevronId) {
-        document.getElementById(listId).classList.toggle('hidden');
-        document.getElementById(chevronId).classList.toggle('-rotate-90');
+    async function openInviteModal() {
+        const srv = servers.find(s => s.id === currentServerId);
+        if (!srv) return;
+        
+        // Generate robust 8 character code
+        const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+        
+        const { error } = await client.from('server_invites').insert({
+            code: code,
+            server_id: srv.id,
+            inviter_id: currentUser.id
+        });
+
+        if (error) return showToast("Failed to generate invite.", "error");
+
+        document.getElementById('inviteCodeInput').value = code;
+        
+        const c = document.getElementById('inviteFriendsList');
+        c.innerHTML = '';
+        if (friends.length === 0) {
+            c.innerHTML = '<div class="text-xs text-discord-textMuted text-center py-4">No friends found. Add some to send direct invites!</div>';
+        } else {
+            friends.forEach(f => {
+                c.innerHTML += `
+                    <div class="flex items-center justify-between p-2 hover:bg-discord-hover/50 rounded-lg transition-colors border border-transparent hover:border-discord-hover">
+                        <div class="flex items-center space-x-3">
+                            <img src="${f.avatar_url || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-7 h-7 rounded-full object-cover" />
+                            <div class="text-sm font-bold text-discord-textHeader">${f.display_name}</div>
+                        </div>
+                        <button onclick="sendInviteToFriend('${f.friendId}', '${code}')" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-4 py-1.5 rounded text-xs font-bold transition-colors">Send</button>
+                    </div>
+                `;
+            });
+        }
+        
+        openModal('inviteModal');
     }
 
-    function renderChannelsList(channels) {
-      const txtDiv = document.getElementById('textChannelsList');
-      const voiceDiv = document.getElementById('voiceChannelsList');
-      txtDiv.innerHTML = ''; voiceDiv.innerHTML = '';
-
-      channels.forEach(chan => {
-        const btn = document.createElement('button');
-        btn.onclick = () => switchChannel(chan.id, chan.name);
-        btn.className = `w-full flex items-center px-2 py-1.5 rounded text-sm font-medium text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors`;
-        const icon = chan.type === 'voice' ? 'fa-volume-high' : 'fa-hashtag';
-        btn.innerHTML = `<i class="fa-solid ${icon} text-xs mr-2 opacity-60"></i><span class="truncate">${chan.name}</span>`;
-        if (chan.type === 'voice') voiceDiv.appendChild(btn); else txtDiv.appendChild(btn);
-      });
+    function copyInviteCode() {
+        const input = document.getElementById('inviteCodeInput');
+        input.select();
+        document.execCommand('copy');
+        showToast("Invite code copied to clipboard!");
     }
 
-    function switchChannel(chanId, chanName) {
+    async function sendInviteToFriend(friendId, code) {
+        const sortedIds = [currentUser.id, friendId].sort();
+        const dmChannelId = 'dm_' + sortedIds.join('_');
+        
+        let msgData = {
+            text: `Hey, use this code to join my server! \n\n[INVITE:${code}]`,
+            user_name: currentUser.name,
+            user_id: currentUser.id,
+            avatar_url: currentUser.avatar,
+            server_id: 'dm',
+            channel_id: dmChannelId
+        };
+        
+        await client.from('messages').insert([msgData]);
+        showToast("Invite sent directly via DM!");
+    }
+
+    async function handleJoinServerByCode() {
+        const code = document.getElementById('joinInviteInput').value.trim();
+        if (!code) return;
+        await joinServerViaInviteCode(code);
+    }
+
+    async function joinServerViaInviteCode(code) {
+        // Find Invite
+        const { data: invite, error: inviteErr } = await client.from('server_invites').select('server_id').eq('code', code).single();
+        if (inviteErr || !invite) return showToast("Invalid or expired invite code.", "error");
+
+        // Insert into server_members (DOES NOT CREATE NEW SERVER)
+        const { error: joinErr } = await client.from('server_members').insert({
+            server_id: invite.server_id,
+            user_id: currentUser.id,
+            role: 'member'
+        });
+
+        if (joinErr) {
+            if (joinErr.code === '23505') {
+                showToast("You are already in this server.");
+                closeModal('createServerModal');
+                switchServer(invite.server_id);
+            } else {
+                showToast(joinErr.message, "error");
+            }
+            return;
+        }
+
+        showToast("Joined server!");
+        closeModal('createServerModal');
+        await loadServersFromDB();
+        switchServer(invite.server_id);
+    }
+
+    async function leaveCurrentServer() {
+        if(currentServerId === 'home' || currentServerId === 'dm') return;
+        const srv = servers.find(s => s.id === currentServerId);
+        if (srv && srv.owner_id === currentUser.id && !currentUser.isCEO) return showToast("Owners cannot leave. Delete the server instead.", "error");
+
+        await client.from('server_members').delete().eq('server_id', currentServerId).eq('user_id', currentUser.id);
+        
+        showToast("Left server.");
+        await loadServersFromDB();
+        switchServer('home');
+    }
+
+    // =========================================================================
+    // 6. MESSAGING & CHANNELS
+    // =========================================================================
+    function switchChannel(chanId, chanName, slowmode = 0) {
       currentChannelId = chanId;
       document.getElementById('channelHeaderName').innerText = chanName.includes('@') ? chanName : `#${chanName}`;
       
-      const srv = servers.find(s => s.id === currentServerId);
-      const chan = srv?.channels.find(c => c.id === chanId);
       const smBadge = document.getElementById('channelSlowmodeBadge');
-      if (chan && chan.slowmode > 0) {
+      if (slowmode > 0) {
           smBadge.classList.remove('hidden');
-          smBadge.innerText = chan.slowmode + "s Slowmode";
+          smBadge.innerText = slowmode + "s Slowmode";
       } else {
           smBadge.classList.add('hidden');
       }
@@ -1051,7 +1070,7 @@
       const container = document.getElementById('messagesContainer');
       container.innerHTML = '<div class="flex h-full items-center justify-center text-discord-textMuted"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>';
 
-      if (activeRealtimeChannel) { client.removeChannel(activeRealtimeChannel); activeRealtimeChannel = null; }
+      if (activeRealtimeMessages) { client.removeChannel(activeRealtimeMessages); activeRealtimeMessages = null; }
 
       const { data } = await client.from('messages').select('*').eq('server_id', srvId).eq('channel_id', chanId).order('created_at', { ascending: true }).limit(100);
 
@@ -1059,7 +1078,7 @@
       if (data) data.forEach(msg => appendMessage(msg));
       container.scrollTop = container.scrollHeight;
 
-      activeRealtimeChannel = client.channel(`room:${srvId}:${chanId}`)
+      activeRealtimeMessages = client.channel(`room:${srvId}:${chanId}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `server_id=eq.${srvId}` }, payload => {
           if (payload.eventType === 'INSERT' && payload.new.channel_id === chanId) appendMessage(payload.new);
           else if (payload.eventType === 'UPDATE') updateMessageInDOM(payload.new);
@@ -1079,18 +1098,9 @@
         container.appendChild(div);
       }
 
-      // Dynamic User Resolving (Overrides static DB data with current Cache)
       let resolvedName = msg.user_name;
       let resolvedAvatar = msg.avatar_url;
-      let isMsgUserGuest = msg.user_name.startsWith('Guest_');
 
-      if (knownUsers[msg.user_id]) {
-          resolvedName = knownUsers[msg.user_id].name;
-          resolvedAvatar = knownUsers[msg.user_id].avatar;
-          isMsgUserGuest = knownUsers[msg.user_id].isGuest;
-      }
-
-      // Permissions Logic
       const isMsgOwner = msg.user_id === currentUser.id;
       let isServerOwner = false;
       if (currentServerId !== 'home') {
@@ -1113,34 +1123,23 @@
       const ytMatch = safeText.match(ytRegex);
       if (ytMatch) formattedText = safeText.replace(ytRegex, `<br><iframe class="yt-embed" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe>`);
       
-      const inviteRegex = /\[INVITE:([A-Za-z0-9+/=%\-]+)\]/g;
-      formattedText = formattedText.replace(inviteRegex, (match, b64) => {
-          try {
-              const srvData = JSON.parse(decodeURIComponent(atob(b64)));
-              return `
-              <div class="mt-2 p-3 bg-discord-black border border-discord-hover/50 rounded-md w-[320px] flex flex-col gap-2 shadow-sm">
-                  <div class="text-[10px] font-bold text-discord-textMuted uppercase tracking-wider">You've been invited to join a server</div>
-                  <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-xl bg-discord-sidebar flex items-center justify-center font-bold text-white shrink-0 shadow-inner overflow-hidden">
-                          ${srvData.icon && srvData.icon.startsWith('data:') ? `<img src="${srvData.icon}" class="w-full h-full object-cover"/>` : (srvData.icon || srvData.name[0])}
-                      </div>
-                      <div class="font-bold text-discord-textHeader truncate flex-1">${srvData.name}</div>
-                      <button onclick="joinServerViaInvite('${b64}')" class="bg-discord-green hover:bg-green-600 text-white px-4 py-1.5 rounded text-xs font-bold transition-colors">Join</button>
-                  </div>
-              </div>`;
-          } catch(e) {
-              return `<span class="text-red-500 font-bold">[Invalid Invite Code]</span>`;
-          }
+      const inviteRegex = /\[INVITE:([A-Za-z0-9]+)\]/g;
+      formattedText = formattedText.replace(inviteRegex, (match, code) => {
+          return `
+          <div class="mt-2 p-3 bg-discord-black border border-discord-hover/50 rounded-md w-[320px] flex flex-col gap-2 shadow-sm">
+              <div class="text-[10px] font-bold text-discord-textMuted uppercase tracking-wider">You've been invited to join a server</div>
+              <div class="flex items-center gap-3">
+                  <div class="font-bold text-discord-textHeader truncate flex-1 tracking-widest text-center">${code}</div>
+                  <button onclick="joinServerViaInviteCode('${code}')" class="bg-discord-green hover:bg-green-600 text-white px-4 py-1.5 rounded text-xs font-bold transition-colors">Join</button>
+              </div>
+          </div>`;
       });
-
-      // Enforce Guest Tag on rendering
-      const finalDisplayName = isMsgUserGuest ? `<span class="text-[10px] bg-discord-hover text-discord-textMuted px-1.5 rounded mr-1 font-black">[GUEST]</span>${resolvedName}` : resolvedName;
 
       div.innerHTML = `
         <img src="${resolvedAvatar || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5 shadow-sm" />
         <div class="flex-1 min-w-0">
           <div class="flex items-baseline space-x-2">
-            <span class="font-bold text-sm text-discord-textHeader">${finalDisplayName}</span>
+            <span class="font-bold text-sm text-discord-textHeader">${resolvedName}</span>
             <span class="text-[10px] text-discord-textMuted">${new Date(msg.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
           </div>
           <div id="msg_text_${msg.id}" class="text-sm text-gray-200 mt-0.5 break-words whitespace-pre-wrap leading-relaxed">${formattedText}</div>
@@ -1149,7 +1148,6 @@
       `;
 
       if (isNew) {
-          // auto scroll if at bottom
           if (container.scrollHeight - container.scrollTop < container.clientHeight + 100) {
               container.scrollTop = container.scrollHeight;
           }
@@ -1225,33 +1223,21 @@
 
       const srv = servers.find(s => s.id === currentServerId);
       
-      // Moderation Engine checks (bypass if CEO or in DMs)
-      if (!currentUser.isCEO && currentServerId !== 'dm') {
-          if (srv && srv.settings) {
+      // Moderation Engine 
+      if (!currentUser.isCEO && currentServerId !== 'dm' && currentServerId !== 'home') {
+          if (srv) {
               const tl = text.toLowerCase();
-              
-              // 1. Strict Mode (Spam/Hate block)
-              if (srv.settings.strictMode) {
+              if (srv.strict_mode) {
                   const bad = ['spam', 'hate', 'slur', 'hack', 'scam'];
-                  if (bad.some(b => tl.includes(b))) {
-                      showToast("Strict Auto-Mod blocked your message.", 'error');
-                      return;
-                  }
+                  if (bad.some(b => tl.includes(b))) return showToast("Strict Auto-Mod blocked your message.", 'error');
               }
-              
-              // 2. Custom Blocked Words
-              if (srv.settings.blockedWords) {
-                  const blocked = srv.settings.blockedWords.split(',').map(w=>w.trim().toLowerCase()).filter(w=>w);
-                  if (blocked.some(b => tl.includes(b))) {
-                      showToast("Message contains blocked word.", 'error');
-                      return;
-                  }
+              if (srv.banned_words) {
+                  const blocked = srv.banned_words.split(',').map(w=>w.trim().toLowerCase()).filter(w=>w);
+                  if (blocked.some(b => tl.includes(b))) return showToast("Message contains blocked word.", 'error');
               }
           }
 
-          // 3. Slowmode enforcement
-          const chan = srv?.channels.find(c => c.id === currentChannelId);
-          // Guests get forced 10s minimum slowmode unless channel is longer
+          const chan = currentServerChannels.find(c => c.id === currentChannelId);
           let enforcedSlowmode = currentUser.isGuest ? 10 : (chan?.slowmode || 0); 
           
           if (enforcedSlowmode > 0) {
@@ -1259,8 +1245,7 @@
               const now = Date.now();
               if (now - lastT < enforcedSlowmode * 1000) {
                   const wait = Math.ceil((enforcedSlowmode * 1000 - (now - lastT))/1000);
-                  showToast(`Slowmode Active: Wait ${wait}s`, 'error');
-                  return;
+                  return showToast(`Slowmode Active: Wait ${wait}s`, 'error');
               }
               lastMessageTimeMap[currentChannelId] = now;
           }
@@ -1286,52 +1271,88 @@
     }
 
     // =========================================================================
-    // 5. MEMBER SIDEBAR & ROLES
+    // 7. USER UI, SETTINGS & FRIENDS
     // =========================================================================
+    function updateUserBar() {
+      document.getElementById('userBarName').innerText = currentUser.name;
+      document.getElementById('settingsUsername').value = currentUser.name;
+      document.getElementById('userBarAvatar').src = currentUser.avatar;
+    }
+
+    async function saveUserSettings() {
+      currentUser.name = document.getElementById('settingsUsername').value.trim() || currentUser.name;
+      
+      if (!currentUser.isGuest) {
+          currentUser.avatar = document.getElementById('settingsAvatarUrl').value.trim() || currentUser.avatar;
+      }
+      
+      const theme = document.getElementById('settingsTheme').value;
+      applyTheme(theme);
+      
+      // Sync profile to DB
+      await client.from('profiles').update({ 
+          display_name: currentUser.name, 
+          avatar_url: currentUser.avatar 
+      }).eq('id', currentUser.id);
+      
+      updateUserBar();
+      closeModal('userSettingsModal');
+      showToast("User settings saved");
+    }
+
+    function toggleCategory(listId, chevronId) {
+        document.getElementById(listId).classList.toggle('hidden');
+        document.getElementById(chevronId).classList.toggle('-rotate-90');
+    }
+
+    function renderChannelsList(channels) {
+      const txtDiv = document.getElementById('textChannelsList');
+      const voiceDiv = document.getElementById('voiceChannelsList');
+      txtDiv.innerHTML = ''; voiceDiv.innerHTML = '';
+
+      channels.forEach(chan => {
+        const btn = document.createElement('button');
+        btn.onclick = () => switchChannel(chan.id, chan.name, chan.slowmode);
+        btn.className = `w-full flex items-center px-2 py-1.5 rounded text-sm font-medium text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors`;
+        const icon = chan.type === 'voice' ? 'fa-volume-high' : 'fa-hashtag';
+        btn.innerHTML = `<i class="fa-solid ${icon} text-xs mr-2 opacity-60"></i><span class="truncate">${chan.name}</span>`;
+        if (chan.type === 'voice') voiceDiv.appendChild(btn); else txtDiv.appendChild(btn);
+      });
+    }
+
     function toggleMemberList() {
         if (currentServerId === 'home' || currentServerId === 'dm') return;
         const sidebar = document.getElementById('memberSidebar');
         sidebar.classList.toggle('hidden');
-        if (!sidebar.classList.contains('hidden')) renderMemberList();
     }
 
     function renderMemberList() {
         const container = document.getElementById('memberRolesList');
         container.innerHTML = '';
-        const srv = servers.find(s => s.id === currentServerId);
-        if (!srv) return;
 
-        // Collect mock members and current user
-        let members = (srv.mockMembers || []).slice();
-        if (!members.some(m => m.id === currentUser.id)) {
-            let myRole = 'none';
-            if (currentUser.isCEO || srv.owner_id === currentUser.id) myRole = 'admin'; // simplification
-            members.push({ id: currentUser.id, name: currentUser.name, role: myRole, isGuest: currentUser.isGuest, avatar: currentUser.avatar });
-        }
+        const groups = {
+            admin: { name: 'Admins', color: '#f59e0b', members: [] },
+            member: { name: 'Members', color: '#949ba4', members: [] }
+        };
 
-        // Group by Role
-        const groups = {};
-        (srv.roles || []).forEach(r => groups[r.id] = { role: r, members: [] });
-        groups['none'] = { role: { name: 'Online', color: '#949ba4' }, members: [] };
-
-        members.forEach(m => {
-            if (groups[m.role]) groups[m.role].members.push(m);
-            else groups['none'].members.push(m);
+        currentServerMembers.forEach(m => {
+            if (m.profiles) {
+                const groupKey = m.role || 'member';
+                if (!groups[groupKey]) groups[groupKey] = { name: groupKey.toUpperCase(), color: '#ffffff', members: [] };
+                groups[groupKey].members.push(m.profiles);
+            }
         });
 
-        // Render Groups
         Object.keys(groups).forEach(key => {
             const grp = groups[key];
             if (grp.members.length === 0) return;
 
             const grpDiv = document.createElement('div');
-            grpDiv.innerHTML = `<h3 class="text-[11px] font-bold uppercase text-discord-textMuted tracking-wide mb-2">${grp.role.name} — ${grp.members.length}</h3>`;
+            grpDiv.innerHTML = `<h3 class="text-[11px] font-bold uppercase text-discord-textMuted tracking-wide mb-2">${grp.name} — ${grp.members.length}</h3>`;
             
-            grp.members.forEach(m => {
-                const userCacheData = knownUsers[m.id];
-                const displayName = userCacheData ? userCacheData.name : m.name;
-                const avatar = userCacheData?.avatar || m.avatar || `https://placehold.co/80x80/5865f2/ffffff?text=${displayName[0]}`;
-                const isGuest = userCacheData ? userCacheData.isGuest : m.isGuest;
+            grp.members.forEach(p => {
+                const displayName = p.display_name;
+                const avatar = p.avatar_url || `https://placehold.co/80x80/5865f2/ffffff?text=${displayName[0]}`;
 
                 const memberDiv = document.createElement('div');
                 memberDiv.className = 'flex items-center space-x-2 p-1.5 hover:bg-discord-hover/60 rounded cursor-pointer transition-colors';
@@ -1340,8 +1361,8 @@
                         <img src="${avatar}" class="w-8 h-8 rounded-full object-cover" />
                         <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-discord-green border-2 border-discord-sidebar"></div>
                     </div>
-                    <div class="truncate text-sm font-medium" style="color: ${grp.role.color}">
-                        ${isGuest ? `<span class="text-[9px] bg-discord-hover text-discord-textMuted px-1 rounded mr-1">GUEST</span>` : ''}
+                    <div class="truncate text-sm font-medium" style="color: ${grp.color}">
+                        ${p.is_guest ? `<span class="text-[9px] bg-discord-hover text-discord-textMuted px-1 rounded mr-1">GUEST</span>` : ''}
                         ${displayName}
                     </div>
                 `;
@@ -1352,92 +1373,12 @@
     }
 
     // =========================================================================
-    // 6. PUBLIC EXPLORER (With accurate filtering)
-    // =========================================================================
-    function openPublicExplorer() {
-        document.getElementById('publicSearchInput').value = '';
-        renderPublicExplorer();
-        openModal('discoverModal');
-    }
-
-    function renderPublicExplorer() {
-        const search = document.getElementById('publicSearchInput').value.toLowerCase();
-        const container = document.getElementById('publicServersContainer');
-        container.innerHTML = '';
-        
-        let publicServers = [
-            ...defaultServers,
-            ...servers.filter(s => !s.needsInvite && !defaultServers.some(ds => ds.id === s.id))
-        ];
-
-        // Ensure real non-guest member count simulation
-        publicServers.forEach(s => {
-            const rawMembers = s.mockMembers ? s.mockMembers.length : (Math.floor(Math.random()*50)+1);
-            // Simulate that guests aren't counted
-            s.displayMemberCount = rawMembers + (s.id==='ultrachat-hq' ? 0 : 0);
-        });
-
-        if (search) publicServers = publicServers.filter(s => s.name.toLowerCase().includes(search));
-        publicServers.sort((a, b) => b.displayMemberCount - a.displayMemberCount);
-
-        if (publicServers.length === 0) {
-            container.innerHTML = '<div class="text-discord-textMuted text-sm text-center py-4">No public servers found.</div>';
-            return;
-        }
-
-        publicServers.forEach(s => {
-            const isJoined = servers.some(myS => myS.id === s.id);
-            const div = document.createElement('div');
-            div.className = 'flex items-center justify-between p-3 bg-discord-black rounded-lg border border-discord-hover/50';
-            
-            // Fix: Render image tag if it's a Base64 string
-            let iconContent = s.icon || s.name[0];
-            if (s.icon && s.icon.startsWith('data:image')) {
-                iconContent = `<img src="${s.icon}" class="w-full h-full object-cover" />`;
-            }
-
-            div.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-discord-sidebar flex items-center justify-center font-bold text-white text-lg overflow-hidden shrink-0">${iconContent}</div>
-                    <div>
-                        <div class="font-bold text-sm text-discord-textHeader">${s.name}</div>
-                        <div class="text-xs text-discord-textMuted"><i class="fa-solid fa-users mr-1"></i>${s.displayMemberCount} Real Members</div>
-                    </div>
-                </div>
-                ${isJoined 
-                    ? `<button disabled class="bg-discord-hover text-discord-textMuted px-4 py-1.5 rounded text-xs font-bold">Joined</button>` 
-                    : `<button onclick="joinPublicServer('${s.id}')" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-4 py-1.5 rounded text-xs font-bold transition-colors">Join</button>`
-                }
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    function joinPublicServer(id) {
-        const srvToJoin = defaultServers.find(s => s.id === id);
-        if (srvToJoin && !servers.some(s => s.id === srvToJoin.id)) {
-            servers.push(JSON.parse(JSON.stringify(srvToJoin)));
-            saveState();
-            renderServerList();
-            renderPublicExplorer();
-            showToast(`Joined ${srvToJoin.name}!`);
-        }
-    }
-
-    function openCeoModal() {
-        openModal('ceoCommandModal');
-    }
-
-    // =========================================================================
     // FRIENDS & DM LOGIC 
     // =========================================================================
     async function fetchFriendsFromDB() {
         if (currentUser.isGuest || !currentUser.id) return;
 
-        const { data: fData } = await client.from('friends')
-            .select('*')
-            .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
-
+        const { data: fData } = await client.from('friends').select('*').or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
         if (!fData) return;
 
         const accepted = fData.filter(f => f.status === 'accepted');
@@ -1577,7 +1518,6 @@
         
         if (!dms.find(d => d.id === friendId)) {
             dms.push({ id: friendId, name: friendName });
-            saveState();
             renderDMList();
         }
         
@@ -1600,130 +1540,11 @@
     }
 
     // =========================================================================
-    // 7. UTILS & MODALS
+    // 8. UTILS & MODALS
     // =========================================================================
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-    function updateUserBar() {
-      document.getElementById('userBarName').innerText = currentUser.name;
-      document.getElementById('settingsUsername').value = currentUser.name;
-      document.getElementById('userBarAvatar').src = currentUser.avatar;
-    }
-
-    function saveUserSettings() {
-      currentUser.name = document.getElementById('settingsUsername').value.trim() || currentUser.name;
-      
-      // Guest strict block on avatar update
-      if (!currentUser.isGuest) {
-          currentUser.avatar = document.getElementById('settingsAvatarUrl').value.trim() || currentUser.avatar;
-      }
-      
-      const theme = document.getElementById('settingsTheme').value;
-      localStorage.setItem(getStoreKey('theme'), theme);
-      document.body.className = `h-full bg-discord-chat text-gray-200 select-none overflow-hidden font-sans flex theme-${theme}`;
-      
-      saveState();
-      updateUserBar();
-      
-      // Reload messages to instantly reflect new username globally via Cache
-      if (currentServerId !== 'home') fetchMessages(currentServerId, currentChannelId);
-      
-      closeModal('userSettingsModal');
-      showToast("User settings saved");
-    }
-
-    function openInviteModal() {
-        const srv = servers.find(s => s.id === currentServerId);
-        if (!srv) return;
-        
-        // Use a lightweight copy of the server for the invite code payload
-        const srvLite = { id: srv.id, name: srv.name, icon: srv.icon };
-        const b64 = btoa(encodeURIComponent(JSON.stringify(srvLite)));
-        const inviteCode = `[INVITE:${b64}]`;
-        
-        document.getElementById('inviteCodeInput').value = inviteCode;
-        
-        const c = document.getElementById('inviteFriendsList');
-        c.innerHTML = '';
-        if (friends.length === 0) {
-            c.innerHTML = '<div class="text-xs text-discord-textMuted text-center py-4">No friends found. Add some to send direct invites!</div>';
-        } else {
-            friends.forEach(f => {
-                c.innerHTML += `
-                    <div class="flex items-center justify-between p-2 hover:bg-discord-hover/50 rounded-lg transition-colors border border-transparent hover:border-discord-hover">
-                        <div class="flex items-center space-x-3">
-                            <img src="${f.avatar_url || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-7 h-7 rounded-full object-cover" />
-                            <div class="text-sm font-bold text-discord-textHeader">${f.display_name}</div>
-                        </div>
-                        <button onclick="sendInviteToFriend('${f.friendId}', '${b64}')" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-4 py-1.5 rounded text-xs font-bold transition-colors">Send</button>
-                    </div>
-                `;
-            });
-        }
-        
-        openModal('inviteModal');
-    }
-
-    function copyInviteCode() {
-        const input = document.getElementById('inviteCodeInput');
-        input.select();
-        document.execCommand('copy');
-        showToast("Invite code copied to clipboard!");
-    }
-
-    async function sendInviteToFriend(friendId, b64) {
-        const sortedIds = [currentUser.id, friendId].sort();
-        const dmChannelId = 'dm_' + sortedIds.join('_');
-        
-        let msgData = {
-            text: `Hey, you should join this server! \n\n[INVITE:${b64}]`,
-            user_name: currentUser.name,
-            user_id: currentUser.id,
-            avatar_url: currentUser.avatar,
-            server_id: 'dm',
-            channel_id: dmChannelId
-        };
-        
-        await client.from('messages').insert([msgData]);
-        showToast("Invite sent directly via DM!");
-    }
-
-    function joinServerViaInvite(b64) {
-        try {
-            const srvData = JSON.parse(decodeURIComponent(atob(b64)));
-            if (servers.some(s => s.id === srvData.id)) {
-                showToast("You are already in this server.", "error");
-                switchServer(srvData.id);
-                return;
-            }
-            
-            // Reconstruct server structure from known public/default config or fallback generic setup
-            const fullSrv = defaultServers.find(s => s.id === srvData.id) || {
-                ...srvData,
-                owner_id: 'unknown',
-                needsInvite: true,
-                settings: { strictMode: false, blockedWords: '' },
-                roles: [],
-                channels: [{ id: 'general', name: 'general', type: 'text', slowmode: 0 }],
-                mockMembers: []
-            };
-            
-            // Add self to mock members seamlessly
-            if (!fullSrv.mockMembers.some(m => m.id === currentUser.id)) {
-                fullSrv.mockMembers.push({ id: currentUser.id, name: currentUser.name, role: 'none', isGuest: currentUser.isGuest, avatar: currentUser.avatar });
-            }
-            
-            servers.push(fullSrv);
-            saveState();
-            renderServerList();
-            switchServer(fullSrv.id);
-            showToast(`Successfully joined ${fullSrv.name}!`);
-        } catch(e) {
-            showToast("This invite link has expired or is invalid.", "error");
-        }
-    }
-
+    
     function toggleServerDropdown(e) {
       e.stopPropagation();
       document.getElementById('serverDropdownMenu').classList.toggle('hidden');
@@ -1739,6 +1560,7 @@
       setTimeout(() => t.remove(), 3000);
     }
     function autoGrowInput(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
   </script>
 </body>
 </html>
