@@ -7,7 +7,7 @@
   
   <!-- Supabase JS Library v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Tailwind CSS for rapid layouting -->
+  <!-- Tailwind CSS for utility layouting -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome 6 Retro Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -152,12 +152,12 @@
     /* Nudge Screen Shake Animation */
     @keyframes nudgeShake {
       0% { transform: translate(0, 0) rotate(0deg); }
-      15% { transform: translate(-12px, -8px) rotate(-1deg); }
-      30% { transform: translate(12px, 8px) rotate(1deg); }
-      45% { transform: translate(-10px, 6px) rotate(-0.5deg); }
-      60% { transform: translate(10px, -6px) rotate(0.5deg); }
-      75% { transform: translate(-5px, 2px); }
-      90% { transform: translate(5px, -2px); }
+      15% { transform: translate(-14px, -10px) rotate(-1.5deg); }
+      30% { transform: translate(14px, 10px) rotate(1.5deg); }
+      45% { transform: translate(-12px, 8px) rotate(-1deg); }
+      60% { transform: translate(12px, -8px) rotate(1deg); }
+      75% { transform: translate(-6px, 4px); }
+      90% { transform: translate(6px, -4px); }
       100% { transform: translate(0, 0); }
     }
 
@@ -165,7 +165,7 @@
       animation: nudgeShake 0.5s ease-in-out;
     }
 
-    /* Scrollbars */
+    /* Custom Retro Scrollbars */
     ::-webkit-scrollbar {
       width: 14px;
       height: 14px;
@@ -180,7 +180,7 @@
       box-shadow: inset 1px 1px 0 #fff;
     }
 
-    /* Marquee Glow */
+    /* Marquee Styling */
     .retro-marquee {
       background: #000;
       color: #00ff66;
@@ -191,6 +191,13 @@
   </style>
 </head>
 <body class="h-full flex items-center justify-center p-2 sm:p-4 select-none theme-xp-luna overflow-hidden">
+
+  <!-- RETRO TOAST NOTIFICATION CONTAINER (REPLACES ALERT/CONFIRM) -->
+  <div id="retroToast" class="hidden fixed bottom-6 right-6 z-50 win-outset p-3 max-w-xs text-xs shadow-2xl flex items-center space-x-2 transition-all duration-300 bg-yellow-100 text-yellow-900 border-yellow-500">
+    <i class="fa-solid fa-bell text-yellow-600 text-sm flex-shrink-0"></i>
+    <span id="retroToastText" class="flex-1 font-bold">Notification text</span>
+    <button onclick="hideToast()" class="text-gray-500 hover:text-black font-bold ml-1">✕</button>
+  </div>
 
   <!-- MAIN WINDOW APPLICATION CONTAINER -->
   <div id="appWindow" class="w-full max-w-5xl h-[95vh] max-h-[820px] win-outset flex flex-col rounded-t-lg overflow-hidden shadow-2xl relative">
@@ -209,14 +216,14 @@
       <div class="flex items-center space-x-1">
         <button onclick="playRetroSound('click')" class="xp-btn-ctrl w-5 h-5 rounded flex items-center justify-center text-white text-[10px]" title="Minimize">_</button>
         <button onclick="playRetroSound('click')" class="xp-btn-ctrl w-5 h-5 rounded flex items-center justify-center text-white text-[9px]" title="Maximize">▢</button>
-        <button onclick="confirmExit()" class="xp-btn-close w-5 h-5 rounded flex items-center justify-center text-white text-[10px] font-bold" title="Close Application">✕</button>
+        <button onclick="showNotification('To close the window, simply close your browser tab.', false)" class="xp-btn-close w-5 h-5 rounded flex items-center justify-center text-white text-[10px] font-bold" title="Close Application">✕</button>
       </div>
     </div>
 
     <!-- 2. RETRO MARQUEE HEADER BANNER -->
     <div class="retro-marquee px-2 py-0.5 overflow-hidden whitespace-nowrap flex-shrink-0">
       <marquee behavior="scroll" direction="left" scrollamount="4">
-        ★ WELCOME TO ULTRACHAT 3000 MSN MESSENGER ★ CONNECTED TO REAL SUPABASE DATABASE ★ NUDGE YOUR FRIENDS ★ CHANGE THEMES ★ SEND RETRO EMOTICONS ★
+        ★ WELCOME TO ULTRACHAT 3000 ★ NO BOTS - 100% REAL HUMAN CHAT ★ POWERED BY SUPABASE REALTIME & PRESENCE ★ NUDGE YOUR FRIENDS LIVE ★
       </marquee>
     </div>
 
@@ -269,7 +276,7 @@
         <!-- Connection Status Box -->
         <div class="win-inset p-2 text-[10px] space-y-1 bg-white">
           <div class="font-bold flex items-center justify-between">
-            <span>Supabase Status:</span>
+            <span>Supabase Live:</span>
             <span id="statusIndicator" class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow"></span>
           </div>
           <div id="statusText" class="text-gray-600 truncate">Connecting to live DB...</div>
@@ -286,8 +293,8 @@
               #
             </div>
             <div class="overflow-hidden">
-              <div id="activeRoomTitle" class="font-bold text-sm truncate">#Lobby-2004</div>
-              <div id="activeRoomDesc" class="text-[11px] text-gray-500 truncate">Official MSN Supabase Live Chatroom</div>
+              <div id="activeRoomTitle" class="font-bold text-sm truncate">#MSN-Lounge</div>
+              <div id="activeRoomDesc" class="text-[11px] text-gray-500 truncate">Official MSN Supabase Public Lounge</div>
             </div>
           </div>
 
@@ -306,7 +313,7 @@
         <div id="chatFeed" class="flex-1 win-inset p-3 overflow-y-auto space-y-2.5">
           <div class="text-center text-xs text-gray-500 py-4">
             <i class="fa-solid fa-spinner fa-spin text-base text-blue-600 mb-1"></i>
-            <div>Loading messages from Supabase...</div>
+            <div>Loading live messages from Supabase...</div>
           </div>
         </div>
 
@@ -334,7 +341,7 @@
 
       </main>
 
-      <!-- COLUMN C: BUDDY LIST & USER PROFILE -->
+      <!-- COLUMN C: REAL-TIME BUDDY LIST & USER PROFILE (NO BOTS) -->
       <aside class="w-52 bg-[var(--win-bg)] win-outset flex flex-col flex-shrink-0 p-2 space-y-3 hidden lg:flex">
         
         <!-- User Profile Card -->
@@ -345,21 +352,30 @@
             </div>
             <div class="overflow-hidden flex-1">
               <div id="userNameDisplay" class="font-bold text-xs truncate">Guest_User</div>
-              <div id="userStatusDisplay" class="text-[10px] text-emerald-600 truncate">🟢 Online</div>
+              
+              <!-- Status Selector -->
+              <select id="userStatusSelect" onchange="updateUserStatus(this.value)" class="text-[10px] border border-gray-300 rounded bg-white text-emerald-700 font-bold focus:outline-none">
+                <option value="Online">🟢 Online</option>
+                <option value="Busy">🔴 Busy</option>
+                <option value="Away">🟡 Away</option>
+              </select>
             </div>
           </div>
-          <input type="text" id="userQuoteInput" placeholder="Set status quote (e.g. listening to Linkin Park...)" class="w-full text-[10px] border border-gray-300 rounded px-1.5 py-1 bg-yellow-50 focus:outline-none" onchange="updateUserQuote(this.value)" value="Listening to Linkin Park - In The End">
+          
+          <input type="text" id="userQuoteInput" placeholder="Set status quote..." class="w-full text-[10px] border border-gray-300 rounded px-1.5 py-1 bg-yellow-50 focus:outline-none" onchange="updateUserQuote(this.value)" value="Listening to Linkin Park - In The End">
         </div>
 
-        <!-- Buddy List Section -->
+        <!-- Real-Time Online Buddies Section -->
         <div class="flex-1 flex flex-col overflow-hidden">
           <div class="text-xs font-bold text-gray-700 border-b border-gray-400 pb-1 mb-1 flex items-center justify-between">
-            <span><i class="fa-solid fa-address-book text-emerald-600 mr-1"></i> Buddy List</span>
-            <button onclick="addBuddyPrompt()" class="text-[10px] text-blue-700 hover:underline">+ Add</button>
+            <span><i class="fa-solid fa-users text-emerald-600 mr-1"></i> Live Buddies</span>
+            <span id="onlineCountBadge" class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 rounded-full">0 Online</span>
           </div>
 
           <div id="buddyList" class="flex-1 overflow-y-auto space-y-1 pr-1">
-            <!-- Dynamically Rendered Buddies -->
+            <div class="text-[11px] text-gray-500 italic p-2 text-center">
+              Scanning for real online users...
+            </div>
           </div>
         </div>
 
@@ -377,7 +393,7 @@
       <div class="flex items-center space-x-2">
         <button onclick="toggleAudio()" id="audioToggleBtn" class="hover:underline">🔊 Sound: ON</button>
         <span>|</span>
-        <span>UltraChat 3000 v2.4</span>
+        <span>UltraChat 3000 v3.0</span>
       </div>
     </div>
 
@@ -429,6 +445,10 @@
         <button onclick="handleGuestMode()" class="w-full text-center text-blue-700 hover:underline text-[11px] pt-1">
           Continue as Guest Anonymous User
         </button>
+
+        <button id="signOutBtn" onclick="handleSignOut()" class="hidden w-full retro-btn bg-red-100 text-red-800 py-1 font-bold mt-2">
+          Sign Out
+        </button>
       </div>
     </div>
   </div>
@@ -443,28 +463,28 @@
       </div>
 
       <p class="text-xs text-gray-700 leading-relaxed">
-        UltraChatApp 3000 reads and writes directly to your Supabase table. If you haven't created the <code class="bg-gray-200 px-1 font-bold">messages</code> table yet, run this SQL query in your <strong>Supabase Dashboard > SQL Editor</strong>:
+        UltraChatApp 3000 reads and writes directly to your Supabase table. If you encounter schema errors, copy and run this in your <strong>Supabase Dashboard > SQL Editor</strong>:
       </p>
 
       <div class="win-inset p-2 bg-black text-green-400 font-mono text-[10px] overflow-x-auto space-y-1">
 <pre>
--- 1. Create messages table
+-- 1. Create messages table with all schema fields
 CREATE TABLE IF NOT EXISTS public.messages (
   id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  text TEXT NOT NULL,
+  text TEXT,
   user_name TEXT DEFAULT 'Anonymous',
-  room TEXT DEFAULT 'Lobby'
+  room TEXT DEFAULT 'MSN-Lounge',
+  server_id TEXT DEFAULT 'msn-lounge',
+  channel_id TEXT DEFAULT 'general',
+  is_nudge BOOLEAN DEFAULT false
 );
 
 -- 2. Enable Realtime & RLS Policies
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow public select" ON public.messages 
-FOR SELECT USING (true);
-
-CREATE POLICY "Allow public insert" ON public.messages 
-FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public select" ON public.messages FOR SELECT USING (true);
+CREATE POLICY "Allow public insert" ON public.messages FOR INSERT WITH CHECK (true);
 </pre>
       </div>
 
@@ -487,7 +507,7 @@ FOR INSERT WITH CHECK (true);
       <div class="space-y-2 text-xs">
         <div>
           <label class="block font-bold mb-1">Room Name:</label>
-          <input type="text" id="newRoomNameInput" placeholder="e.g. Retro-Gaming" class="w-full win-inset p-1.5 focus:outline-none">
+          <input type="text" id="newRoomNameInput" placeholder="e.g. Retro-Gamers" class="w-full win-inset p-1.5 focus:outline-none">
         </div>
         <button onclick="createNewRoom()" class="w-full retro-btn retro-btn-accent py-1.5 font-bold">Create & Join</button>
       </div>
@@ -496,7 +516,7 @@ FOR INSERT WITH CHECK (true);
 
 
   <!-- ======================================================================
-       APPLICATION JAVASCRIPT & SUPABASE REALTIME LOGIC
+       APPLICATION JAVASCRIPT & SUPABASE REALTIME PRESENCE LOGIC
        ====================================================================== -->
   <script>
     /* ----------------------------------------------------------------------
@@ -508,9 +528,9 @@ FOR INSERT WITH CHECK (true);
     const { createClient } = supabase;
     const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // App State
+    // Dynamic App State
     let currentUser = {
-      id: 'guest_' + Math.floor(Math.random() * 8999 + 1000),
+      id: 'usr_' + Math.floor(Math.random() * 899999 + 100000),
       name: 'Guest_' + Math.floor(Math.random() * 899 + 100),
       status: 'Online',
       quote: 'Listening to Linkin Park - In The End',
@@ -518,29 +538,22 @@ FOR INSERT WITH CHECK (true);
     };
 
     let rooms = [
-      { id: 'Lobby', name: 'Lobby-2004', desc: 'Main public hangout lounge', icon: '💬' },
+      { id: 'MSN-Lounge', name: 'MSN-Lounge', desc: 'Main public hangout lounge', icon: '💬' },
       { id: 'Retro-Tech', name: 'Retro-Tech', desc: 'Windows XP, Pentium 4, CRT displays', icon: '💻' },
-      { id: 'Music-Corner', name: 'Music-Corner', desc: 'Nu-metal, Pop-punk, MP3s, Limewire', icon: '🎧' },
+      { id: 'Music-Y2K', name: 'Music-Y2K', desc: 'Nu-metal, Pop-punk, MP3s, Limewire', icon: '🎧' },
       { id: 'Gaming-Zone', name: 'Gaming-Zone', desc: 'Counter-Strike 1.6, Halo CE, Starcraft', icon: '🎮' }
     ];
 
-    let currentRoomId = 'Lobby';
-    let buddies = [
-      { name: 'Sk8er_Boi_99', status: 'Online', quote: 'Avril Lavigne rulez!', isOnline: true },
-      { name: 'Cyber_Girl_Y2K', status: 'Busy', quote: 'Coding MySpace HTML theme', isOnline: true },
-      { name: 'xX_Shadow_Ninja_Xx', status: 'Away', quote: 'BRB eating pizza slices', isOnline: true },
-      { name: 'Matrix_Neo', status: 'Offline', quote: 'Knock knock, Neo...', isOnline: false }
-    ];
-
+    let currentRoomId = 'MSN-Lounge';
     let audioEnabled = true;
     let realtimeChannel = null;
+    let presenceChannel = null;
 
     /* ----------------------------------------------------------------------
-       2. INITIALIZATION & SUPABASE REALTIME SUBSCRIPTION
+       2. INITIALIZATION & SUPABASE REALTIME PRESENCE SUBSCRIPTION
        ---------------------------------------------------------------------- */
     window.addEventListener('DOMContentLoaded', async () => {
       renderRooms();
-      renderBuddies();
       updateUserUI();
 
       // Check current Supabase Auth Session
@@ -552,12 +565,14 @@ FOR INSERT WITH CHECK (true);
         updateUserUI();
       }
 
-      // Initial Fetch & Subscribe
+      // Initial Fetch, Realtime Messages & Realtime Presence
       fetchMessages();
       subscribeToRealtimeMessages();
+      subscribeToRealtimePresence();
     });
 
-    async function subscribeToRealtimeMessages() {
+    /* --- REALTIME MESSAGES SUBSCRIPTION --- */
+    function subscribeToRealtimeMessages() {
       if (realtimeChannel) {
         client.removeChannel(realtimeChannel);
       }
@@ -567,11 +582,11 @@ FOR INSERT WITH CHECK (true);
           const newMsg = payload.new;
           if (!newMsg.room || newMsg.room === currentRoomId) {
             appendMessageToFeed(newMsg);
-            playRetroSound('message');
             
-            // Check for nudge trigger word
-            if (newMsg.text && newMsg.text.includes('[NUDGE!]')) {
+            if (newMsg.is_nudge || (newMsg.text && newMsg.text.includes('[NUDGE!]'))) {
               triggerScreenShake();
+            } else {
+              playRetroSound('message');
             }
           }
         })
@@ -583,9 +598,108 @@ FOR INSERT WITH CHECK (true);
             statusTxt.innerText = 'Connected & Live!';
           } else {
             statusDot.className = 'w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block shadow';
-            statusTxt.innerText = 'Connecting (' + status + ')';
+            statusTxt.innerText = 'Connecting...';
           }
         });
+    }
+
+    /* --- REALTIME PRESENCE SUBSCRIPTION (100% REAL USERS, ZERO BOTS) --- */
+    function subscribeToRealtimePresence() {
+      if (presenceChannel) {
+        client.removeChannel(presenceChannel);
+      }
+
+      presenceChannel = client.channel('msn-online-presence', {
+        config: {
+          presence: {
+            key: currentUser.id
+          }
+        }
+      });
+
+      presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+          const state = presenceChannel.presenceState();
+          renderPresenceBuddies(state);
+        })
+        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+          const joinedUser = newPresences[0];
+          if (joinedUser && joinedUser.id !== currentUser.id) {
+            showNotification(`${joinedUser.name || 'A buddy'} signed online!`);
+            playRetroSound('login');
+          }
+        })
+        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+          const leftUser = leftPresences[0];
+          if (leftUser && leftUser.id !== currentUser.id) {
+            showNotification(`${leftUser.name || 'A buddy'} signed off.`);
+          }
+        });
+
+      presenceChannel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({
+            id: currentUser.id,
+            name: currentUser.name,
+            status: currentUser.status,
+            quote: currentUser.quote,
+            onlineAt: new Date().toISOString()
+          });
+        }
+      });
+    }
+
+    async function updatePresenceState() {
+      if (presenceChannel) {
+        await presenceChannel.track({
+          id: currentUser.id,
+          name: currentUser.name,
+          status: currentUser.status,
+          quote: currentUser.quote,
+          onlineAt: new Date().toISOString()
+        });
+      }
+    }
+
+    function renderPresenceBuddies(state) {
+      const buddyListEl = document.getElementById('buddyList');
+      const badgeEl = document.getElementById('onlineCountBadge');
+      const onlineUsers = [];
+
+      for (const key in state) {
+        const presences = state[key];
+        if (presences && presences.length > 0) {
+          onlineUsers.push(presences[presences.length - 1]);
+        }
+      }
+
+      badgeEl.innerText = `${onlineUsers.length} Online`;
+
+      if (onlineUsers.length === 0) {
+        buddyListEl.innerHTML = `
+          <div class="text-[11px] text-gray-500 italic p-2 text-center">
+            No active buddies online right now.
+          </div>
+        `;
+        return;
+      }
+
+      buddyListEl.innerHTML = onlineUsers.map(u => {
+        const isSelf = u.id === currentUser.id;
+        const statusColor = u.status === 'Busy' ? 'bg-red-500' : u.status === 'Away' ? 'bg-yellow-500' : 'bg-emerald-500';
+        
+        return `
+          <div class="p-1.5 win-inset bg-white rounded text-xs flex items-center space-x-2">
+            <div class="w-2.5 h-2.5 rounded-full ${statusColor} flex-shrink-0 shadow-xs"></div>
+            <div class="overflow-hidden flex-1">
+              <div class="font-bold text-gray-800 truncate">
+                ${escapeHtml(u.name || 'Anonymous')} ${isSelf ? '<span class="text-[9px] text-blue-600 font-normal">(You)</span>' : ''}
+              </div>
+              <div class="text-[9px] text-gray-500 truncate">${escapeHtml(u.quote || 'No status set')}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     /* ----------------------------------------------------------------------
@@ -596,7 +710,7 @@ FOR INSERT WITH CHECK (true);
       feed.innerHTML = `
         <div class="text-center text-xs text-gray-500 py-4">
           <i class="fa-solid fa-spinner fa-spin text-base text-blue-600 mb-1"></i>
-          <div>Fetching messages from Supabase...</div>
+          <div>Fetching live messages...</div>
         </div>
       `;
 
@@ -605,7 +719,7 @@ FOR INSERT WITH CHECK (true);
           .from('messages')
           .select('*')
           .order('created_at', { ascending: true })
-          .limit(75);
+          .limit(80);
 
         if (error) {
           console.error('Supabase fetch error:', error);
@@ -619,7 +733,6 @@ FOR INSERT WITH CHECK (true);
           return;
         }
 
-        // Filter messages by room if room field is present
         const filtered = (data || []).filter(m => !m.room || m.room === currentRoomId);
 
         if (filtered.length === 0) {
@@ -645,12 +758,11 @@ FOR INSERT WITH CHECK (true);
     function appendMessageToFeed(msg, autoScroll = true) {
       const feed = document.getElementById('chatFeed');
       
-      // If feed currently displays loading or empty notice, clear it
       if (feed.querySelector('.fa-spinner') || feed.querySelector('.fa-comment-dots')) {
         feed.innerHTML = '';
       }
 
-      const isNudge = msg.text && msg.text.includes('[NUDGE!]');
+      const isNudge = msg.is_nudge || (msg.text && msg.text.includes('[NUDGE!]'));
       const formattedText = parseEmoticons(escapeHtml(msg.text || ''));
       const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now';
       const sender = msg.user_name || 'Anonymous';
@@ -658,10 +770,10 @@ FOR INSERT WITH CHECK (true);
       const msgEl = document.createElement('div');
       
       if (isNudge) {
-        msgEl.className = 'win-outset p-2 bg-yellow-100 border-yellow-400 text-xs font-bold text-center text-yellow-900 my-1 rounded';
+        msgEl.className = 'win-outset p-2 bg-yellow-100 border-yellow-400 text-xs font-bold text-center text-yellow-900 my-1 rounded shadow-xs';
         msgEl.innerHTML = `
           <i class="fa-solid fa-hand-pointer text-red-600 mr-1 animate-bounce"></i>
-          <span>${sender} just sent a NUDGE to everyone!</span>
+          <span>${escapeHtml(sender)} just sent a NUDGE to everyone!</span>
         `;
       } else {
         msgEl.className = 'text-xs space-y-0.5 hover:bg-gray-50 p-1.5 rounded transition border-b border-gray-100';
@@ -696,19 +808,22 @@ FOR INSERT WITH CHECK (true);
 
       input.value = '';
 
+      const payload = {
+        text: text,
+        user_name: currentUser.name,
+        room: currentRoomId,
+        server_id: 'msn-lounge',
+        channel_id: currentRoomId.toLowerCase(),
+        is_nudge: false
+      };
+
       const { error } = await client
         .from('messages')
-        .insert([
-          {
-            text: text,
-            user_name: currentUser.name,
-            room: currentRoomId
-          }
-        ]);
+        .insert([payload]);
 
       if (error) {
         console.error('Send message error:', error);
-        alert('Failed to send message: ' + error.message);
+        showNotification('Failed to send: ' + error.message, true);
       } else {
         playRetroSound('click');
       }
@@ -718,48 +833,56 @@ FOR INSERT WITH CHECK (true);
       triggerScreenShake();
       playRetroSound('nudge');
 
+      const payload = {
+        text: '[NUDGE!]',
+        user_name: currentUser.name,
+        room: currentRoomId,
+        server_id: 'msn-lounge',
+        channel_id: currentRoomId.toLowerCase(),
+        is_nudge: true
+      };
+
       const { error } = await client
         .from('messages')
-        .insert([
-          {
-            text: '[NUDGE!]',
-            user_name: currentUser.name,
-            room: currentRoomId
-          }
-        ]);
+        .insert([payload]);
 
-      if (error) console.error('Nudge error:', error);
+      if (error) {
+        console.error('Nudge error:', error);
+        showNotification('Nudge failed: ' + error.message, true);
+      }
     }
 
     function triggerScreenShake() {
       const app = document.getElementById('appWindow');
       app.classList.remove('animate-nudge');
-      void app.offsetWidth; // force reflow
+      void app.offsetWidth;
       app.classList.add('animate-nudge');
       playRetroSound('nudge');
     }
 
     /* ----------------------------------------------------------------------
-       5. USER AUTHENTICATION & GUEST HANDLERS
+       5. USER AUTHENTICATION & PROFILE HANDLERS
        ---------------------------------------------------------------------- */
     async function handleLogin() {
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value.trim();
 
       if (!email || !password) {
-        alert('Please enter both email and password.');
+        showNotification('Please enter both email and password.', true);
         return;
       }
 
       const { data, error } = await client.auth.signInWithPassword({ email, password });
       if (error) {
-        alert('Login failed: ' + error.message);
+        showNotification('Login failed: ' + error.message, true);
       } else if (data.user) {
         currentUser.id = data.user.id;
         currentUser.name = data.user.user_metadata?.full_name || email.split('@')[0];
         currentUser.isGuest = false;
         updateUserUI();
+        updatePresenceState();
         closeModal('modalAuth');
+        showNotification(`Welcome back, ${currentUser.name}!`);
         playRetroSound('login');
       }
     }
@@ -770,7 +893,7 @@ FOR INSERT WITH CHECK (true);
       const screenName = document.getElementById('authScreenName').value.trim() || email.split('@')[0];
 
       if (!email || !password) {
-        alert('Please enter an email and password to register.');
+        showNotification('Please enter email and password.', true);
         return;
       }
 
@@ -781,13 +904,14 @@ FOR INSERT WITH CHECK (true);
       });
 
       if (error) {
-        alert('Registration failed: ' + error.message);
+        showNotification('Registration failed: ' + error.message, true);
       } else {
-        alert('Account created! Logging you in...');
+        showNotification('Account created successfully!');
         currentUser.id = data.user?.id || currentUser.id;
         currentUser.name = screenName;
         currentUser.isGuest = false;
         updateUserUI();
+        updatePresenceState();
         closeModal('modalAuth');
         playRetroSound('login');
       }
@@ -797,30 +921,55 @@ FOR INSERT WITH CHECK (true);
       const { error } = await client.auth.signInWithOAuth({
         provider: 'google'
       });
-      if (error) alert('Google Auth Error: ' + error.message);
+      if (error) showNotification('Google Auth Error: ' + error.message, true);
+    }
+
+    async function handleSignOut() {
+      await client.auth.signOut();
+      currentUser.isGuest = true;
+      currentUser.name = 'Guest_' + Math.floor(Math.random() * 899 + 100);
+      updateUserUI();
+      updatePresenceState();
+      closeModal('modalAuth');
+      showNotification('Signed out.');
     }
 
     function handleGuestMode() {
       currentUser.name = 'Guest_' + Math.floor(Math.random() * 899 + 100);
       currentUser.isGuest = true;
       updateUserUI();
+      updatePresenceState();
       closeModal('modalAuth');
+      showNotification(`Signed in as ${currentUser.name}`);
       playRetroSound('login');
     }
 
     function updateUserUI() {
       document.getElementById('userNameDisplay').innerText = currentUser.name;
       document.getElementById('userAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
-      document.getElementById('navAuthLabel').innerText = currentUser.isGuest ? 'Sign In / Account' : currentUser.name + ' (Logout)';
+      document.getElementById('navAuthLabel').innerText = currentUser.isGuest ? 'Sign In / Account' : currentUser.name + ' (Account)';
       document.getElementById('footerUserRole').innerHTML = `<i class="fa-solid fa-user text-blue-600"></i> User: <strong>${escapeHtml(currentUser.name)}</strong> (${currentUser.isGuest ? 'Guest' : 'Authenticated'})`;
+      
+      const signOutBtn = document.getElementById('signOutBtn');
+      if (currentUser.isGuest) {
+        signOutBtn.classList.add('hidden');
+      } else {
+        signOutBtn.classList.remove('hidden');
+      }
     }
 
     function updateUserQuote(val) {
       currentUser.quote = val;
+      updatePresenceState();
+    }
+
+    function updateUserStatus(val) {
+      currentUser.status = val;
+      updatePresenceState();
     }
 
     /* ----------------------------------------------------------------------
-       6. ROOMS & BUDDY LIST RENDERERS
+       6. ROOMS RENDERERS
        ---------------------------------------------------------------------- */
     function renderRooms() {
       const list = document.getElementById('roomList');
@@ -857,34 +1006,8 @@ FOR INSERT WITH CHECK (true);
       switchRoom(name);
     }
 
-    function renderBuddies() {
-      const list = document.getElementById('buddyList');
-      list.innerHTML = buddies.map(b => `
-        <div class="p-1.5 win-inset bg-white rounded text-xs flex items-center space-x-2">
-          <div class="w-2 h-2 rounded-full ${b.isOnline ? 'bg-emerald-500' : 'bg-gray-400'} flex-shrink-0"></div>
-          <div class="overflow-hidden flex-1">
-            <div class="font-bold text-gray-800 truncate">${escapeHtml(b.name)}</div>
-            <div class="text-[9px] text-gray-500 truncate">${escapeHtml(b.quote)}</div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function addBuddyPrompt() {
-      const name = prompt('Enter Buddy screen name or email:');
-      if (name) {
-        buddies.push({
-          name: name,
-          status: 'Online',
-          quote: 'Added as MSN Buddy!',
-          isOnline: true
-        });
-        renderBuddies();
-      }
-    }
-
     /* ----------------------------------------------------------------------
-       7. RETRO WEB AUDIO SYNTHESIZER (NO EXTERNAL MP3 DEPENDENCIES)
+       7. RETRO WEB AUDIO SYNTHESIZER
        ---------------------------------------------------------------------- */
     function playRetroSound(type) {
       if (!audioEnabled) return;
@@ -895,12 +1018,11 @@ FOR INSERT WITH CHECK (true);
         const ctx = new AudioCtx();
 
         if (type === 'message') {
-          // Double ding-ling chime
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
           gain.gain.setValueAtTime(0.15, ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
           osc.connect(gain);
@@ -908,7 +1030,6 @@ FOR INSERT WITH CHECK (true);
           osc.start();
           osc.stop(ctx.currentTime + 0.3);
         } else if (type === 'nudge') {
-          // Low rumbling nudge pitch drop
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sawtooth';
@@ -921,7 +1042,6 @@ FOR INSERT WITH CHECK (true);
           osc.start();
           osc.stop(ctx.currentTime + 0.4);
         } else if (type === 'login') {
-          // Arpeggio login sound
           [261.63, 329.63, 392.00, 523.25].forEach((freq, idx) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -957,8 +1077,24 @@ FOR INSERT WITH CHECK (true);
     }
 
     /* ----------------------------------------------------------------------
-       8. UTILITY HELPERS
+       8. UTILITY HELPERS & NOTIFICATIONS
        ---------------------------------------------------------------------- */
+    function showNotification(msg, isError = false) {
+      const toast = document.getElementById('retroToast');
+      const toastText = document.getElementById('retroToastText');
+      toastText.innerText = msg;
+      toast.className = `fixed bottom-6 right-6 z-50 win-outset p-3 max-w-xs text-xs shadow-2xl flex items-center space-x-2 transition-all duration-300 ${isError ? 'bg-red-100 text-red-900 border-red-500' : 'bg-yellow-100 text-yellow-900 border-yellow-500'}`;
+      toast.classList.remove('hidden');
+
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 4000);
+    }
+
+    function hideToast() {
+      document.getElementById('retroToast').classList.add('hidden');
+    }
+
     function applyTheme(themeClass) {
       document.body.className = `h-full flex items-center justify-center p-2 sm:p-4 select-none ${themeClass} overflow-hidden`;
     }
@@ -987,7 +1123,7 @@ FOR INSERT WITH CHECK (true);
     }
 
     function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
     }
 
     function openModal(id) {
@@ -998,19 +1134,16 @@ FOR INSERT WITH CHECK (true);
       document.getElementById(id).classList.add('hidden');
     }
 
-    function confirmExit() {
-      if (confirm('Close UltraChatApp 3000 MSN Messenger?')) {
-        alert('MSN Messenger session ended.');
-      }
-    }
-
     function copySqlSnippet() {
       const sqlText = `CREATE TABLE IF NOT EXISTS public.messages (
   id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  text TEXT NOT NULL,
+  text TEXT,
   user_name TEXT DEFAULT 'Anonymous',
-  room TEXT DEFAULT 'Lobby'
+  room TEXT DEFAULT 'MSN-Lounge',
+  server_id TEXT DEFAULT 'msn-lounge',
+  channel_id TEXT DEFAULT 'general',
+  is_nudge BOOLEAN DEFAULT false
 );
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public select" ON public.messages FOR SELECT USING (true);
@@ -1022,7 +1155,7 @@ CREATE POLICY "Allow public insert" ON public.messages FOR INSERT WITH CHECK (tr
       tempTextArea.select();
       document.execCommand('copy');
       document.body.removeChild(tempTextArea);
-      alert('SQL code copied to clipboard!');
+      showNotification('SQL code copied to clipboard!');
     }
   </script>
 </body>
