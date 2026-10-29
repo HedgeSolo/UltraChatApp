@@ -255,6 +255,7 @@
         <div class="flex border-b border-discord-hover pb-4 space-x-6 mb-6">
           <button onclick="setFriendsSubTab('online')" id="ftab-online" class="text-sm font-bold text-white hover:bg-discord-hover px-3 py-1.5 rounded transition-colors">Online</button>
           <button onclick="setFriendsSubTab('all')" id="ftab-all" class="text-sm font-bold text-discord-textMuted hover:bg-discord-hover hover:text-white px-3 py-1.5 rounded transition-colors">All</button>
+          <button onclick="setFriendsSubTab('pending')" id="ftab-pending" class="text-sm font-bold text-discord-textMuted hover:bg-discord-hover hover:text-white px-3 py-1.5 rounded transition-colors">Pending</button>
           <button onclick="setFriendsSubTab('add')" id="ftab-add" class="text-sm font-bold bg-discord-green text-white px-3 py-1.5 rounded hover:bg-green-600 transition-colors">Add Friend</button>
         </div>
 
@@ -589,8 +590,8 @@
       const stSrv = localStorage.getItem(getStoreKey('servers'));
       servers = stSrv ? JSON.parse(stSrv) : JSON.parse(JSON.stringify(defaultServers));
       
-      const stFr = localStorage.getItem(getStoreKey('friends'));
-      friends = stFr ? JSON.parse(stFr) : [];
+      const stDms = localStorage.getItem(getStoreKey('dms'));
+      dms = stDms ? JSON.parse(stDms) : [];
 
       currentServerId = localStorage.getItem(getStoreKey('last_srv')) || 'home';
 
@@ -608,8 +609,8 @@
       localStorage.setItem(getStoreKey('name'), currentUser.name);
       localStorage.setItem(getStoreKey('avatar'), currentUser.avatar);
       localStorage.setItem(getStoreKey('servers'), JSON.stringify(servers));
-      localStorage.setItem(getStoreKey('friends'), JSON.stringify(friends));
-      localStorage.setItem(getStoreKey('last_srv'), currentServerId);
+      localStorage.setItem(getStoreKey('dms'), JSON.stringify(dms));
+      localStorage.setItem(getStoreKey('last_srv'), currentServerId === 'dm' ? 'home' : currentServerId);
       
       knownUsers[currentUser.id] = { name: currentUser.name, avatar: currentUser.avatar, isGuest: currentUser.isGuest };
       localStorage.setItem('uc3000_user_cache', JSON.stringify(knownUsers));
@@ -759,17 +760,23 @@
       const isHome = srvId === 'home';
       document.getElementById('dmListGroup').classList.toggle('hidden', !isHome);
       document.getElementById('serverChannelsGroup').classList.toggle('hidden', isHome);
-      document.getElementById('friendsViewPanel').classList.toggle('hidden', !isHome);
-      document.getElementById('chatFeedPanel').classList.toggle('hidden', isHome);
       document.getElementById('memberSidebar').classList.add('hidden'); // Default hide on switch
 
       if (isHome) {
+        document.getElementById('friendsViewPanel').classList.remove('hidden');
+        document.getElementById('chatFeedPanel').classList.add('hidden');
+
         document.getElementById('serverTitleText').innerText = "Direct Messages";
         document.getElementById('serverOwnerBadge').classList.add('hidden');
         document.getElementById('btnServerSettings').classList.add('hidden');
         document.getElementById('btnCreateChannel').classList.add('hidden');
-        renderFriendsList();
+        
+        fetchFriendsFromDB();
+        renderDMList();
       } else {
+        document.getElementById('friendsViewPanel').classList.add('hidden');
+        document.getElementById('chatFeedPanel').classList.remove('hidden');
+
         const srv = servers.find(s => s.id === srvId) || servers[0];
         document.getElementById('serverTitleText').innerText = srv.name;
         
@@ -813,7 +820,7 @@
     }
 
     function leaveCurrentServer() {
-        if(currentServerId === 'home') return;
+        if(currentServerId === 'home' || currentServerId === 'dm') return;
         if(currentServerId === 'ultrachat-hq') return showToast("Cannot leave HQ.", 'error');
         servers = servers.filter(s => s.id !== currentServerId);
         saveState();
@@ -1146,8 +1153,8 @@
 
       const srv = servers.find(s => s.id === currentServerId);
       
-      // Moderation Engine checks (bypass if CEO)
-      if (!currentUser.isCEO) {
+      // Moderation Engine checks (bypass if CEO or in DMs)
+      if (!currentUser.isCEO && currentServerId !== 'dm') {
           if (srv && srv.settings) {
               const tl = text.toLowerCase();
               
@@ -1210,6 +1217,7 @@
     // 5. MEMBER SIDEBAR & ROLES
     // =========================================================================
     function toggleMemberList() {
+        if (currentServerId === 'home' || currentServerId === 'dm') return;
         const sidebar = document.getElementById('memberSidebar');
         sidebar.classList.toggle('hidden');
         if (!sidebar.classList.contains('hidden')) renderMemberList();
@@ -1339,6 +1347,177 @@
 
     function openCeoModal() {
         openModal('ceoCommandModal');
+    }
+
+    // =========================================================================
+    // FRIENDS & DM LOGIC 
+    // =========================================================================
+    async function fetchFriendsFromDB() {
+        if (currentUser.isGuest || !currentUser.id) return;
+
+        const { data: fData } = await client.from('friends')
+            .select('*')
+            .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
+
+        if (!fData) return;
+
+        const accepted = fData.filter(f => f.status === 'accepted');
+        const pending = fData.filter(f => f.status === 'pending' && f.receiver_id === currentUser.id);
+
+        const userIds = new Set();
+        accepted.forEach(f => { userIds.add(f.sender_id); userIds.add(f.receiver_id); });
+        pending.forEach(f => userIds.add(f.sender_id));
+        userIds.delete(currentUser.id);
+
+        let profiles = [];
+        if (userIds.size > 0) {
+            const { data: pData } = await client.from('profiles').select('id, display_name, avatar_url').in('id', Array.from(userIds));
+            if (pData) profiles = pData;
+        }
+
+        const getProfile = (id) => profiles.find(p => p.id === id) || { id, display_name: 'Unknown', avatar_url: '' };
+
+        friends = accepted.map(f => {
+            const friendId = f.sender_id === currentUser.id ? f.receiver_id : f.sender_id;
+            return { friendId, ...getProfile(friendId), friendRecordId: f.id };
+        });
+
+        window.pendingRequests = pending.map(f => {
+            return { ...getProfile(f.sender_id), friendRecordId: f.id };
+        });
+
+        if (currentServerId === 'home' || currentServerId === 'dm') renderFriendsList();
+    }
+
+    function renderFriendsList() {
+        const container = document.getElementById('friendsListContainer');
+        container.innerHTML = '';
+        
+        let listToRender = [];
+        if (friendsSubTab === 'online' || friendsSubTab === 'all') {
+            listToRender = friends;
+            if (listToRender.length === 0) container.innerHTML = '<div class="text-discord-textMuted text-sm text-center mt-4">No friends found. Add some!</div>';
+            listToRender.forEach(f => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-3 hover:bg-discord-hover/50 rounded-lg border-t border-discord-black/20 group cursor-pointer" onclick="openDM('${f.friendId}', '${f.display_name}')">
+                        <div class="flex items-center space-x-3">
+                            <img src="${f.avatar_url || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-8 h-8 rounded-full object-cover" />
+                            <div class="font-bold text-discord-textHeader text-sm">${f.display_name}</div>
+                        </div>
+                        <div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="bg-discord-black hover:bg-discord-sidebar p-2 rounded-full text-discord-textMuted hover:text-white" title="Message" onclick="event.stopPropagation(); openDM('${f.friendId}', '${f.display_name}')"><i class="fa-solid fa-message"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        } else if (friendsSubTab === 'pending') {
+            listToRender = window.pendingRequests || [];
+            if (listToRender.length === 0) container.innerHTML = '<div class="text-discord-textMuted text-sm text-center mt-4">No pending requests.</div>';
+            listToRender.forEach(p => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-3 hover:bg-discord-hover/50 rounded-lg border-t border-discord-black/20 group">
+                        <div class="flex items-center space-x-3">
+                            <img src="${p.avatar_url || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-8 h-8 rounded-full object-cover" />
+                            <div class="font-bold text-discord-textHeader text-sm">${p.display_name}</div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="acceptFriendRequest('${p.friendRecordId}')" class="bg-discord-green hover:bg-green-600 p-1.5 rounded-full text-white text-xs px-3 font-bold"><i class="fa-solid fa-check mr-1"></i> Accept</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    function setFriendsSubTab(tab) {
+        friendsSubTab = tab;
+        ['online', 'all', 'pending', 'add'].forEach(t => {
+            const btn = document.getElementById('ftab-' + t);
+            if (!btn) return;
+            if (t === tab) {
+                if (t === 'add') btn.className = 'text-sm font-bold bg-green-600 text-white px-3 py-1.5 rounded transition-colors';
+                else btn.className = 'text-sm font-bold text-white bg-discord-hover px-3 py-1.5 rounded transition-colors';
+            } else {
+                if (t === 'add') btn.className = 'text-sm font-bold bg-discord-green text-white px-3 py-1.5 rounded hover:bg-green-600 transition-colors';
+                else btn.className = 'text-sm font-bold text-discord-textMuted hover:bg-discord-hover hover:text-white px-3 py-1.5 rounded transition-colors';
+            }
+        });
+        document.getElementById('friendsAddContainer').classList.toggle('hidden', tab !== 'add');
+        document.getElementById('friendsListContainer').classList.toggle('hidden', tab === 'add');
+        if (tab !== 'add') renderFriendsList();
+    }
+
+    async function sendFriendRequest() {
+        const input = document.getElementById('addFriendInput').value.trim();
+        if (!input) return;
+        
+        const { data: targetUser } = await client.from('profiles').select('id').ilike('display_name', input).single();
+        
+        if (!targetUser) return showToast("User not found.", "error");
+        if (targetUser.id === currentUser.id) return showToast("You can't add yourself.", "error");
+
+        const { error } = await client.from('friends').insert({ sender_id: currentUser.id, receiver_id: targetUser.id, status: 'pending' });
+
+        if (error) showToast(error.message, "error");
+        else {
+            showToast("Friend request sent!");
+            document.getElementById('addFriendInput').value = '';
+        }
+    }
+
+    async function acceptFriendRequest(recordId) {
+        const { error } = await client.from('friends').update({ status: 'accepted' }).eq('id', recordId);
+        if (error) showToast(error.message, "error");
+        else {
+            showToast("Friend added!");
+            fetchFriendsFromDB();
+        }
+    }
+
+    function switchHomeTab(tab) {
+        if (tab === 'friends') {
+            document.getElementById('friendsViewPanel').classList.remove('hidden');
+            document.getElementById('chatFeedPanel').classList.add('hidden');
+            currentServerId = 'home';
+            fetchFriendsFromDB();
+        }
+    }
+
+    function openDM(friendId, friendName) {
+        document.getElementById('friendsViewPanel').classList.add('hidden');
+        document.getElementById('chatFeedPanel').classList.remove('hidden');
+        
+        const sortedIds = [currentUser.id, friendId].sort();
+        const dmChannelId = 'dm_' + sortedIds.join('_');
+        
+        currentServerId = 'dm';
+        currentChannelId = dmChannelId;
+        
+        document.getElementById('channelHeaderName').innerText = '@' + friendName;
+        document.getElementById('channelSlowmodeBadge').classList.add('hidden');
+        
+        if (!dms.find(d => d.id === friendId)) {
+            dms.push({ id: friendId, name: friendName });
+            saveState();
+            renderDMList();
+        }
+        
+        fetchMessages('dm', dmChannelId);
+    }
+    
+    function renderDMList() {
+        const c = document.getElementById('dmList');
+        if (!c) return;
+        c.innerHTML = '';
+        dms.forEach(dm => {
+            const isActive = currentChannelId === ('dm_' + [currentUser.id, dm.id].sort().join('_'));
+            c.innerHTML += `
+                <button onclick="openDM('${dm.id}', '${dm.name}')" class="w-full flex items-center px-2 py-1.5 rounded text-sm font-medium ${isActive ? 'bg-discord-hover text-white' : 'text-discord-textMuted hover:bg-discord-hover hover:text-white'} transition-colors">
+                    <img src="https://placehold.co/80x80/5865f2/ffffff?text=${dm.name[0]}" class="w-6 h-6 rounded-full object-cover mr-2 opacity-80" />
+                    <span class="truncate">${dm.name}</span>
+                </button>
+            `;
+        });
     }
 
     // =========================================================================
