@@ -292,7 +292,7 @@
       <!-- CHAT FEED PANEL -->
       <div id="chatFeedPanel" class="flex-1 flex flex-col min-w-0 h-full">
         
-        <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-5 scroll-smooth"></div>
+        <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-2 scroll-smooth"></div>
 
         <!-- Message Input Area -->
         <div class="px-4 pb-6 pt-2 shrink-0">
@@ -908,28 +908,136 @@
 
       activeRealtimeChannel = client
         .channel(`room:${srvId}:${chanId}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `server_id=eq.${srvId}` }, payload => {
-          if (payload.new.channel_id === chanId) appendMessage(payload.new);
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `server_id=eq.${srvId}` }, payload => {
+          if (payload.eventType === 'INSERT' && payload.new.channel_id === chanId) appendMessage(payload.new);
+          else if (payload.eventType === 'UPDATE') updateMessageInDOM(payload.new);
+          else if (payload.eventType === 'DELETE') removeMessageFromDOM(payload.old.id);
         })
         .subscribe();
     }
 
     function appendMessage(msg) {
       const container = document.getElementById('messagesContainer');
-      const div = document.createElement('div');
-      div.className = 'flex space-x-3 px-2 py-1 hover:bg-discord-hover/20 rounded';
+      let div = document.getElementById('msg_' + msg.id);
+      const isNew = !div;
+      
+      if (isNew) {
+        div = document.createElement('div');
+        div.id = 'msg_' + msg.id;
+        div.className = 'group flex space-x-3 px-2 py-1.5 hover:bg-discord-hover/20 rounded relative';
+        container.appendChild(div);
+      }
+
+      // 1. Resolve Moderation Permissions
+      const isMsgOwner = msg.user_id === currentUser.id;
+      let isServerOwner = false;
+      if (currentServerId !== 'home') {
+        const srv = servers.find(s => s.id === currentServerId);
+        if (srv && srv.owner_id === currentUser.id) isServerOwner = true;
+      }
+      const canDelete = isMsgOwner || isServerOwner || currentUser.isCEO;
+      const canEdit = isMsgOwner;
+
+      // 2. Build Hover Action Menu
+      const actionsHtml = (canEdit || canDelete) ? `
+        <div class="hidden group-hover:flex absolute right-4 -top-3 bg-discord-chat border border-discord-hover rounded-md shadow-sm overflow-hidden z-10">
+          ${canEdit ? `<button onclick="editMessage('${msg.id}')" class="px-2 py-1.5 text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors" title="Edit"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
+          ${canDelete ? `<button onclick="deleteMessage('${msg.id}')" class="px-2 py-1.5 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
+        </div>
+      ` : '';
+
+      // Secure text formatting for display
+      const safeText = msg.text ? msg.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
       div.innerHTML = `
-        <img src="${msg.avatar_url || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5" />
-        <div>
+        <img src="${msg.avatar_url || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5 shadow-sm" />
+        <div class="flex-1 min-w-0">
           <div class="flex items-baseline space-x-2">
             <span class="font-bold text-sm text-discord-textHeader">${msg.user_name}</span>
             <span class="text-[10px] text-discord-textMuted">${new Date(msg.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
           </div>
-          <div class="text-sm text-gray-200 mt-0.5">${msg.text}</div>
+          <div id="msg_text_${msg.id}" class="text-sm text-gray-200 mt-0.5 break-words whitespace-pre-wrap leading-relaxed">${safeText}</div>
+        </div>
+        ${actionsHtml}
+      `;
+
+      if (isNew) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function updateMessageInDOM(msg) {
+      const textEl = document.getElementById('msg_text_' + msg.id);
+      if (textEl) {
+        const safeText = msg.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        textEl.innerHTML = safeText + ' <span class="text-[10px] text-discord-textMuted italic ml-1">(edited)</span>';
+      }
+    }
+
+    function removeMessageFromDOM(msgId) {
+      const div = document.getElementById('msg_' + msgId);
+      if (div) div.remove();
+    }
+
+    function editMessage(msgId) {
+      const textEl = document.getElementById('msg_text_' + msgId);
+      if (!textEl) return;
+      
+      const currentText = textEl.innerText.replace(' (edited)', '').trim();
+      const container = document.getElementById('msg_' + msgId);
+      const textContainer = container.querySelector('.flex-1');
+      
+      // Store original state to allow cancel
+      if (!container.dataset.originalHtml) {
+        container.dataset.originalHtml = container.innerHTML;
+      }
+      
+      textContainer.innerHTML = `
+        <div class="flex items-baseline space-x-2 mb-1">
+          <span class="font-bold text-xs text-discord-blurple uppercase tracking-wider">Editing Message</span>
+        </div>
+        <textarea id="edit_input_${msgId}" class="w-full bg-discord-input border border-discord-hover/50 rounded-lg p-3 text-sm text-discord-textHeader outline-none resize-none focus:ring-1 focus:ring-discord-blurple shadow-inner" rows="2">${currentText}</textarea>
+        <div class="text-[10px] text-discord-textMuted mt-1.5 flex items-center space-x-2">
+          <span>escape to <button onclick="cancelEdit('${msgId}')" class="text-discord-blurple hover:underline font-bold">cancel</button></span>
+          <span>•</span>
+          <span>enter to <span class="text-discord-green font-bold">save</span></span>
         </div>
       `;
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
+      
+      const input = document.getElementById('edit_input_' + msgId);
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+      
+      input.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          const newText = input.value.trim();
+          if (newText && newText !== currentText) {
+            await client.from('messages').update({ text: newText }).eq('id', msgId);
+            showToast("Message updated successfully");
+            // Note: Supabase Realtime 'UPDATE' event handles redrawing it globally
+          } else {
+            cancelEdit(msgId);
+          }
+        } else if (e.key === 'Escape') {
+          cancelEdit(msgId);
+        }
+      });
+    }
+
+    function cancelEdit(msgId) {
+      const container = document.getElementById('msg_' + msgId);
+      if (container && container.dataset.originalHtml) {
+        container.innerHTML = container.dataset.originalHtml;
+        delete container.dataset.originalHtml;
+      }
+    }
+
+    async function deleteMessage(msgId) {
+      // Bypassing browser 'confirm()' intentionally for seamless UI
+      await client.from('messages').delete().eq('id', msgId);
+      showToast("Message deleted", "error");
+      // Note: Supabase Realtime 'DELETE' event handles removing it globally
     }
 
     async function submitMessage() {
@@ -938,6 +1046,8 @@
       if (!text) return;
 
       input.value = '';
+      input.style.height = 'auto'; // Reset text area height
+      
       await client.from('messages').insert([{
         text,
         user_name: currentUser.name,
