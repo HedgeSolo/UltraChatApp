@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UltraChatApp 3000 - Discord Clone</title>
+  <title>UltraChatApp 3000 By Lincoln D</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -27,6 +27,7 @@
               active: '#404249',
               input: '#383a40',
               gold: '#f59e0b',
+              ownerGold: '#f1c40f',
               danger: '#da373c'
             }
           }
@@ -799,11 +800,31 @@
     handleFileUpload('ssInputIconFile', 'ssInputIcon');
     handleFileUpload('newServerIconFile', 'newServerIcon');
 
-    // Helper: Ensure server has default "Member" role and return it
-    async function getOrCreateDefaultRole(serverId) {
+    // Helper: Ensure server has default "Owner" and "Member" roles and return them
+    async function getOrCreateDefaultRoles(serverId) {
+      // 1. Default Owner Role
+      let { data: ownerRole } = await client.from('server_roles').select('*').eq('server_id', serverId).eq('name', 'Owner').maybeSingle();
+      if (!ownerRole) {
+        const { data: newOwner } = await client.from('server_roles').insert({
+          server_id: serverId,
+          name: 'Owner',
+          color: '#f1c40f',
+          bypass_slowmode: true,
+          can_kick: true,
+          can_ban: true,
+          can_manage_messages: true,
+          can_manage_settings: true,
+          can_send_images: true,
+          can_add_reactions: true,
+          can_manage_roles: true
+        }).select().single();
+        ownerRole = newOwner;
+      }
+
+      // 2. Default Member Role
       let { data: memberRole } = await client.from('server_roles').select('*').eq('server_id', serverId).eq('name', 'Member').maybeSingle();
       if (!memberRole) {
-        const { data: newRole } = await client.from('server_roles').insert({
+        const { data: newMember } = await client.from('server_roles').insert({
           server_id: serverId,
           name: 'Member',
           color: '#949ba4',
@@ -813,11 +834,13 @@
           can_manage_messages: false,
           can_manage_settings: false,
           can_send_images: true,
-          can_add_reactions: true
+          can_add_reactions: true,
+          can_manage_roles: false
         }).select().single();
-        memberRole = newRole;
+        memberRole = newMember;
       }
-      return memberRole;
+
+      return { ownerRole, memberRole };
     }
 
     // =========================================================================
@@ -959,12 +982,12 @@
               const { data: defaultServers } = await client.from('servers').select('id').eq('is_default', true);
               if (defaultServers && defaultServers.length > 0) {
                 for (const ds of defaultServers) {
-                  const defaultRole = await getOrCreateDefaultRole(ds.id);
+                  const { memberRole } = await getOrCreateDefaultRoles(ds.id);
                   await client.from('server_members').insert({
                     server_id: ds.id,
                     user_id: data.user.id,
                     role: 'Member',
-                    role_id: defaultRole?.id || null
+                    role_id: memberRole?.id || null
                   });
                 }
               }
@@ -1161,8 +1184,8 @@
 
       if (srvErr) return showToast(srvErr.message, "error");
 
-      // Auto-create default Member role
-      const defaultRole = await getOrCreateDefaultRole(serverId);
+      // Auto-create default Owner & Member roles
+      const { ownerRole } = await getOrCreateDefaultRoles(serverId);
 
       // Create default General channel
       await client.from('channels').insert({
@@ -1176,12 +1199,12 @@
         is_private: false
       });
 
-      // Insert server owner as member with Member role_id
+      // Insert server owner as member with Owner role_id
       await client.from('server_members').insert({
         server_id: serverId,
         user_id: currentUser.id,
-        role: 'owner',
-        role_id: defaultRole?.id || null
+        role: 'Owner',
+        role_id: ownerRole?.id || null
       });
 
       showToast("Server created!");
@@ -1273,13 +1296,13 @@
     }
 
     async function joinServerFromDiscovery(serverId) {
-      const defaultRole = await getOrCreateDefaultRole(serverId);
+      const { memberRole } = await getOrCreateDefaultRoles(serverId);
 
       const { error } = await client.from('server_members').insert({
         server_id: serverId,
         user_id: currentUser.id,
         role: 'Member',
-        role_id: defaultRole?.id || null
+        role_id: memberRole?.id || null
       });
 
       if (error && error.code !== '23505') {
@@ -1347,46 +1370,71 @@
       }
 
       currentRolesCache.forEach(r => {
+        const isDefaultRole = (r.name === 'Owner' || r.name === 'Member');
+        const isOwnerRole = (r.name === 'Owner');
+
         const div = document.createElement('div');
         div.className = 'bg-discord-black p-3 rounded-lg border border-discord-hover/50 space-y-3';
+
+        let deleteBtnHtml = ``;
+        if (isDefaultRole) {
+          deleteBtnHtml = `<span class="text-[10px] text-discord-textMuted font-bold bg-discord-sidebar px-2 py-0.5 rounded border border-discord-hover/40">Default Role</span>`;
+        } else {
+          deleteBtnHtml = `<button onclick="deleteCustomRole('${r.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold"><i class="fa-solid fa-trash"></i> Delete</button>`;
+        }
+
+        let permsSectionHtml = ``;
+        if (isOwnerRole) {
+          permsSectionHtml = `
+            <div class="text-xs text-discord-textMuted bg-discord-sidebar/60 p-2.5 rounded border border-discord-hover/30 italic flex items-center space-x-2">
+              <i class="fa-solid fa-crown text-amber-400 text-sm"></i>
+              <span>The Owner role is a visual badge for server ownership with full administrative access. Color is customizable.</span>
+            </div>
+          `;
+        } else {
+          permsSectionHtml = `
+            <div class="grid grid-cols-2 gap-2 text-xs text-discord-textMuted pt-1 border-t border-discord-hover/20">
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${r.bypass_slowmode ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'bypass_slowmode', this.checked)" class="accent-discord-blurple" />
+                <span>Bypass Slowmode</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${r.can_kick ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_kick', this.checked)" class="accent-discord-blurple" />
+                <span>Can Kick Members</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${r.can_ban ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_ban', this.checked)" class="accent-discord-blurple" />
+                <span>Can Ban Members</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${r.can_manage_messages ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_manage_messages', this.checked)" class="accent-discord-blurple" />
+                <span>Manage Messages</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${r.can_manage_settings ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_manage_settings', this.checked)" class="accent-discord-blurple" />
+                <span>Manage Settings & Roles</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${r.can_send_images !== false ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_send_images', this.checked)" class="accent-discord-blurple" />
+                <span>Send Image Attachments</span>
+              </label>
+              <label class="flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" ${r.can_add_reactions !== false ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_add_reactions', this.checked)" class="accent-discord-blurple" />
+                <span>Add Emoji Reactions</span>
+              </label>
+            </div>
+          `;
+        }
+
         div.innerHTML = `
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
-              <input type="color" value="${r.color || '#ffffff'}" onchange="updateRoleField('${r.id}', 'color', this.value)" class="w-6 h-6 rounded bg-transparent cursor-pointer border-0" />
-              <input type="text" value="${r.name}" onchange="updateRoleField('${r.id}', 'name', this.value)" class="bg-discord-sidebar px-2 py-1 rounded text-sm text-discord-textHeader font-bold outline-none border border-transparent focus:border-discord-blurple" />
+              <input type="color" value="${r.color || '#f1c40f'}" onchange="updateRoleField('${r.id}', 'color', this.value)" class="w-6 h-6 rounded bg-transparent cursor-pointer border-0" title="Change Role Color" />
+              <input type="text" value="${r.name}" ${isDefaultRole ? 'disabled' : ''} onchange="updateRoleField('${r.id}', 'name', this.value)" class="bg-discord-sidebar px-2 py-1 rounded text-sm text-discord-textHeader font-bold outline-none border border-transparent focus:border-discord-blurple ${isDefaultRole ? 'opacity-80 cursor-not-allowed' : ''}" />
             </div>
-            <button onclick="deleteCustomRole('${r.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+            ${deleteBtnHtml}
           </div>
-          <div class="grid grid-cols-2 gap-2 text-xs text-discord-textMuted pt-1 border-t border-discord-hover/20">
-            <label class="flex items-center space-x-1.5 cursor-pointer">
-              <input type="checkbox" ${r.bypass_slowmode ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'bypass_slowmode', this.checked)" class="accent-discord-blurple" />
-              <span>Bypass Slowmode</span>
-            </label>
-            <label class="flex items-center space-x-1.5 cursor-pointer">
-              <input type="checkbox" ${r.can_kick ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_kick', this.checked)" class="accent-discord-blurple" />
-              <span>Can Kick Members</span>
-            </label>
-            <label class="flex items-center space-x-1.5 cursor-pointer">
-              <input type="checkbox" ${r.can_ban ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_ban', this.checked)" class="accent-discord-blurple" />
-              <span>Can Ban Members</span>
-            </label>
-            <label class="flex items-center space-x-1.5 cursor-pointer">
-              <input type="checkbox" ${r.can_manage_messages ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_manage_messages', this.checked)" class="accent-discord-blurple" />
-              <span>Manage Messages</span>
-            </label>
-            <label class="flex items-center space-x-1.5 cursor-pointer">
-              <input type="checkbox" ${r.can_manage_settings ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_manage_settings', this.checked)" class="accent-discord-blurple" />
-              <span>Manage Settings & Roles</span>
-            </label>
-            <label class="flex items-center space-x-1.5 cursor-pointer">
-              <input type="checkbox" ${r.can_send_images !== false ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_send_images', this.checked)" class="accent-discord-blurple" />
-              <span>Send Image Attachments</span>
-            </label>
-            <label class="flex items-center space-x-1.5 cursor-pointer">
-              <input type="checkbox" ${r.can_add_reactions !== false ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_add_reactions', this.checked)" class="accent-discord-blurple" />
-              <span>Add Emoji Reactions</span>
-            </label>
-          </div>
+          ${permsSectionHtml}
         `;
         container.appendChild(div);
       });
@@ -1415,6 +1463,10 @@
     }
 
     async function deleteCustomRole(roleId) {
+      const role = currentRolesCache.find(r => r.id === roleId);
+      if (role && (role.name === 'Owner' || role.name === 'Member')) {
+        return showToast("Default roles (Owner, Member) cannot be deleted.", "error");
+      }
       await client.from('server_roles').delete().eq('id', roleId);
       loadServerRolesSettings();
     }
@@ -1738,13 +1790,13 @@
         const { data: invite, error: inviteErr } = await client.from('server_invites').select('server_id').eq('code', code).single();
         if (inviteErr || !invite) return showToast("Invalid or expired invite code.", "error");
 
-        const defaultRole = await getOrCreateDefaultRole(invite.server_id);
+        const { memberRole } = await getOrCreateDefaultRoles(invite.server_id);
 
         const { error: joinErr } = await client.from('server_members').insert({
             server_id: invite.server_id,
             user_id: currentUser.id,
             role: 'Member',
-            role_id: defaultRole?.id || null
+            role_id: memberRole?.id || null
         });
 
         if (joinErr) {
@@ -2348,7 +2400,7 @@
         container.innerHTML = '';
 
         const groups = {
-            admin: { name: 'Admins', color: '#f59e0b', members: [] },
+            owner: { name: 'Owner', color: '#f1c40f', members: [] },
             member: { name: 'Members', color: '#949ba4', members: [] }
         };
 
@@ -2358,7 +2410,7 @@
 
         currentServerMembers.forEach(m => {
             if (m.profiles) {
-                const groupKey = m.role_id || m.role || 'member';
+                const groupKey = m.role_id || (m.role ? m.role.toLowerCase() : 'member');
                 if (!groups[groupKey]) groups[groupKey] = { name: (m.role || groupKey).toUpperCase(), color: '#ffffff', members: [] };
                 groups[groupKey].members.push({ id: m.user_id, ...m.profiles });
             }
