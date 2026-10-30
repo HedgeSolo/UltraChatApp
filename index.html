@@ -94,6 +94,18 @@
   <!-- Toast Container -->
   <div id="toastContainer" class="fixed top-4 right-4 z-[120] flex flex-col space-y-2 pointer-events-none"></div>
 
+  <!-- CONFIRMATION DIALOG MODAL (NO ALERT/CONFIRM) -->
+  <div id="confirmModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-discord-sidebar border border-discord-hover/60 rounded-xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+      <h3 id="confirmModalTitle" class="text-lg font-bold text-discord-textHeader">Confirm Action</h3>
+      <p id="confirmModalText" class="text-sm text-discord-textMuted">Are you sure you want to proceed?</p>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="closeConfirmModal(false)" class="px-4 py-1.5 rounded text-sm font-bold text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors">Cancel</button>
+        <button id="confirmModalOkBtn" onclick="closeConfirmModal(true)" class="px-4 py-1.5 rounded text-sm font-bold bg-discord-danger text-white hover:bg-red-600 transition-colors">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <!-- CUSTOM RIGHT-CLICK CONTEXT MENU -->
   <div id="customContextMenu" class="hidden fixed bg-discord-black border border-discord-hover/80 rounded-lg p-1.5 shadow-2xl z-[150] text-sm w-48 space-y-0.5 font-medium">
     <button onclick="ctxViewProfile()" class="w-full text-left px-2.5 py-1.5 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
@@ -304,9 +316,26 @@
       <div id="chatFeedPanel" class="flex-1 flex flex-col min-w-0 h-full">
         <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-2 scroll-smooth"></div>
 
+        <!-- Image attachment preview bar -->
+        <div id="imageAttachmentPreview" class="hidden px-4 pt-2">
+          <div class="bg-discord-sidebar border border-discord-hover rounded-lg p-2 flex items-center justify-between max-w-xs">
+            <div class="flex items-center space-x-2 min-w-0">
+              <i class="fa-solid fa-image text-discord-blurple"></i>
+              <span id="imageAttachmentName" class="text-xs text-discord-textHeader truncate">Image Attached</span>
+            </div>
+            <button onclick="removeAttachedImage()" class="text-discord-textMuted hover:text-discord-danger text-xs p-1"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
         <div class="px-4 pb-6 pt-2 shrink-0">
-          <div class="bg-discord-input rounded-lg flex items-start px-4 py-3 shadow-inner relative group">
-            <textarea id="messageInput" rows="1" oninput="autoGrowInput(this)" onkeydown="handleInputKeydown(event)" placeholder="Message..." class="bg-transparent text-base text-discord-textHeader placeholder-discord-textMuted flex-1 outline-none resize-none max-h-[40vh] overflow-y-auto leading-relaxed"></textarea>
+          <div class="bg-discord-input rounded-lg flex items-center px-4 py-2.5 shadow-inner relative group space-x-2">
+            <!-- Image Attachment Button -->
+            <label id="btnAttachImage" class="cursor-pointer text-discord-textMuted hover:text-discord-textHeader transition-colors p-1" title="Attach Image">
+              <i class="fa-solid fa-circle-plus text-lg"></i>
+              <input type="file" id="msgImageFileInput" accept="image/*" class="hidden" onchange="handleMessageImageSelect(event)" />
+            </label>
+
+            <textarea id="messageInput" rows="1" oninput="autoGrowInput(this)" onkeydown="handleInputKeydown(event)" placeholder="Message..." class="bg-transparent text-base text-discord-textHeader placeholder-discord-textMuted flex-1 outline-none resize-none max-h-[40vh] overflow-y-auto leading-relaxed py-1"></textarea>
           </div>
         </div>
       </div>
@@ -430,7 +459,7 @@
 
   <!-- CHANNEL SETTINGS MODAL -->
   <div id="channelSettingsModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-discord-sidebar w-full max-w-md rounded-lg shadow-2xl relative p-6 border border-discord-hover">
+    <div class="bg-discord-sidebar w-full max-w-md rounded-lg shadow-2xl relative p-6 border border-discord-hover max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-discord-textHeader flex items-center space-x-2">
           <i class="fa-solid fa-gear text-discord-blurple"></i>
@@ -453,6 +482,24 @@
             <option value="30">30 seconds</option>
             <option value="60">1 minute</option>
           </select>
+        </div>
+
+        <div class="pt-2 border-t border-discord-hover/40">
+          <h3 class="text-xs font-bold uppercase text-discord-textMuted mb-2">Role Permissions Overrides</h3>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-discord-textHeader mb-1">Roles Allowed to View Channel</label>
+              <p class="text-[11px] text-discord-textMuted mb-1.5">If empty, all members can view.</p>
+              <div id="csViewRolesContainer" class="space-y-1.5 max-h-32 overflow-y-auto bg-discord-black p-2 rounded border border-discord-hover/40"></div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-discord-textHeader mb-1">Roles Allowed to Send Messages</label>
+              <p class="text-[11px] text-discord-textMuted mb-1.5">If empty, all members can send messages.</p>
+              <div id="csSendRolesContainer" class="space-y-1.5 max-h-32 overflow-y-auto bg-discord-black p-2 rounded border border-discord-hover/40"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -500,7 +547,11 @@
           </div>
         </div>
 
-        <div class="mt-6">
+        <div class="mt-6 space-y-2">
+          <button id="profileModalAssignRoleBtn" onclick="openAssignRoleFromProfile()" class="w-full bg-discord-black hover:bg-discord-hover text-discord-textHeader border border-discord-hover/50 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center space-x-2 hidden">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Assign Role</span>
+          </button>
           <button id="profileModalMessageBtn" class="w-full bg-discord-blurple hover:bg-discord-blurpleHover text-white py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center space-x-2">
             <i class="fa-solid fa-comment"></i>
             <span>Send Direct Message</span>
@@ -682,6 +733,11 @@
     </div>
   </div>
 
+  <!-- LIGHTBOX IMAGE PREVIEW MODAL -->
+  <div id="imageLightboxModal" class="hidden fixed inset-0 bg-black/90 z-[200] flex items-center justify-center p-4" onclick="closeModal('imageLightboxModal')">
+    <img id="lightboxImg" src="" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" />
+  </div>
+
   <script>
     // =========================================================================
     // 1. SUPABASE & CORE STATE
@@ -713,6 +769,8 @@
     let lastMessageTimeMap = {}; 
     let contextTarget = null; // Stores target user info for right-click context menu
     let targetEditingChannelId = null; // Channel selected for channel settings
+    let attachedMessageBase64 = null; // Pending base64 image for message
+    let pendingConfirmCallback = null; // Non-blocking confirmation modal callback
 
     function handleFileUpload(inputId, hiddenInputId) {
       const fileInput = document.getElementById(inputId);
@@ -817,8 +875,42 @@
       }, 300);
     }
 
+    // Modal Confirmation Utility (Replaces native confirm)
+    function customConfirm(title, message, callback) {
+      document.getElementById('confirmModalTitle').innerText = title;
+      document.getElementById('confirmModalText').innerText = message;
+      pendingConfirmCallback = callback;
+      openModal('confirmModal');
+    }
+
+    function closeConfirmModal(result) {
+      closeModal('confirmModal');
+      if (pendingConfirmCallback) {
+        pendingConfirmCallback(result);
+        pendingConfirmCallback = null;
+      }
+    }
+
+    // Check Role Permissions Helper
+    function getUserRolePermission(permKey) {
+      if (currentUser.isCEO) return true;
+      if (currentServerId === 'home' || currentServerId === 'dm') return true;
+      const srv = servers.find(s => s.id === currentServerId);
+      if (srv && srv.owner_id === currentUser.id) return true;
+
+      const myMember = currentServerMembers.find(m => m.user_id === currentUser.id);
+      if (myMember && myMember.role_id) {
+        const role = currentRolesCache.find(r => r.id === myMember.role_id);
+        if (role) return !!role[permKey];
+      }
+
+      // Default permissions if no custom role overrides
+      if (permKey === 'can_send_images' || permKey === 'can_add_reactions') return true;
+      return false;
+    }
+
     // =========================================================================
-    // 3. AUTH LOGIC (STRICT SEPARATION)
+    // 3. AUTH LOGIC
     // =========================================================================
     async function handleLogin() {
       const email = document.getElementById('authEmail').value.trim();
@@ -899,7 +991,16 @@
             .on('postgres_changes', { event: '*', schema: 'public', table: 'servers' }, payload => {
                 loadServersFromDB();
             })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'server_roles' }, payload => {
+                if (currentServerId !== 'home') loadServerRolesCache();
+            })
             .subscribe();
+    }
+
+    async function loadServerRolesCache() {
+      if (currentServerId === 'home' || currentServerId === 'dm') return;
+      const { data: roles } = await client.from('server_roles').select('*').eq('server_id', currentServerId);
+      currentRolesCache = roles || [];
     }
 
     async function loadServersFromDB() {
@@ -1001,18 +1102,26 @@
         
         const isOwner = (srv.owner_id === currentUser.id) || currentUser.isCEO;
         
+        await loadServerRolesCache();
         await loadChannelsFromDB();
         await loadMembersFromDB();
 
+        const canManage = isOwner || getUserRolePermission('can_manage_settings');
+
         document.getElementById('serverOwnerBadge').classList.toggle('hidden', !isOwner);
-        document.getElementById('btnServerSettings').classList.toggle('hidden', !isOwner);
-        document.getElementById('btnCreateChannel').classList.toggle('hidden', !isOwner);
+        document.getElementById('btnServerSettings').classList.toggle('hidden', !canManage);
+        document.getElementById('btnCreateChannel').classList.toggle('hidden', !canManage);
         
         document.getElementById('btnInvitePeople').classList.toggle('hidden', false);
         document.getElementById('inviteDivider').classList.toggle('hidden', false);
 
         if (currentServerChannels.length > 0) {
-            switchChannel(currentServerChannels[0].id, currentServerChannels[0].name, currentServerChannels[0].slowmode);
+            const firstVisible = currentServerChannels.find(c => canUserViewChannel(c));
+            if (firstVisible) {
+              switchChannel(firstVisible.id, firstVisible.name, firstVisible.slowmode);
+            } else {
+              document.getElementById('messagesContainer').innerHTML = '<div class="flex h-full items-center justify-center text-discord-textMuted">You do not have permission to view channels in this server.</div>';
+            }
         } else {
             document.getElementById('messagesContainer').innerHTML = '<div class="flex h-full items-center justify-center text-discord-textMuted">No channels exist.</div>';
         }
@@ -1022,7 +1131,7 @@
     }
 
     // =========================================================================
-    // 5. PUBLIC SERVER DISCOVERY (RESTORED & OPTIMIZED)
+    // 5. PUBLIC SERVER DISCOVERY
     // =========================================================================
     async function openPublicExplorer() {
       openModal('discoverModal');
@@ -1161,8 +1270,7 @@
       const container = document.getElementById('rolesListContainer');
       container.innerHTML = '<div class="text-xs text-discord-textMuted p-2">Loading custom roles...</div>';
 
-      const { data: roles } = await client.from('server_roles').select('*').eq('server_id', currentServerId);
-      currentRolesCache = roles || [];
+      await loadServerRolesCache();
 
       container.innerHTML = '';
       if (currentRolesCache.length === 0) {
@@ -1198,6 +1306,18 @@
               <input type="checkbox" ${r.can_manage_messages ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_manage_messages', this.checked)" class="accent-discord-blurple" />
               <span>Manage Messages</span>
             </label>
+            <label class="flex items-center space-x-1.5 cursor-pointer">
+              <input type="checkbox" ${r.can_manage_settings ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_manage_settings', this.checked)" class="accent-discord-blurple" />
+              <span>Manage Settings & Roles</span>
+            </label>
+            <label class="flex items-center space-x-1.5 cursor-pointer">
+              <input type="checkbox" ${r.can_send_images !== false ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_send_images', this.checked)" class="accent-discord-blurple" />
+              <span>Send Image Attachments</span>
+            </label>
+            <label class="flex items-center space-x-1.5 cursor-pointer">
+              <input type="checkbox" ${r.can_add_reactions !== false ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_add_reactions', this.checked)" class="accent-discord-blurple" />
+              <span>Add Emoji Reactions</span>
+            </label>
           </div>
         `;
         container.appendChild(div);
@@ -1212,7 +1332,10 @@
         bypass_slowmode: false,
         can_kick: false,
         can_ban: false,
-        can_manage_messages: false
+        can_manage_messages: false,
+        can_manage_settings: false,
+        can_send_images: true,
+        can_add_reactions: true
       });
       if (error) showToast(error.message, 'error');
       else loadServerRolesSettings();
@@ -1220,6 +1343,7 @@
 
     async function updateRoleField(roleId, field, value) {
       await client.from('server_roles').update({ [field]: value }).eq('id', roleId);
+      await loadServerRolesCache();
     }
 
     async function deleteCustomRole(roleId) {
@@ -1254,14 +1378,15 @@
       }
     }
 
-    async function deleteCurrentServer() {
-      if (!confirm("Are you sure you want to permanently delete this server?")) return;
-
-      await client.from('servers').delete().eq('id', currentServerId);
-      showToast("Server deleted.");
-      closeModal('serverSettingsModal');
-      await loadServersFromDB();
-      switchServer('home');
+    function deleteCurrentServer() {
+      customConfirm("Delete Server", "Are you sure you want to permanently delete this server?", async (confirmed) => {
+        if (!confirmed) return;
+        await client.from('servers').delete().eq('id', currentServerId);
+        showToast("Server deleted.");
+        closeModal('serverSettingsModal');
+        await loadServersFromDB();
+        switchServer('home');
+      });
     }
 
     // =========================================================================
@@ -1295,42 +1420,47 @@
       });
     }
 
-    async function ceoDeleteServer(srvId) {
-      if (!confirm(`[CEO OVERRIDE] Delete server ${srvId}?`)) return;
-      await client.from('servers').delete().eq('id', srvId);
-      showToast("Server deleted via CEO Command");
-      openCeoModal();
-      await loadServersFromDB();
+    function ceoDeleteServer(srvId) {
+      customConfirm("CEO Override", `Nuke server ${srvId}?`, async (confirmed) => {
+        if (!confirmed) return;
+        await client.from('servers').delete().eq('id', srvId);
+        showToast("Server deleted via CEO Command");
+        openCeoModal();
+        await loadServersFromDB();
+      });
     }
 
     // =========================================================================
-    // 8. SERVER CREATION, CHANNEL EDIT/DELETE & INVITES
+    // 8. CHANNEL PERMISSIONS & ROLES MANAGEMENT
     // =========================================================================
-    async function handleCreateServer() {
-      const name = document.getElementById('newServerName').value.trim();
-      if (!name) return;
+    function canUserViewChannel(chan) {
+      if (currentServerId === 'home' || currentServerId === 'dm') return true;
+      if (currentUser.isCEO) return true;
+      const srv = servers.find(s => s.id === currentServerId);
+      if (srv && srv.owner_id === currentUser.id) return true;
 
-      const newSrvId = 'srv_' + Date.now();
-      const srvData = {
-          id: newSrvId,
-          name: name,
-          icon: document.getElementById('newServerIcon').value.trim(),
-          owner_id: currentUser.id,
-          needs_invite: false,
-          strict_mode: false,
-          banned_words: ''
-      };
+      const allowedRoles = chan.allowed_roles_view ? (Array.isArray(chan.allowed_roles_view) ? chan.allowed_roles_view : JSON.parse(chan.allowed_roles_view || '[]')) : [];
+      if (allowedRoles.length === 0) return true;
 
-      const { error: srvErr } = await client.from('servers').insert(srvData);
-      if (srvErr) return showToast(srvErr.message, "error");
+      const myMember = currentServerMembers.find(m => m.user_id === currentUser.id);
+      if (!myMember || !myMember.role_id) return false;
+      return allowedRoles.includes(myMember.role_id);
+    }
 
-      await client.from('server_members').insert({ server_id: newSrvId, user_id: currentUser.id, role: 'admin' });
-      await client.from('channels').insert({ id: 'chan_' + Date.now(), server_id: newSrvId, name: 'general', type: 'text', slowmode: 0 });
+    function canUserSendInChannel(chan) {
+      if (currentServerId === 'home' || currentServerId === 'dm') return true;
+      if (currentUser.isCEO) return true;
+      const srv = servers.find(s => s.id === currentServerId);
+      if (srv && srv.owner_id === currentUser.id) return true;
 
-      closeModal('createServerModal');
-      await loadServersFromDB();
-      switchServer(newSrvId);
-      showToast(`Created server ${name}`);
+      if (getUserRolePermission('can_manage_settings') || getUserRolePermission('can_manage_messages')) return true;
+
+      const allowedRoles = chan.allowed_roles_send ? (Array.isArray(chan.allowed_roles_send) ? chan.allowed_roles_send : JSON.parse(chan.allowed_roles_send || '[]')) : [];
+      if (allowedRoles.length === 0) return true;
+
+      const myMember = currentServerMembers.find(m => m.user_id === currentUser.id);
+      if (!myMember || !myMember.role_id) return false;
+      return allowedRoles.includes(myMember.role_id);
     }
 
     function canManageChannels() {
@@ -1338,21 +1468,48 @@
       if (currentUser.isCEO) return true;
       const srv = servers.find(s => s.id === currentServerId);
       if (srv && srv.owner_id === currentUser.id) return true;
-      const myMemberRecord = currentServerMembers.find(m => m.user_id === currentUser.id);
-      if (myMemberRecord && myMemberRecord.role_id) {
-        const role = currentRolesCache.find(r => r.id === myMemberRecord.role_id);
-        if (role && (role.can_manage_settings || role.can_manage_messages)) return true;
-      }
-      return false;
+      return getUserRolePermission('can_manage_settings');
     }
 
-    function openChannelSettings(chanId) {
+    async function openChannelSettings(chanId) {
       const chan = currentServerChannels.find(c => c.id === chanId);
       if (!chan) return;
 
       targetEditingChannelId = chanId;
       document.getElementById('csInputName').value = chan.name;
       document.getElementById('csSelectSlowmode').value = chan.slowmode || 0;
+
+      await loadServerRolesCache();
+
+      // Render View/Send role permission checkboxes
+      const viewRoles = chan.allowed_roles_view ? (Array.isArray(chan.allowed_roles_view) ? chan.allowed_roles_view : JSON.parse(chan.allowed_roles_view || '[]')) : [];
+      const sendRoles = chan.allowed_roles_send ? (Array.isArray(chan.allowed_roles_send) ? chan.allowed_roles_send : JSON.parse(chan.allowed_roles_send || '[]')) : [];
+
+      const vContainer = document.getElementById('csViewRolesContainer');
+      const sContainer = document.getElementById('csSendRolesContainer');
+
+      vContainer.innerHTML = '';
+      sContainer.innerHTML = '';
+
+      if (currentRolesCache.length === 0) {
+        vContainer.innerHTML = '<div class="text-xs text-discord-textMuted italic">No custom roles in server.</div>';
+        sContainer.innerHTML = '<div class="text-xs text-discord-textMuted italic">No custom roles in server.</div>';
+      } else {
+        currentRolesCache.forEach(r => {
+          vContainer.innerHTML += `
+            <label class="flex items-center space-x-2 text-xs text-discord-textHeader cursor-pointer hover:bg-discord-hover/40 p-1 rounded">
+              <input type="checkbox" value="${r.id}" class="cs-view-role-check accent-discord-blurple" ${viewRoles.includes(r.id) ? 'checked' : ''} />
+              <span style="color:${r.color || '#fff'}">${r.name}</span>
+            </label>
+          `;
+          sContainer.innerHTML += `
+            <label class="flex items-center space-x-2 text-xs text-discord-textHeader cursor-pointer hover:bg-discord-hover/40 p-1 rounded">
+              <input type="checkbox" value="${r.id}" class="cs-send-role-check accent-discord-blurple" ${sendRoles.includes(r.id) ? 'checked' : ''} />
+              <span style="color:${r.color || '#fff'}">${r.name}</span>
+            </label>
+          `;
+        });
+      }
 
       openModal('channelSettingsModal');
     }
@@ -1365,9 +1522,14 @@
 
       if (!newName) return showToast("Channel name cannot be empty", "error");
 
+      const viewRoles = Array.from(document.querySelectorAll('.cs-view-role-check:checked')).map(cb => cb.value);
+      const sendRoles = Array.from(document.querySelectorAll('.cs-send-role-check:checked')).map(cb => cb.value);
+
       const { error } = await client.from('channels').update({
         name: newName,
-        slowmode: newSlowmode
+        slowmode: newSlowmode,
+        allowed_roles_view: JSON.stringify(viewRoles),
+        allowed_roles_send: JSON.stringify(sendRoles)
       }).eq('id', targetEditingChannelId);
 
       if (error) {
@@ -1382,23 +1544,25 @@
       }
     }
 
-    async function handleDeleteChannel() {
+    function handleDeleteChannel() {
       if (!targetEditingChannelId) return;
       if (currentServerChannels.length <= 1) return showToast("Cannot delete the only channel in the server.", "error");
-      if (!confirm("Are you sure you want to delete this channel? All messages in it will be lost.")) return;
 
-      const { error } = await client.from('channels').delete().eq('id', targetEditingChannelId);
+      customConfirm("Delete Channel", "Are you sure you want to delete this channel? All messages will be permanently lost.", async (confirmed) => {
+        if (!confirmed) return;
+        const { error } = await client.from('channels').delete().eq('id', targetEditingChannelId);
 
-      if (error) {
-        showToast(error.message, "error");
-      } else {
-        showToast("Channel deleted", "error");
-        closeModal('channelSettingsModal');
-        await loadChannelsFromDB();
-        if (currentServerChannels.length > 0) {
-          switchChannel(currentServerChannels[0].id, currentServerChannels[0].name, currentServerChannels[0].slowmode);
+        if (error) {
+          showToast(error.message, "error");
+        } else {
+          showToast("Channel deleted", "error");
+          closeModal('channelSettingsModal');
+          await loadChannelsFromDB();
+          if (currentServerChannels.length > 0) {
+            switchChannel(currentServerChannels[0].id, currentServerChannels[0].name, currentServerChannels[0].slowmode);
+          }
         }
-      }
+      });
     }
 
     async function handleCreateChannel() {
@@ -1414,7 +1578,9 @@
             server_id: currentServerId,
             name: name,
             type: typeInput.value,
-            slowmode: parseInt(slowmodeInput.value) || 0
+            slowmode: parseInt(slowmodeInput.value) || 0,
+            allowed_roles_view: '[]',
+            allowed_roles_send: '[]'
         };
 
         const { error } = await client.from('channels').insert(chanData);
@@ -1532,7 +1698,7 @@
     }
 
     // =========================================================================
-    // 9. MESSAGING & CHANNELS
+    // 9. MESSAGING, IMAGE ATTACHMENTS & EMOJI REACTIONS
     // =========================================================================
     function switchChannel(chanId, chanName, slowmode = 0) {
       currentChannelId = chanId;
@@ -1545,8 +1711,50 @@
       } else {
           smBadge.classList.add('hidden');
       }
+
+      const chan = currentServerChannels.find(c => c.id === chanId);
+      const input = document.getElementById('messageInput');
+      const attachBtn = document.getElementById('btnAttachImage');
+
+      if (chan && !canUserSendInChannel(chan)) {
+        input.disabled = true;
+        input.placeholder = "Read-Only: You do not have permission to send messages here.";
+        attachBtn.classList.add('pointer-events-none', 'opacity-30');
+      } else {
+        input.disabled = false;
+        input.placeholder = `Message #${chanName}`;
+        
+        const canSendImages = getUserRolePermission('can_send_images');
+        attachBtn.classList.toggle('pointer-events-none', !canSendImages);
+        attachBtn.classList.toggle('opacity-30', !canSendImages);
+      }
       
       fetchMessages(currentServerId, chanId);
+    }
+
+    function handleMessageImageSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!getUserRolePermission('can_send_images')) {
+        showToast("You do not have permission to attach images.", "error");
+        e.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        attachedMessageBase64 = evt.target.result;
+        document.getElementById('imageAttachmentName').innerText = file.name;
+        document.getElementById('imageAttachmentPreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeAttachedImage() {
+      attachedMessageBase64 = null;
+      document.getElementById('msgImageFileInput').value = '';
+      document.getElementById('imageAttachmentPreview').classList.add('hidden');
     }
 
     async function fetchMessages(srvId, chanId) {
@@ -1590,15 +1798,25 @@
         const srv = servers.find(s => s.id === currentServerId);
         if (srv && srv.owner_id === currentUser.id) isServerOwner = true;
       }
-      const canDelete = isMsgOwner || isServerOwner || currentUser.isCEO;
+      const canDelete = isMsgOwner || isServerOwner || currentUser.isCEO || getUserRolePermission('can_manage_messages');
       const canEdit = isMsgOwner || currentUser.isCEO;
+      const canReact = getUserRolePermission('can_add_reactions');
 
-      const actionsHtml = (canEdit || canDelete) ? `
-        <div class="hidden group-hover:flex absolute right-4 -top-3 bg-discord-chat border border-discord-hover rounded-md shadow-sm overflow-hidden z-10">
-          ${canEdit ? `<button onclick="editMessage('${msg.id}')" class="px-2 py-1.5 text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors" title="Edit"><i class="fa-solid fa-pen text-xs"></i></button>` : ''}
-          ${canDelete ? `<button onclick="deleteMessage('${msg.id}')" class="px-2 py-1.5 text-discord-danger hover:bg-discord-danger hover:text-white transition-colors" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
+      const hoverActionHtml = `
+        <div class="hidden group-hover:flex absolute right-4 -top-3 bg-discord-chat border border-discord-hover rounded-md shadow-sm overflow-hidden z-10 items-center divide-x divide-discord-hover/40 text-xs">
+          ${canReact ? `
+            <div class="flex items-center px-1 space-x-1">
+              <button onclick="toggleEmojiReaction('${msg.id}', '👍')" class="px-1.5 py-1 hover:bg-discord-hover transition-colors">👍</button>
+              <button onclick="toggleEmojiReaction('${msg.id}', '❤️')" class="px-1.5 py-1 hover:bg-discord-hover transition-colors">❤️</button>
+              <button onclick="toggleEmojiReaction('${msg.id}', '😂')" class="px-1.5 py-1 hover:bg-discord-hover transition-colors">😂</button>
+              <button onclick="toggleEmojiReaction('${msg.id}', '🔥')" class="px-1.5 py-1 hover:bg-discord-hover transition-colors">🔥</button>
+              <button onclick="toggleEmojiReaction('${msg.id}', '🎉')" class="px-1.5 py-1 hover:bg-discord-hover transition-colors">🎉</button>
+            </div>
+          ` : ''}
+          ${canEdit ? `<button onclick="editMessage('${msg.id}')" class="px-2 py-1.5 text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors" title="Edit"><i class="fa-solid fa-pen"></i></button>` : ''}
+          ${canDelete ? `<button onclick="deleteMessage('${msg.id}')" class="px-2 py-1.5 text-discord-danger hover:bg-discord-danger hover:text-white transition-colors" title="Delete"><i class="fa-solid fa-trash"></i></button>` : ''}
         </div>
-      ` : '';
+      `;
 
       const safeText = msg.text ? msg.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
       let formattedText = safeText;
@@ -1618,6 +1836,33 @@
           </div>`;
       });
 
+      // Embed Image if exists
+      let imageEmbedHtml = '';
+      if (msg.image_url) {
+        imageEmbedHtml = `<div class="mt-2"><img src="${msg.image_url}" onclick="openLightbox('${msg.image_url}')" class="max-w-xs max-h-60 rounded-lg border border-discord-hover/50 cursor-pointer object-cover hover:opacity-95 transition-opacity shadow-md" /></div>`;
+      }
+
+      // Reactions Pills
+      let reactionsHtml = '';
+      const rx = msg.reactions ? (typeof msg.reactions === 'string' ? JSON.parse(msg.reactions) : msg.reactions) : {};
+      const rxKeys = Object.keys(rx);
+      if (rxKeys.length > 0) {
+        reactionsHtml = '<div class="flex flex-wrap gap-1 mt-1.5">';
+        rxKeys.forEach(emoji => {
+          const userList = rx[emoji] || [];
+          if (userList.length > 0) {
+            const reacted = userList.includes(currentUser.id);
+            reactionsHtml += `
+              <button onclick="toggleEmojiReaction('${msg.id}', '${emoji}')" class="inline-flex items-center space-x-1 border px-2 py-0.5 rounded-full text-xs font-semibold ${reacted ? 'bg-discord-blurple/20 border-discord-blurple text-discord-blurple' : 'bg-discord-black/40 border-discord-hover/60 text-discord-textMuted hover:border-discord-hover'} transition-colors">
+                <span>${emoji}</span>
+                <span>${userList.length}</span>
+              </button>
+            `;
+          }
+        });
+        reactionsHtml += '</div>';
+      }
+
       const escapedName = resolvedName.replace(/'/g, "\\'");
       const escapedAvatar = (resolvedAvatar || '').replace(/'/g, "\\'");
 
@@ -1629,8 +1874,10 @@
             <span class="text-[10px] text-discord-textMuted">${new Date(msg.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
           </div>
           <div id="msg_text_${msg.id}" class="text-sm text-gray-200 mt-0.5 break-words whitespace-pre-wrap leading-relaxed">${formattedText}</div>
+          ${imageEmbedHtml}
+          ${reactionsHtml}
         </div>
-        ${actionsHtml}
+        ${hoverActionHtml}
       `;
 
       if (isNew) {
@@ -1640,12 +1887,33 @@
       }
     }
 
-    function updateMessageInDOM(msg) {
-      const textEl = document.getElementById('msg_text_' + msg.id);
-      if (textEl) {
-        const safeText = msg.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        textEl.innerHTML = safeText + ' <span class="text-[10px] text-discord-textMuted italic ml-1">(edited)</span>';
+    function openLightbox(src) {
+      document.getElementById('lightboxImg').src = src;
+      openModal('imageLightboxModal');
+    }
+
+    async function toggleEmojiReaction(msgId, emoji) {
+      if (!getUserRolePermission('can_add_reactions')) return showToast("You do not have permission to add reactions.", "error");
+
+      const { data: msg } = await client.from('messages').select('reactions').eq('id', msgId).single();
+      if (!msg) return;
+
+      let rx = msg.reactions ? (typeof msg.reactions === 'string' ? JSON.parse(msg.reactions) : msg.reactions) : {};
+      if (!rx[emoji]) rx[emoji] = [];
+
+      const idx = rx[emoji].indexOf(currentUser.id);
+      if (idx > -1) {
+        rx[emoji].splice(idx, 1);
+        if (rx[emoji].length === 0) delete rx[emoji];
+      } else {
+        rx[emoji].push(currentUser.id);
       }
+
+      await client.from('messages').update({ reactions: JSON.stringify(rx) }).eq('id', msgId);
+    }
+
+    function updateMessageInDOM(msg) {
+      appendMessage(msg);
     }
 
     function removeMessageFromDOM(msgId) {
@@ -1705,7 +1973,12 @@
     async function submitMessage() {
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
-      if (!text) return;
+      const imagePayload = attachedMessageBase64;
+
+      if (!text && !imagePayload) return;
+
+      const chan = currentServerChannels.find(c => c.id === currentChannelId);
+      if (chan && !canUserSendInChannel(chan)) return showToast("You do not have permission to send messages in this channel.", "error");
 
       const srv = servers.find(s => s.id === currentServerId);
       
@@ -1723,7 +1996,6 @@
               }
           }
 
-          const chan = currentServerChannels.find(c => c.id === currentChannelId);
           let enforcedSlowmode = currentUser.isGuest ? 10 : (chan?.slowmode || 0); 
           
           if (enforcedSlowmode > 0) {
@@ -1739,14 +2011,17 @@
 
       input.value = '';
       input.style.height = 'auto';
+      removeAttachedImage();
       
       let msgData = {
         text,
+        image_url: imagePayload || null,
         user_name: currentUser.name,
         user_id: currentUser.id,
         avatar_url: currentUser.avatar,
         server_id: currentServerId,
-        channel_id: currentChannelId || 'general'
+        channel_id: currentChannelId || 'general',
+        reactions: '{}'
       };
 
       await client.from('messages').insert([msgData]);
@@ -1777,6 +2052,8 @@
 
       if (!profile) return showToast("User profile not found.", "error");
 
+      contextTarget = { id: userId, name: profile.display_name || 'User', avatar: profile.avatar_url };
+
       document.getElementById('profileModalName').innerText = profile.display_name || 'User';
       document.getElementById('profileModalAvatar').src = profile.avatar_url || `https://placehold.co/80x80/5865f2/ffffff?text=${(profile.display_name || 'U')[0]}`;
       
@@ -1797,8 +2074,12 @@
         }
       }
 
+      const isSelf = userId === currentUser.id;
+      const canManageRoles = !isSelf && (currentUser.isCEO || (servers.find(s => s.id === currentServerId)?.owner_id === currentUser.id) || getUserRolePermission('can_manage_settings'));
+      document.getElementById('profileModalAssignRoleBtn').classList.toggle('hidden', !canManageRoles);
+
       const msgBtn = document.getElementById('profileModalMessageBtn');
-      if (userId === currentUser.id) {
+      if (isSelf) {
         msgBtn.classList.add('hidden');
       } else {
         msgBtn.classList.remove('hidden');
@@ -1809,6 +2090,11 @@
       }
 
       openModal('userProfileModal');
+    }
+
+    function openAssignRoleFromProfile() {
+      closeModal('userProfileModal');
+      ctxAssignRole();
     }
 
     function handleMemberContextMenu(e, userId, userName, userAvatar) {
@@ -1831,18 +2117,9 @@
       const isOwner = srv && srv.owner_id === currentUser.id;
       const isCEO = currentUser.isCEO;
 
-      let canKick = !isSelf && (isCEO || isOwner);
-      let canBan = !isSelf && (isCEO || isOwner);
-      let canAssign = !isSelf && (isCEO || isOwner);
-
-      const myMemberRecord = currentServerMembers.find(m => m.user_id === currentUser.id);
-      if (myMemberRecord && myMemberRecord.role_id) {
-        const role = currentRolesCache.find(r => r.id === myMemberRecord.role_id);
-        if (role) {
-          if (role.can_kick) canKick = !isSelf;
-          if (role.can_ban) canBan = !isSelf;
-        }
-      }
+      let canKick = !isSelf && (isCEO || isOwner || getUserRolePermission('can_kick'));
+      let canBan = !isSelf && (isCEO || isOwner || getUserRolePermission('can_ban'));
+      let canAssign = !isSelf && (isCEO || isOwner || getUserRolePermission('can_manage_settings'));
 
       document.getElementById('ctxModDivider').classList.toggle('hidden', !(canKick || canBan || canAssign));
       document.getElementById('ctxKickBtn').classList.toggle('hidden', !canKick);
@@ -1867,30 +2144,34 @@
       if (contextTarget && contextTarget.id !== currentUser.id) openDM(contextTarget.id, contextTarget.name);
     }
 
-    async function ctxKickMember() {
+    function ctxKickMember() {
       hideContextMenu();
       if (!contextTarget) return;
-      if (!confirm(`Kick ${contextTarget.name} from server?`)) return;
 
-      const { error } = await client.from('server_members').delete().eq('server_id', currentServerId).eq('user_id', contextTarget.id);
-      if (error) showToast(error.message, "error");
-      else {
-        showToast(`Kicked ${contextTarget.name}`);
-        loadMembersFromDB();
-      }
+      customConfirm("Kick Member", `Kick ${contextTarget.name} from server?`, async (confirmed) => {
+        if (!confirmed) return;
+        const { error } = await client.from('server_members').delete().eq('server_id', currentServerId).eq('user_id', contextTarget.id);
+        if (error) showToast(error.message, "error");
+        else {
+          showToast(`Kicked ${contextTarget.name}`);
+          loadMembersFromDB();
+        }
+      });
     }
 
-    async function ctxBanMember() {
+    function ctxBanMember() {
       hideContextMenu();
       if (!contextTarget) return;
-      if (!confirm(`Ban ${contextTarget.name} from server?`)) return;
 
-      const { error } = await client.from('server_members').delete().eq('server_id', currentServerId).eq('user_id', contextTarget.id);
-      if (error) showToast(error.message, "error");
-      else {
-        showToast(`Banned ${contextTarget.name}`, "error");
-        loadMembersFromDB();
-      }
+      customConfirm("Ban Member", `Ban ${contextTarget.name} from server?`, async (confirmed) => {
+        if (!confirmed) return;
+        const { error } = await client.from('server_members').delete().eq('server_id', currentServerId).eq('user_id', contextTarget.id);
+        if (error) showToast(error.message, "error");
+        else {
+          showToast(`Banned ${contextTarget.name}`, "error");
+          loadMembersFromDB();
+        }
+      });
     }
 
     async function ctxAssignRole() {
@@ -1903,15 +2184,15 @@
 
       openModal('assignRoleModal');
 
-      const { data: roles } = await client.from('server_roles').select('*').eq('server_id', currentServerId);
+      await loadServerRolesCache();
       listContainer.innerHTML = '';
 
-      if (!roles || roles.length === 0) {
+      if (!currentRolesCache || currentRolesCache.length === 0) {
         listContainer.innerHTML = '<div class="text-xs text-discord-textMuted italic">No custom roles available. Create roles in Server Settings.</div>';
         return;
       }
 
-      roles.forEach(r => {
+      currentRolesCache.forEach(r => {
         const btn = document.createElement('button');
         btn.className = 'w-full text-left px-3 py-2 rounded bg-discord-black hover:bg-discord-hover text-sm font-bold flex items-center justify-between transition-colors';
         btn.innerHTML = `<span style="color:${r.color || '#fff'}">${r.name}</span><i class="fa-solid fa-plus text-xs text-discord-textMuted"></i>`;
@@ -1958,6 +2239,8 @@
       const canManage = canManageChannels();
 
       channels.forEach(chan => {
+        if (!canUserViewChannel(chan)) return;
+
         const btn = document.createElement('div');
         btn.className = `w-full flex items-center justify-between px-2 py-1.5 rounded text-sm font-medium text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors group cursor-pointer`;
         const icon = chan.type === 'voice' ? 'fa-volume-high' : 'fa-hashtag';
@@ -1991,10 +2274,14 @@
             member: { name: 'Members', color: '#949ba4', members: [] }
         };
 
+        currentRolesCache.forEach(r => {
+          groups[r.id] = { name: r.name, color: r.color || '#5865f2', members: [] };
+        });
+
         currentServerMembers.forEach(m => {
             if (m.profiles) {
-                const groupKey = m.role || 'member';
-                if (!groups[groupKey]) groups[groupKey] = { name: groupKey.toUpperCase(), color: '#ffffff', members: [] };
+                const groupKey = m.role_id || m.role || 'member';
+                if (!groups[groupKey]) groups[groupKey] = { name: (m.role || groupKey).toUpperCase(), color: '#ffffff', members: [] };
                 groups[groupKey].members.push({ id: m.user_id, ...m.profiles });
             }
         });
@@ -2215,7 +2502,7 @@
     function showToast(msg, type='success') {
       const c = document.getElementById('toastContainer');
       const t = document.createElement('div');
-      t.className = `px-4 py-2 rounded font-bold text-xs text-white shadow-xl ${type==='error'?'bg-red-600':'bg-discord-green'}`;
+      t.className = `px-4 py-2 rounded font-bold text-xs text-white shadow-xl transition-all duration-300 ${type==='error'?'bg-red-600':'bg-discord-green'}`;
       t.innerText = msg;
       c.appendChild(t);
       setTimeout(() => t.remove(), 3000);
