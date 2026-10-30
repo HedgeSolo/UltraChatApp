@@ -286,7 +286,7 @@
         </div>
       </div>
 
-      <!-- RIGHT MEMBER SIDEBAR (NEW) -->
+      <!-- RIGHT MEMBER SIDEBAR -->
       <aside id="memberSidebar" class="w-60 bg-discord-sidebar border-l border-discord-black/40 overflow-y-auto p-4 hidden flex-shrink-0">
         <div id="memberRolesList" class="space-y-6"></div>
       </aside>
@@ -315,7 +315,6 @@
           <input type="text" id="authUsername" class="w-full bg-discord-black border border-discord-hover/50 rounded p-2.5 text-base text-discord-textHeader outline-none focus:border-discord-blurple" placeholder="Only needed for sign up" />
         </div>
         <div class="flex space-x-3 pt-2">
-          <!-- STRICT LOGIN / SIGNUP SPLIT -->
           <button onclick="handleLogin()" class="flex-1 bg-discord-blurple hover:bg-discord-blurpleHover text-white py-3 rounded font-bold text-sm transition-colors">Log In</button>
           <button onclick="handleSignup()" class="flex-1 border border-discord-blurple text-discord-blurple hover:bg-discord-blurple/10 py-3 rounded font-bold text-sm transition-colors">Sign Up</button>
         </div>
@@ -371,7 +370,7 @@
               <h3 class="text-sm font-bold uppercase text-discord-textMuted">Custom Roles</h3>
               <button onclick="addCustomRole()" class="bg-discord-blurple text-xs text-white px-3 py-1.5 rounded font-bold hover:bg-discord-blurpleHover">+ Create Role</button>
             </div>
-            <div id="rolesListContainer" class="space-y-2"></div>
+            <div id="rolesListContainer" class="space-y-3"></div>
           </div>
 
           <div id="ssContent-mod" class="hidden space-y-5">
@@ -394,9 +393,12 @@
         </div>
       </div>
 
-      <div class="bg-discord-serverbar p-4 flex justify-end space-x-3 shrink-0">
-        <button onclick="closeModal('serverSettingsModal')" class="text-sm text-discord-textMuted hover:underline">Cancel</button>
-        <button onclick="saveServerSettings()" class="bg-discord-green hover:bg-green-600 text-white px-5 py-1.5 rounded text-sm font-bold transition-colors">Save Changes</button>
+      <div class="bg-discord-serverbar p-4 flex justify-between items-center shrink-0">
+        <button onclick="deleteCurrentServer()" id="btnDeleteServer" class="text-sm text-red-500 font-bold hover:underline">Delete Server</button>
+        <div class="flex space-x-3">
+          <button onclick="closeModal('serverSettingsModal')" class="text-sm text-discord-textMuted hover:underline">Cancel</button>
+          <button onclick="saveServerSettings()" class="bg-discord-green hover:bg-green-600 text-white px-5 py-1.5 rounded text-sm font-bold transition-colors">Save Changes</button>
+        </div>
       </div>
     </div>
   </div>
@@ -405,11 +407,14 @@
   <div id="discoverModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-discord-sidebar w-full max-w-xl rounded-xl shadow-2xl relative p-6 border border-discord-hover">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-discord-textHeader">Explore Public Servers</h2>
+        <h2 class="text-xl font-bold text-discord-textHeader flex items-center gap-2">
+          <i class="fa-solid fa-compass text-discord-blurple"></i>
+          <span>Explore Public Servers</span>
+        </h2>
         <button onclick="closeModal('discoverModal')" class="text-discord-textMuted hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
-      <input type="text" id="publicSearchInput" oninput="renderPublicExplorer()" placeholder="Search servers..." class="w-full bg-discord-black border border-discord-hover rounded-lg px-4 py-2 text-sm text-discord-textHeader mb-4 outline-none focus:border-discord-blurple" />
-      <div id="publicServersContainer" class="space-y-2 max-h-[400px] overflow-y-auto pr-2"></div>
+      <input type="text" id="publicSearchInput" oninput="renderPublicExplorer()" placeholder="Search servers by name..." class="w-full bg-discord-black border border-discord-hover rounded-lg px-4 py-2.5 text-sm text-discord-textHeader mb-4 outline-none focus:border-discord-blurple" />
+      <div id="publicServersContainer" class="space-y-3 max-h-[420px] overflow-y-auto pr-2"></div>
     </div>
   </div>
 
@@ -452,6 +457,21 @@
         <button onclick="logout()" class="text-red-500 font-bold text-sm hover:underline">Log Out</button>
         <button onclick="saveUserSettings()" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-5 py-1.5 rounded text-sm font-bold transition-colors">Save</button>
       </div>
+    </div>
+  </div>
+
+  <!-- CEO COMMAND CENTER MODAL -->
+  <div id="ceoModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-discord-sidebar w-full max-w-2xl rounded-xl shadow-2xl relative p-6 border border-amber-500/50">
+      <div class="flex justify-between items-center mb-4 border-b border-amber-500/30 pb-3">
+        <h2 class="text-xl font-black text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-crown"></i>
+          <span>CEO Command Center</span>
+        </h2>
+        <button onclick="closeModal('ceoModal')" class="text-discord-textMuted hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <p class="text-xs text-discord-textMuted mb-4">You have universal governance rights over all servers and channels.</p>
+      <div id="ceoServerList" class="space-y-2 max-h-[350px] overflow-y-auto pr-2"></div>
     </div>
   </div>
 
@@ -561,6 +581,8 @@
     let servers = [];
     let currentServerChannels = [];
     let currentServerMembers = [];
+    let publicServersCache = [];
+    let currentRolesCache = [];
     let friends = [];
     let dms = [];
     
@@ -575,6 +597,7 @@
     function handleFileUpload(inputId, hiddenInputId) {
       const fileInput = document.getElementById(inputId);
       const hiddenInput = document.getElementById(hiddenInputId);
+      if (!fileInput) return;
       fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -598,7 +621,8 @@
         document.body.classList.remove('theme-dark', 'theme-amoled', 'theme-light', 'theme-hacker');
         document.body.classList.add(`theme-${themeName}`);
         localStorage.setItem('uca3000_theme', themeName);
-        document.getElementById('settingsTheme').value = themeName;
+        const sel = document.getElementById('settingsTheme');
+        if (sel) sel.value = themeName;
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -677,14 +701,13 @@
       const password = document.getElementById('authPassword').value.trim();
       if (!email || !password) return showToast("Email & password required", 'error');
 
-      // strictly login only
       const { data, error } = await client.auth.signInWithPassword({ email, password });
       
       if (error) {
           showToast("Login failed: " + error.message, 'error');
       } else {
           closeModal('authModal');
-          window.location.reload(); // Reload to run full initialization safely
+          window.location.reload();
       }
     }
 
@@ -694,7 +717,6 @@
       const name = document.getElementById('authUsername').value.trim() || email.split('@')[0];
       if (!email || !password) return showToast("Email & password required", 'error');
 
-      // strictly sign up
       const { data, error } = await client.auth.signUp({ 
           email, 
           password, 
@@ -704,7 +726,6 @@
       if (error) {
           showToast("Signup failed: " + error.message, 'error');
       } else {
-          // Attempt to insert profile immediately
           if (data.user) {
               await client.from('profiles').insert({ id: data.user.id, display_name: name, is_guest: false });
           }
@@ -739,15 +760,15 @@
 
         activeRealtimeGlobal = client.channel('global_structural_sync')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'channels' }, payload => {
-                if (currentServerId !== 'home' && currentServerId !== 'dm' && payload.new.server_id === currentServerId) {
+                if (currentServerId !== 'home' && currentServerId !== 'dm' && payload.new && payload.new.server_id === currentServerId) {
                     loadChannelsFromDB();
                 }
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'server_members' }, payload => {
-                if (payload.new.user_id === currentUser.id || payload.old?.user_id === currentUser.id) {
+                if ((payload.new && payload.new.user_id === currentUser.id) || (payload.old && payload.old.user_id === currentUser.id)) {
                     loadServersFromDB();
                 }
-                if (payload.new.server_id === currentServerId) {
+                if (payload.new && payload.new.server_id === currentServerId) {
                     loadMembersFromDB();
                 }
             })
@@ -760,7 +781,6 @@
     async function loadServersFromDB() {
         if (!currentUser.id) return;
 
-        // Get server IDs where user is member
         const { data: memberData } = await client.from('server_members').select('server_id').eq('user_id', currentUser.id);
         
         if (memberData && memberData.length > 0) {
@@ -805,7 +825,7 @@
         const div = document.createElement('div');
         div.className = 'relative group flex items-center justify-center w-full my-1';
         
-        let iconContent = srv.icon || (srv.name ? srv.name.substring(0, 2) : 'SV');
+        let iconContent = srv.icon || (srv.name ? srv.name.substring(0, 2).toUpperCase() : 'SV');
         if (srv.icon && srv.icon.startsWith('data:image')) {
             iconContent = `<img src="${srv.icon}" class="w-full h-full object-cover" alt="Server Icon" />`;
         }
@@ -848,7 +868,6 @@
 
         const srv = servers.find(s => s.id === srvId);
         if (!srv) {
-            // fallback if server was deleted or user kicked
             switchServer('home');
             return;
         }
@@ -857,18 +876,14 @@
         
         const isOwner = (srv.owner_id === currentUser.id) || currentUser.isCEO;
         
-        // Wait to load members and roles to check permissions fully
         await loadChannelsFromDB();
         await loadMembersFromDB();
 
-        // Simple permission check (can expand later with server_roles table lookup)
-        let canInvite = isOwner; 
-        
         document.getElementById('serverOwnerBadge').classList.toggle('hidden', !isOwner);
         document.getElementById('btnServerSettings').classList.toggle('hidden', !isOwner);
         document.getElementById('btnCreateChannel').classList.toggle('hidden', !isOwner);
         
-        document.getElementById('btnInvitePeople').classList.toggle('hidden', false); // Everyone can try to invite for now, or restrict later
+        document.getElementById('btnInvitePeople').classList.toggle('hidden', false);
         document.getElementById('inviteDivider').classList.toggle('hidden', false);
 
         if (currentServerChannels.length > 0) {
@@ -882,7 +897,294 @@
     }
 
     // =========================================================================
-    // 5. SERVER CREATION & INVITES (DB STRICT)
+    // 5. PUBLIC SERVER DISCOVERY (RESTORED & OPTIMIZED)
+    // =========================================================================
+    async function openPublicExplorer() {
+      openModal('discoverModal');
+      await renderPublicExplorer();
+    }
+
+    async function renderPublicExplorer() {
+      const container = document.getElementById('publicServersContainer');
+      const searchQuery = (document.getElementById('publicSearchInput')?.value || '').toLowerCase();
+      container.innerHTML = '<div class="flex justify-center p-6 text-discord-textMuted"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>';
+
+      // 1. Fetch public servers (needs_invite is false or null)
+      const { data: pubServers, error: srvErr } = await client
+        .from('servers')
+        .select('*')
+        .or('needs_invite.eq.false,needs_invite.is.null');
+
+      if (srvErr || !pubServers) {
+        container.innerHTML = '<div class="text-center p-4 text-discord-danger">Failed to load public servers.</div>';
+        return;
+      }
+
+      // 2. Fetch all server_members joined with profiles to filter non-guest user counts
+      const { data: memberRows } = await client
+        .from('server_members')
+        .select('server_id, user_id, profiles(is_guest)');
+
+      // Count non-guest members per server
+      const countsMap = {};
+      if (memberRows) {
+        memberRows.forEach(m => {
+          if (!m.profiles || !m.profiles.is_guest) {
+            countsMap[m.server_id] = (countsMap[m.server_id] || 0) + 1;
+          }
+        });
+      }
+
+      // 3. Map servers with real counts & sort descending
+      const sortedServers = pubServers.map(s => ({
+        ...s,
+        memberCount: countsMap[s.id] || 1
+      })).sort((a, b) => b.memberCount - a.memberCount);
+
+      // Filter by search query
+      const filtered = sortedServers.filter(s => s.name.toLowerCase().includes(searchQuery));
+
+      container.innerHTML = '';
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center p-6 text-discord-textMuted">No public servers found.</div>';
+        return;
+      }
+
+      filtered.forEach(srv => {
+        const isAlreadyMember = servers.some(s => s.id === srv.id);
+        let iconMarkup = `<div class="w-12 h-12 rounded-xl bg-discord-blurple flex items-center justify-center font-bold text-white text-lg shrink-0">${srv.name.substring(0, 2).toUpperCase()}</div>`;
+        if (srv.icon && srv.icon.startsWith('data:image')) {
+          iconMarkup = `<img src="${srv.icon}" class="w-12 h-12 rounded-xl object-cover shrink-0" />`;
+        }
+
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-3 bg-discord-black hover:bg-discord-hover/50 rounded-xl border border-discord-hover/40 transition-colors';
+        div.innerHTML = `
+          <div class="flex items-center space-x-3 min-w-0 pr-2">
+            ${iconMarkup}
+            <div class="min-w-0">
+              <div class="font-bold text-discord-textHeader text-sm truncate">${srv.name}</div>
+              <div class="text-xs text-discord-textMuted flex items-center space-x-1.5 mt-0.5">
+                <span class="w-2 h-2 rounded-full bg-discord-green inline-block"></span>
+                <span>${srv.memberCount} ${srv.memberCount === 1 ? 'member' : 'members'}</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            ${isAlreadyMember ? `
+              <button onclick="closeModal('discoverModal'); switchServer('${srv.id}')" class="bg-discord-hover text-discord-textHeader px-4 py-2 rounded-lg text-xs font-bold hover:bg-discord-active transition-colors">Open</button>
+            ` : `
+              <button onclick="joinServerFromDiscovery('${srv.id}')" class="bg-discord-green hover:bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors">Join</button>
+            `}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function joinServerFromDiscovery(serverId) {
+      const { error } = await client.from('server_members').insert({
+        server_id: serverId,
+        user_id: currentUser.id,
+        role: 'member'
+      });
+
+      if (error && error.code !== '23505') {
+        showToast(error.message, 'error');
+        return;
+      }
+
+      showToast("Joined server!");
+      closeModal('discoverModal');
+      await loadServersFromDB();
+      switchServer(serverId);
+    }
+
+    // =========================================================================
+    // 6. SERVER SETTINGS & GOVERNANCE (RESTORED)
+    // =========================================================================
+    async function openServerSettings() {
+      const srv = servers.find(s => s.id === currentServerId);
+      if (!srv) return;
+
+      document.getElementById('ssInputName').value = srv.name || '';
+      document.getElementById('ssInputIcon').value = srv.icon || '';
+      document.getElementById('ssCheckNeedsInvite').checked = srv.needs_invite || false;
+      document.getElementById('ssCheckStrictMode').checked = srv.strict_mode || false;
+      document.getElementById('ssInputBlockedWords').value = srv.banned_words || '';
+
+      const isOwner = (srv.owner_id === currentUser.id) || currentUser.isCEO;
+      document.getElementById('btnDeleteServer').classList.toggle('hidden', !isOwner);
+
+      setServerSettingsTab('overview');
+      await loadServerRolesSettings();
+      openModal('serverSettingsModal');
+    }
+
+    function setServerSettingsTab(tab) {
+      ['overview', 'roles', 'mod'].forEach(t => {
+        const btn = document.getElementById('sstab-' + t);
+        const content = document.getElementById('ssContent-' + t);
+        if (btn && content) {
+          if (t === tab) {
+            btn.className = 'w-full text-left px-3 py-2 rounded bg-discord-hover text-white font-bold';
+            content.classList.remove('hidden');
+          } else {
+            btn.className = 'w-full text-left px-3 py-2 rounded text-discord-textMuted hover:bg-discord-hover hover:text-white';
+            content.classList.add('hidden');
+          }
+        }
+      });
+    }
+
+    async function loadServerRolesSettings() {
+      const container = document.getElementById('rolesListContainer');
+      container.innerHTML = '<div class="text-xs text-discord-textMuted p-2">Loading custom roles...</div>';
+
+      const { data: roles } = await client.from('server_roles').select('*').eq('server_id', currentServerId);
+      currentRolesCache = roles || [];
+
+      container.innerHTML = '';
+      if (currentRolesCache.length === 0) {
+        container.innerHTML = '<div class="text-xs text-discord-textMuted italic p-2">No custom roles created yet.</div>';
+        return;
+      }
+
+      currentRolesCache.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'bg-discord-black p-3 rounded-lg border border-discord-hover/50 space-y-3';
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <input type="color" value="${r.color || '#ffffff'}" onchange="updateRoleField('${r.id}', 'color', this.value)" class="w-6 h-6 rounded bg-transparent cursor-pointer border-0" />
+              <input type="text" value="${r.name}" onchange="updateRoleField('${r.id}', 'name', this.value)" class="bg-discord-sidebar px-2 py-1 rounded text-sm text-discord-textHeader font-bold outline-none border border-transparent focus:border-discord-blurple" />
+            </div>
+            <button onclick="deleteCustomRole('${r.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs text-discord-textMuted pt-1 border-t border-discord-hover/20">
+            <label class="flex items-center space-x-1.5 cursor-pointer">
+              <input type="checkbox" ${r.bypass_slowmode ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'bypass_slowmode', this.checked)" class="accent-discord-blurple" />
+              <span>Bypass Slowmode</span>
+            </label>
+            <label class="flex items-center space-x-1.5 cursor-pointer">
+              <input type="checkbox" ${r.can_kick ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_kick', this.checked)" class="accent-discord-blurple" />
+              <span>Can Kick Members</span>
+            </label>
+            <label class="flex items-center space-x-1.5 cursor-pointer">
+              <input type="checkbox" ${r.can_ban ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_ban', this.checked)" class="accent-discord-blurple" />
+              <span>Can Ban Members</span>
+            </label>
+            <label class="flex items-center space-x-1.5 cursor-pointer">
+              <input type="checkbox" ${r.can_manage_messages ? 'checked' : ''} onchange="updateRoleField('${r.id}', 'can_manage_messages', this.checked)" class="accent-discord-blurple" />
+              <span>Manage Messages</span>
+            </label>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function addCustomRole() {
+      const { error } = await client.from('server_roles').insert({
+        server_id: currentServerId,
+        name: 'New Role',
+        color: '#5865f2',
+        bypass_slowmode: false,
+        can_kick: false,
+        can_ban: false,
+        can_manage_messages: false
+      });
+      if (error) showToast(error.message, 'error');
+      else loadServerRolesSettings();
+    }
+
+    async function updateRoleField(roleId, field, value) {
+      await client.from('server_roles').update({ [field]: value }).eq('id', roleId);
+    }
+
+    async function deleteCustomRole(roleId) {
+      await client.from('server_roles').delete().eq('id', roleId);
+      loadServerRolesSettings();
+    }
+
+    async function saveServerSettings() {
+      const name = document.getElementById('ssInputName').value.trim();
+      const icon = document.getElementById('ssInputIcon').value.trim();
+      const needsInvite = document.getElementById('ssCheckNeedsInvite').checked;
+      const strictMode = document.getElementById('ssCheckStrictMode').checked;
+      const bannedWords = document.getElementById('ssInputBlockedWords').value.trim();
+
+      if (!name) return showToast("Server name cannot be empty.", 'error');
+
+      const { error } = await client.from('servers').update({
+        name: name,
+        icon: icon,
+        needs_invite: needsInvite,
+        strict_mode: strictMode,
+        banned_words: bannedWords
+      }).eq('id', currentServerId);
+
+      if (error) {
+        showToast(error.message, 'error');
+      } else {
+        showToast("Server settings saved!");
+        closeModal('serverSettingsModal');
+        await loadServersFromDB();
+        document.getElementById('serverTitleText').innerText = name;
+      }
+    }
+
+    async function deleteCurrentServer() {
+      if (!confirm("Are you sure you want to permanently delete this server?")) return;
+
+      await client.from('servers').delete().eq('id', currentServerId);
+      showToast("Server deleted.");
+      closeModal('serverSettingsModal');
+      await loadServersFromDB();
+      switchServer('home');
+    }
+
+    // =========================================================================
+    // 7. CEO COMMAND CENTER
+    // =========================================================================
+    async function openCeoModal() {
+      if (!currentUser.isCEO) return;
+      openModal('ceoModal');
+      const container = document.getElementById('ceoServerList');
+      container.innerHTML = '<div class="text-xs text-discord-textMuted p-2">Loading all system servers...</div>';
+
+      const { data: allServers } = await client.from('servers').select('*');
+      container.innerHTML = '';
+
+      if (!allServers || allServers.length === 0) {
+        container.innerHTML = '<div class="text-xs text-discord-textMuted">No servers found.</div>';
+        return;
+      }
+
+      allServers.forEach(srv => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-3 bg-discord-black rounded-lg border border-amber-500/20';
+        div.innerHTML = `
+          <div>
+            <div class="font-bold text-sm text-discord-textHeader">${srv.name} <span class="text-[10px] text-discord-textMuted font-mono">(${srv.id})</span></div>
+            <div class="text-xs text-discord-textMuted">Owner: ${srv.owner_id}</div>
+          </div>
+          <button onclick="ceoDeleteServer('${srv.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-bold transition-colors">Nuke Server</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function ceoDeleteServer(srvId) {
+      if (!confirm(`[CEO OVERRIDE] Delete server ${srvId}?`)) return;
+      await client.from('servers').delete().eq('id', srvId);
+      showToast("Server deleted via CEO Command");
+      openCeoModal();
+      await loadServersFromDB();
+    }
+
+    // =========================================================================
+    // 8. SERVER CREATION & INVITES (DB STRICT)
     // =========================================================================
     async function handleCreateServer() {
       const name = document.getElementById('newServerName').value.trim();
@@ -899,14 +1201,10 @@
           banned_words: ''
       };
 
-      // Insert Server
       const { error: srvErr } = await client.from('servers').insert(srvData);
       if (srvErr) return showToast(srvErr.message, "error");
 
-      // Join Server as Owner
       await client.from('server_members').insert({ server_id: newSrvId, user_id: currentUser.id, role: 'admin' });
-      
-      // Create Default Channel
       await client.from('channels').insert({ id: 'chan_' + Date.now(), server_id: newSrvId, name: 'general', type: 'text', slowmode: 0 });
 
       closeModal('createServerModal');
@@ -943,7 +1241,6 @@
         const srv = servers.find(s => s.id === currentServerId);
         if (!srv) return;
         
-        // Generate robust 8 character code
         const code = Math.random().toString(36).substring(2, 10).toUpperCase();
         
         const { error } = await client.from('server_invites').insert({
@@ -1008,11 +1305,9 @@
     }
 
     async function joinServerViaInviteCode(code) {
-        // Find Invite
         const { data: invite, error: inviteErr } = await client.from('server_invites').select('server_id').eq('code', code).single();
         if (inviteErr || !invite) return showToast("Invalid or expired invite code.", "error");
 
-        // Insert into server_members (DOES NOT CREATE NEW SERVER)
         const { error: joinErr } = await client.from('server_members').insert({
             server_id: invite.server_id,
             user_id: currentUser.id,
@@ -1049,7 +1344,7 @@
     }
 
     // =========================================================================
-    // 6. MESSAGING & CHANNELS
+    // 9. MESSAGING & CHANNELS
     // =========================================================================
     function switchChannel(chanId, chanName, slowmode = 0) {
       currentChannelId = chanId;
@@ -1271,7 +1566,7 @@
     }
 
     // =========================================================================
-    // 7. USER UI, SETTINGS & FRIENDS
+    // 10. USER UI, SETTINGS & FRIENDS
     // =========================================================================
     function updateUserBar() {
       document.getElementById('userBarName').innerText = currentUser.name;
@@ -1289,7 +1584,6 @@
       const theme = document.getElementById('settingsTheme').value;
       applyTheme(theme);
       
-      // Sync profile to DB
       await client.from('profiles').update({ 
           display_name: currentUser.name, 
           avatar_url: currentUser.avatar 
@@ -1540,7 +1834,7 @@
     }
 
     // =========================================================================
-    // 8. UTILS & MODALS
+    // 11. UTILS & MODALS
     // =========================================================================
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
