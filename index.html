@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UltraChatApp 3000 By Lincoln D</title>
+  <title>UltraChatApp 3000 by Lincoln D</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -338,8 +338,11 @@
           </div>
         </div>
 
-        <!-- Chat Input Field Bar -->
-        <div class="px-4 pb-6 pt-2 shrink-0">
+        <!-- Chat Input Field Bar with Mention Autocomplete Popup -->
+        <div class="px-4 pb-6 pt-2 shrink-0 relative">
+          <!-- Mention Autocomplete Popup -->
+          <div id="mentionAutocompletePopup" class="hidden absolute bottom-full left-4 right-4 mb-2 bg-discord-sidebar border border-discord-hover/80 rounded-lg shadow-2xl z-50 max-h-48 overflow-y-auto p-1.5 space-y-1"></div>
+
           <div class="bg-discord-input rounded-lg flex items-center px-4 py-2.5 shadow-inner relative group space-x-2">
             <!-- Image Attachment File Button -->
             <label id="btnAttachImage" class="cursor-pointer text-discord-textMuted hover:text-discord-textHeader transition-colors p-1" title="Attach Image">
@@ -347,7 +350,7 @@
               <input type="file" id="msgImageFileInput" accept="image/*" class="hidden" onchange="handleMessageImageSelect(event)" />
             </label>
 
-            <textarea id="messageInput" rows="1" oninput="autoGrowInput(this)" onkeydown="handleInputKeydown(event)" placeholder="Message..." class="bg-transparent text-base text-discord-textHeader placeholder-discord-textMuted flex-1 outline-none resize-none max-h-[40vh] overflow-y-auto leading-relaxed py-1"></textarea>
+            <textarea id="messageInput" rows="1" oninput="autoGrowInput(this); handleMessageInputMention(event);" onkeydown="handleInputKeydown(event)" placeholder="Message..." class="bg-transparent text-base text-discord-textHeader placeholder-discord-textMuted flex-1 outline-none resize-none max-h-[40vh] overflow-y-auto leading-relaxed py-1"></textarea>
           </div>
         </div>
       </div>
@@ -421,11 +424,11 @@
               <input type="hidden" id="ssInputIcon" />
             </div>
 
-            <!-- Private Server Toggle (Owner public limit enforced to max 3) -->
+            <!-- Private Server Toggle (Owner public limit enforced to max 3 for non-CEO) -->
             <div class="flex items-center justify-between p-3 bg-discord-sidebar rounded-lg border border-discord-hover">
               <div>
                 <div class="text-sm font-bold text-discord-textHeader">Private Server</div>
-                <div class="text-xs text-discord-textMuted">Hide server from Public Discovery Explorer (Max 3 public servers allowed per owner)</div>
+                <div class="text-xs text-discord-textMuted">Hide server from Public Discovery Explorer (Non-CEO users capped at max 3 public servers)</div>
               </div>
               <input type="checkbox" id="ssCheckNeedsInvite" class="w-5 h-5 accent-discord-blurple cursor-pointer" />
             </div>
@@ -773,6 +776,10 @@
     let friends = [];
     let dms = [];
 
+    // Mention Autocomplete State
+    let selectedMentionIndex = 0;
+    let currentMentionMatches = [];
+
     // Notification State Trackers
     let unreadServerMap = {}; // { [serverId]: { mentions: number, unread: boolean } }
     let unreadDmMap = {};     // { [dmUserId]: number }
@@ -923,7 +930,13 @@
       loadExistingDMsFromDB();
       loadServersFromDB().then(() => switchServer(currentServerId));
 
-      window.addEventListener('click', hideContextMenu);
+      window.addEventListener('click', (e) => {
+        hideContextMenu();
+        const popup = document.getElementById('mentionAutocompletePopup');
+        if (popup && !popup.contains(e.target) && e.target.id !== 'messageInput') {
+          popup.classList.add('hidden');
+        }
+      });
       window.addEventListener('scroll', hideContextMenu);
 
       setTimeout(() => {
@@ -1058,7 +1071,7 @@
                     return;
                 }
 
-                // B. Handle Server Messages & @Mentions / Yellow Dots
+                // B. Handle Server Messages & @Mentions / Notification Dots
                 if (msg.server_id && msg.server_id !== 'home' && msg.server_id !== 'dm') {
                     const isViewingChannel = (currentServerId === msg.server_id && currentChannelId === msg.channel_id);
 
@@ -1248,12 +1261,14 @@
           iconContent = `<img src="${srv.icon}" class="w-full h-full object-cover" alt="Server Icon" />`;
       }
 
-      // Notification Badge Logic: Red dot with number for mentions, Yellow dot (no number) for unread
+      // Notification Badge Logic:
+      // Mentions -> Red badge with number
+      // Unread messages without mentions -> Red dot with NO number
       let badgeHtml = '';
       if (unreadData.mentions > 0) {
         badgeHtml = `<div class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-extrabold rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center border-2 border-discord-serverbar shadow-lg z-10">${unreadData.mentions}</div>`;
       } else if (unreadData.unread) {
-        badgeHtml = `<div class="absolute -top-1 -right-1 bg-amber-400 rounded-full w-3.5 h-3.5 border-2 border-discord-serverbar shadow-lg z-10"></div>`;
+        badgeHtml = `<div class="absolute -top-1 -right-1 bg-red-600 rounded-full w-3.5 h-3.5 border-2 border-discord-serverbar shadow-lg z-10"></div>`;
       }
 
       const borderHighlight = isCeoUnjoined ? 'border-2 border-amber-500/60' : '';
@@ -1389,7 +1404,7 @@
     }
 
     // =========================================================================
-    // 5. PUBLIC SERVER DISCOVERY & LIMIT ENFORCEMENT
+    // 5. PUBLIC SERVER DISCOVERY & CEO UNLIMITED EXEMPTION
     // =========================================================================
     async function openPublicExplorer() {
       openModal('discoverModal');
@@ -1485,7 +1500,7 @@
     }
 
     // =========================================================================
-    // 6. SERVER SETTINGS & PUBLIC SERVER LIMIT RULE
+    // 6. SERVER SETTINGS & CEO EXEMPT PUBLIC SERVER LIMIT RULE
     // =========================================================================
     async function openServerSettings() {
       const srv = servers.find(s => s.id === currentServerId) || ceoUnjoinedServers.find(s => s.id === currentServerId);
@@ -1646,8 +1661,8 @@
 
       if (!name) return showToast("Server name cannot be empty.", 'error');
 
-      // Requirement Rule: Maximum 3 Public Servers per user
-      if (!needsInvite) {
+      // Requirement Rule: Max 3 Public Servers per user (EXEMPT FOR CEO)
+      if (!needsInvite && !currentUser.isCEO) {
         const { data: myPublics } = await client.from('servers')
           .select('id')
           .eq('owner_id', currentUser.id)
@@ -1655,8 +1670,8 @@
         
         const existingOtherPublics = (myPublics || []).filter(s => s.id !== currentServerId);
         if (existingOtherPublics.length >= 3) {
-          document.getElementById('ssCheckNeedsInvite').checked = true; // Force revert to private
-          return showToast("Limit Reached: You can own a maximum of 3 public servers!", "error");
+          document.getElementById('ssCheckNeedsInvite').checked = true; // Revert checkbox
+          return showToast("Limit Reached: Non-CEO users can own a maximum of 3 public servers!", "error");
         }
       }
 
@@ -2006,8 +2021,129 @@
     }
 
     // =========================================================================
-    // 9. MESSAGING & REAL-TIME CHAT
+    // 9. MESSAGING & @MENTION AUTOCOMPLETE
     // =========================================================================
+    function handleMessageInputMention(e) {
+      const input = document.getElementById('messageInput');
+      const popup = document.getElementById('mentionAutocompletePopup');
+      if (!popup) return;
+
+      const text = input.value;
+      const cursorPos = input.selectionStart;
+
+      // Extract match immediately prior to text cursor
+      const textBeforeCursor = text.slice(0, cursorPos);
+      const mentionMatch = textBeforeCursor.match(/@([a-zA-Z0-9_]*)$/);
+
+      if (!mentionMatch) {
+        popup.classList.add('hidden');
+        currentMentionMatches = [];
+        return;
+      }
+
+      const query = mentionMatch[1].toLowerCase();
+
+      // Find available target users
+      let availableMembers = [];
+      if (currentServerId !== 'home' && currentServerId !== 'dm') {
+        availableMembers = currentServerMembers.map(m => {
+          const name = m.profiles?.display_name || 'User';
+          let color = '#949ba4';
+          if (m.role_id) {
+            const r = currentRolesCache.find(rc => rc.id === m.role_id);
+            if (r && r.color) color = r.color;
+          }
+          const isCEO = (m.profiles?.email?.toLowerCase() === CEO_EMAIL.toLowerCase()) || (m.user_id === currentUser.id && currentUser.isCEO);
+          return { id: m.user_id, name: name, avatar: m.profiles?.avatar_url, color, isCEO };
+        });
+      } else {
+        availableMembers = friends.map(f => ({ id: f.friendId, name: f.display_name, avatar: f.avatar_url, color: '#5865f2', isCEO: false }));
+      }
+
+      currentMentionMatches = availableMembers.filter(m => m.name.toLowerCase().includes(query));
+
+      if (currentMentionMatches.length === 0) {
+        popup.classList.add('hidden');
+        return;
+      }
+
+      if (selectedMentionIndex >= currentMentionMatches.length) selectedMentionIndex = 0;
+
+      popup.innerHTML = '';
+      currentMentionMatches.forEach((m, idx) => {
+        const item = document.createElement('div');
+        const isSelected = idx === selectedMentionIndex;
+        item.className = `flex items-center space-x-2.5 px-3 py-2 rounded-md cursor-pointer transition-colors ${isSelected ? 'bg-discord-blurple text-white' : 'hover:bg-discord-hover text-discord-textHeader'}`;
+        
+        const avatarSrc = m.avatar || `https://placehold.co/80x80/5865f2/ffffff?text=${(m.name[0] || 'U')}`;
+        item.innerHTML = `
+          <img src="${avatarSrc}" class="w-6 h-6 rounded-full object-cover shrink-0" />
+          <span class="font-bold text-xs truncate" style="${isSelected ? 'color:#fff' : 'color:' + m.color}">${m.name}</span>
+          ${m.isCEO ? `<span class="text-[8px] bg-amber-500 text-black px-1 rounded font-black uppercase shrink-0">CEO</span>` : ''}
+        `;
+        item.onmousedown = (evt) => {
+          evt.preventDefault();
+          insertMention(m.name);
+        };
+        popup.appendChild(item);
+      });
+
+      popup.classList.remove('hidden');
+    }
+
+    function insertMention(displayName) {
+      const input = document.getElementById('messageInput');
+      const popup = document.getElementById('mentionAutocompletePopup');
+      const cursorPos = input.selectionStart;
+      const textBeforeCursor = input.value.slice(0, cursorPos);
+      const textAfterCursor = input.value.slice(cursorPos);
+
+      const mentionMatch = textBeforeCursor.match(/@([a-zA-Z0-9_]*)$/);
+      if (mentionMatch) {
+        const startIdx = textBeforeCursor.lastIndexOf('@' + mentionMatch[1]);
+        const newTextBefore = textBeforeCursor.slice(0, startIdx) + `@${displayName} `;
+        input.value = newTextBefore + textAfterCursor;
+        input.selectionStart = input.selectionEnd = newTextBefore.length;
+      }
+
+      popup.classList.add('hidden');
+      currentMentionMatches = [];
+      input.focus();
+    }
+
+    function handleInputKeydown(e) {
+      const popup = document.getElementById('mentionAutocompletePopup');
+      const isPopupOpen = popup && !popup.classList.contains('hidden');
+
+      if (isPopupOpen) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedMentionIndex = (selectedMentionIndex + 1) % currentMentionMatches.length;
+          handleMessageInputMention(e);
+          return;
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedMentionIndex = (selectedMentionIndex - 1 + currentMentionMatches.length) % currentMentionMatches.length;
+          handleMessageInputMention(e);
+          return;
+        } else if (e.key === 'Enter' || e.key === 'Tab') {
+          e.preventDefault();
+          if (currentMentionMatches[selectedMentionIndex]) {
+            insertMention(currentMentionMatches[selectedMentionIndex].name);
+          }
+          return;
+        } else if (e.key === 'Escape') {
+          popup.classList.add('hidden');
+          return;
+        }
+      }
+
+      if (e.key === 'Enter' && !e.shiftKey) { 
+        e.preventDefault(); 
+        submitMessage(); 
+      }
+    }
+
     function switchChannel(chanId, chanName, slowmode = 0) {
       currentChannelId = chanId;
       document.getElementById('channelHeaderName').innerText = chanName.includes('@') ? chanName : `#${chanName}`;
@@ -2347,10 +2483,6 @@
       await client.from('messages').insert([msgData]);
     }
 
-    function handleInputKeydown(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitMessage(); }
-    }
-
     // =========================================================================
     // 10. USER UI, PROFILE MODALS & RIGHT-CLICK CONTEXT MENU
     // =========================================================================
@@ -2661,7 +2793,7 @@
     }
 
     // =========================================================================
-    // 11. FRIENDS & DM LOGIC (WITH UNREAD BADGES PER USER)
+    // 11. FRIENDS & DM LOGIC
     // =========================================================================
     async function fetchFriendsFromDB() {
         if (!currentUser.id) return;
