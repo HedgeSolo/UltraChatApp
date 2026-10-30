@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UltraChatApp 3000 - NOT Discord lol</title>
+  <title>UltraChatApp 3000 - Discord Clone</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -372,9 +372,6 @@
           <button onclick="handleLogin()" class="flex-1 bg-discord-blurple hover:bg-discord-blurpleHover text-white py-3 rounded font-bold text-sm transition-colors">Log In</button>
           <button onclick="handleSignup()" class="flex-1 border border-discord-blurple text-discord-blurple hover:bg-discord-blurple/10 py-3 rounded font-bold text-sm transition-colors">Sign Up</button>
         </div>
-        <div class="text-center pt-2">
-          <button onclick="guestLogin()" class="text-xs text-discord-textMuted hover:text-discord-textHeader hover:underline">Continue as Guest</button>
-        </div>
       </div>
     </div>
   </div>
@@ -417,6 +414,13 @@
               </div>
               <input type="checkbox" id="ssCheckNeedsInvite" class="w-5 h-5 accent-discord-blurple cursor-pointer" />
             </div>
+            <div id="ssCeoAutoJoinGroup" class="hidden flex items-center justify-between p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+              <div>
+                <div class="text-sm font-bold text-amber-400">Auto-Join Server for New Accounts</div>
+                <div class="text-xs text-discord-textMuted">Automatically add all newly registered users to this server</div>
+              </div>
+              <input type="checkbox" id="ssCheckIsDefault" class="w-5 h-5 accent-amber-500 cursor-pointer" />
+            </div>
           </div>
 
           <div id="ssContent-roles" class="hidden space-y-4">
@@ -438,12 +442,12 @@
             </div>
             
             <div>
-              <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Custom Blocked Words</label>
-              <p class="text-xs text-discord-textMuted mb-2">Comma separated. Messages containing these will be blocked entirely.</p>
-              <textarea id="ssInputBlockedWords" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-danger resize-none" rows="3" placeholder="badword1, hateword2, scamlink"></textarea>
-            </div>
+        <div class="min-w-0 flex-1 leading-tight">
+          <div class="flex items-center space-x-1">
+            <span id="userBarName" class="text-sm font-bold text-discord-textHeader truncate">User</span>
+            <span id="ceoUserBadge" class="hidden text-[9px] bg-amber-500 text-black px-1 rounded font-black uppercase">CEO</span>
           </div>
-
+          <div id="userBarCustomStatus" class="text-[11px] text-discord-textMuted truncate">Online</div>
         </div>
       </div>
 
@@ -531,7 +535,6 @@
         </div>
         <div class="flex items-center space-x-2">
           <h2 id="profileModalName" class="text-xl font-bold text-discord-textHeader truncate">Username</h2>
-          <span id="profileModalGuestBadge" class="hidden text-[10px] bg-discord-hover text-discord-textMuted px-1.5 py-0.5 rounded font-black uppercase">GUEST</span>
           <span id="profileModalCeoBadge" class="hidden text-[10px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-black uppercase">CEO</span>
         </div>
         <p id="profileModalStatus" class="text-xs text-discord-textMuted mt-1">Online</p>
@@ -596,12 +599,6 @@
       </div>
 
       <div class="p-6 space-y-4 bg-discord-sidebar">
-        
-        <div id="guestWarningBox" class="hidden bg-discord-hover border-l-4 border-discord-gold p-3 rounded-r text-xs text-discord-textHeader">
-          <span class="font-bold text-discord-gold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Guest Mode Restrictions:</span>
-          You cannot change your avatar, and the <span class="bg-discord-black px-1 rounded">[GUEST]</span> tag is locked to your display name. Register to unlock full features.
-        </div>
-
         <div>
           <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Display Name</label>
           <input type="text" id="settingsUsername" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
@@ -839,25 +836,14 @@
           if (profile) {
               currentUser.name = profile.display_name;
               currentUser.avatar = profile.avatar_url;
-              currentUser.isGuest = profile.is_guest;
           } else {
               currentUser.name = session.user.user_metadata?.display_name || session.user.email.split('@')[0];
-              await client.from('profiles').insert({ id: currentUser.id, display_name: currentUser.name, is_guest: false });
+              await client.from('profiles').insert({ id: currentUser.id, display_name: currentUser.name });
           }
           finalizeInit();
         } else {
-          // Guest check fallback
-          const gId = localStorage.getItem('uc_guest_id');
-          if (gId) {
-            currentUser.id = gId;
-            currentUser.email = 'guest@ultrachat.local';
-            currentUser.name = localStorage.getItem('uc_guest_name') || 'Guest';
-            currentUser.isGuest = true;
-            finalizeInit();
-          } else {
-            document.getElementById('loadingScreen').classList.add('hidden');
-            openModal('authModal');
-          }
+          document.getElementById('loadingScreen').classList.add('hidden');
+          openModal('authModal');
         }
       } catch(e) {
         document.getElementById('loadingScreen').classList.add('hidden');
@@ -871,13 +857,6 @@
       if (currentUser.isCEO) {
         document.getElementById('ceoNavBtnGroup').classList.remove('hidden');
         document.getElementById('ceoUserBadge').classList.remove('hidden');
-      }
-
-      if (currentUser.isGuest) {
-        document.getElementById('createServerBtnWrapper').classList.add('hidden');
-        document.getElementById('userBarGuestBadge').classList.remove('hidden');
-        document.getElementById('avatarUploadGroup').classList.add('hidden');
-        document.getElementById('guestWarningBox').classList.remove('hidden');
       }
 
       currentServerId = localStorage.getItem(`uc3000_last_srv_${currentUser.id}`) || 'home';
@@ -964,22 +943,29 @@
           showToast("Signup failed: " + error.message, 'error');
       } else {
           if (data.user) {
-              await client.from('profiles').insert({ id: data.user.id, display_name: name, is_guest: false });
+              await client.from('profiles').insert({ id: data.user.id, display_name: name });
+
+              // CEO Auto-Join Default Servers
+              const { data: defaultServers } = await client.from('servers').select('id').eq('is_default', true);
+              if (defaultServers && defaultServers.length > 0) {
+                for (const ds of defaultServers) {
+                  const defaultRole = await getOrCreateDefaultRole(ds.id);
+                  await client.from('server_members').insert({
+                    server_id: ds.id,
+                    user_id: data.user.id,
+                    role: 'Member',
+                    role_id: defaultRole?.id || null
+                  });
+                }
+              }
           }
           closeModal('authModal');
           window.location.reload();
       }
     }
 
-    async function guestLogin() {
-      const gId = 'guest_' + Math.floor(Math.random() * 999999);
-      const gName = 'Guest_' + Math.floor(Math.random() * 999);
-      localStorage.setItem('uc_guest_id', gId);
-      localStorage.setItem('uc_guest_name', gName);
-      
-      await client.from('profiles').insert({ id: gId, display_name: gName, is_guest: true });
-      
-      closeModal('authModal');
+    async function logout() {
+      await client.auth.signOut();
       window.location.reload();
     }
 
@@ -1313,7 +1299,11 @@
       document.getElementById('ssCheckStrictMode').checked = srv.strict_mode || false;
       document.getElementById('ssInputBlockedWords').value = srv.banned_words || '';
 
-      const isOwner = (srv.owner_id === currentUser.id) || currentUser.isCEO;
+      const isCEO = currentUser.isCEO;
+      document.getElementById('ssCeoAutoJoinGroup').classList.toggle('hidden', !isCEO);
+      document.getElementById('ssCheckIsDefault').checked = srv.is_default || false;
+
+      const isOwner = (srv.owner_id === currentUser.id) || isCEO;
       document.getElementById('btnDeleteServer').classList.toggle('hidden', !isOwner);
 
       setServerSettingsTab('overview');
@@ -1428,16 +1418,23 @@
       const needsInvite = document.getElementById('ssCheckNeedsInvite').checked;
       const strictMode = document.getElementById('ssCheckStrictMode').checked;
       const bannedWords = document.getElementById('ssInputBlockedWords').value.trim();
+      const isDefault = document.getElementById('ssCheckIsDefault').checked;
 
       if (!name) return showToast("Server name cannot be empty.", 'error');
 
-      const { error } = await client.from('servers').update({
+      const updateData = {
         name: name,
         icon: icon,
         needs_invite: needsInvite,
         strict_mode: strictMode,
         banned_words: bannedWords
-      }).eq('id', currentServerId);
+      };
+
+      if (currentUser.isCEO) {
+        updateData.is_default = isDefault;
+      }
+
+      const { error } = await client.from('servers').update(updateData).eq('id', currentServerId);
 
       if (error) {
         showToast(error.message, 'error');
@@ -1867,6 +1864,9 @@
       let resolvedName = msg.user_name;
       let resolvedAvatar = msg.avatar_url;
 
+      const isAuthorCEO = (msg.user_id === currentUser.id && currentUser.isCEO) || (msg.user_name && msg.user_name.toLowerCase() === 'ceo') || (msg.user_id && currentServerMembers.find(m => m.user_id === msg.user_id)?.profiles?.email?.toLowerCase() === CEO_EMAIL);
+      const ceoBadgeMarkup = isAuthorCEO ? `<span class="text-[9px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-black uppercase shrink-0">CEO</span>` : '';
+
       const isMsgOwner = msg.user_id === currentUser.id;
       let isServerOwner = false;
       if (currentServerId !== 'home') {
@@ -1946,6 +1946,7 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-baseline space-x-2">
             <span onclick="openUserProfile('${msg.user_id}')" oncontextmenu="handleMemberContextMenu(event, '${msg.user_id}', '${escapedName}', '${escapedAvatar}')" class="font-bold text-sm text-discord-textHeader cursor-pointer hover:underline member-context-trigger">${resolvedName}</span>
+            ${ceoBadgeMarkup}
             <span class="text-[10px] text-discord-textMuted">${new Date(msg.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
           </div>
           <div id="msg_text_${msg.id}" class="text-sm text-gray-200 mt-0.5 break-words whitespace-pre-wrap leading-relaxed">${formattedText}</div>
@@ -2071,7 +2072,7 @@
               }
           }
 
-          let enforcedSlowmode = currentUser.isGuest ? 10 : (chan?.slowmode || 0); 
+          let enforcedSlowmode = chan?.slowmode || 0; 
           
           if (enforcedSlowmode > 0) {
               const lastT = lastMessageTimeMap[currentChannelId] || 0;
@@ -2373,6 +2374,7 @@
                 const avatar = p.avatar_url || `https://placehold.co/80x80/5865f2/ffffff?text=${displayName[0]}`;
                 const escapedName = displayName.replace(/'/g, "\\'");
                 const escapedAvatar = avatar.replace(/'/g, "\\'");
+                const isCEOUser = (p.email && p.email.toLowerCase() === CEO_EMAIL) || (p.id === currentUser.id && currentUser.isCEO);
 
                 const memberDiv = document.createElement('div');
                 memberDiv.className = 'flex items-center space-x-2 p-1.5 hover:bg-discord-hover/60 rounded cursor-pointer transition-colors member-context-trigger';
@@ -2384,9 +2386,9 @@
                         <img src="${avatar}" class="w-8 h-8 rounded-full object-cover" />
                         <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-discord-green border-2 border-discord-sidebar"></div>
                     </div>
-                    <div class="truncate text-sm font-medium" style="color: ${grp.color}">
-                        ${p.is_guest ? `<span class="text-[9px] bg-discord-hover text-discord-textMuted px-1 rounded mr-1">GUEST</span>` : ''}
-                        ${displayName}
+                    <div class="truncate text-sm font-medium flex items-center space-x-1" style="color: ${grp.color}">
+                        <span>${displayName}</span>
+                        ${isCEOUser ? `<span class="text-[9px] bg-amber-500 text-black px-1 rounded font-black uppercase">CEO</span>` : ''}
                     </div>
                 `;
                 grpDiv.appendChild(memberDiv);
