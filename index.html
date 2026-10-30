@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UltraChatApp 3000 - Discord Clone</title>
+  <title>UltraChatApp 3000 - NOT Discord lol</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -93,6 +93,31 @@
 
   <!-- Toast Container -->
   <div id="toastContainer" class="fixed top-4 right-4 z-[120] flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- CUSTOM RIGHT-CLICK CONTEXT MENU -->
+  <div id="customContextMenu" class="hidden fixed bg-discord-black border border-discord-hover/80 rounded-lg p-1.5 shadow-2xl z-[150] text-sm w-48 space-y-0.5 font-medium">
+    <button onclick="ctxViewProfile()" class="w-full text-left px-2.5 py-1.5 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
+      <span>View Profile</span>
+      <i class="fa-solid fa-user text-xs"></i>
+    </button>
+    <button onclick="ctxMessageUser()" class="w-full text-left px-2.5 py-1.5 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
+      <span>Message</span>
+      <i class="fa-solid fa-comment text-xs"></i>
+    </button>
+    <div id="ctxModDivider" class="h-[1px] bg-discord-hover my-1 hidden"></div>
+    <button id="ctxAssignRoleBtn" onclick="ctxAssignRole()" class="w-full text-left px-2.5 py-1.5 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors hidden">
+      <span>Assign Role</span>
+      <i class="fa-solid fa-shield-halved text-xs"></i>
+    </button>
+    <button id="ctxKickBtn" onclick="ctxKickMember()" class="w-full text-left px-2.5 py-1.5 hover:bg-red-600 hover:text-white rounded flex items-center justify-between text-red-400 transition-colors hidden">
+      <span>Kick Member</span>
+      <i class="fa-solid fa-user-minus text-xs"></i>
+    </button>
+    <button id="ctxBanBtn" onclick="ctxBanMember()" class="w-full text-left px-2.5 py-1.5 hover:bg-red-600 hover:text-white rounded flex items-center justify-between text-red-400 transition-colors hidden">
+      <span>Ban Member</span>
+      <i class="fa-solid fa-ban text-xs"></i>
+    </button>
+  </div>
 
   <!-- 1. LEFT RAIL: SERVER LIST -->
   <nav class="w-[72px] bg-discord-serverbar flex flex-col items-center py-3 space-y-2 flex-shrink-0 z-20 h-full overflow-hidden">
@@ -403,6 +428,99 @@
     </div>
   </div>
 
+  <!-- CHANNEL SETTINGS MODAL -->
+  <div id="channelSettingsModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-discord-sidebar w-full max-w-md rounded-lg shadow-2xl relative p-6 border border-discord-hover">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-discord-textHeader flex items-center space-x-2">
+          <i class="fa-solid fa-gear text-discord-blurple"></i>
+          <span>Channel Settings</span>
+        </h2>
+        <button onclick="closeModal('channelSettingsModal')" class="text-discord-textMuted hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Channel Name</label>
+          <input type="text" id="csInputName" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Slowmode Delay</label>
+          <select id="csSelectSlowmode" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple">
+            <option value="0">Off</option>
+            <option value="5">5 seconds</option>
+            <option value="10">10 seconds</option>
+            <option value="30">30 seconds</option>
+            <option value="60">1 minute</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-discord-hover flex justify-between items-center">
+        <button onclick="handleDeleteChannel()" class="text-xs text-red-500 font-bold hover:underline flex items-center space-x-1">
+          <i class="fa-solid fa-trash"></i>
+          <span>Delete Channel</span>
+        </button>
+        <div class="flex space-x-2">
+          <button onclick="closeModal('channelSettingsModal')" class="text-sm font-bold text-discord-textMuted hover:underline px-3 py-1.5">Cancel</button>
+          <button onclick="handleSaveChannelSettings()" class="bg-discord-green hover:bg-green-600 text-white px-4 py-1.5 rounded text-sm font-bold transition-colors">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER PROFILE CARD MODAL -->
+  <div id="userProfileModal" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-discord-sidebar w-full max-w-sm rounded-xl shadow-2xl relative overflow-hidden border border-discord-hover">
+      <!-- Profile Header Banner -->
+      <div class="h-24 bg-discord-blurple relative">
+        <button onclick="closeModal('userProfileModal')" class="absolute top-2 right-2 text-white/80 hover:text-white bg-black/40 w-7 h-7 rounded-full flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <!-- Profile Content -->
+      <div class="px-5 pb-5 relative">
+        <div class="relative -mt-12 mb-3 inline-block">
+          <img id="profileModalAvatar" src="" class="w-20 h-20 rounded-full border-4 border-discord-sidebar object-cover bg-discord-black shadow-lg" />
+          <div id="profileModalStatusDot" class="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-discord-green border-2 border-discord-sidebar"></div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <h2 id="profileModalName" class="text-xl font-bold text-discord-textHeader truncate">Username</h2>
+          <span id="profileModalGuestBadge" class="hidden text-[10px] bg-discord-hover text-discord-textMuted px-1.5 py-0.5 rounded font-black uppercase">GUEST</span>
+          <span id="profileModalCeoBadge" class="hidden text-[10px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-black uppercase">CEO</span>
+        </div>
+        <p id="profileModalStatus" class="text-xs text-discord-textMuted mt-1">Online</p>
+
+        <div class="h-[1px] bg-discord-hover/40 my-4"></div>
+
+        <div class="space-y-3">
+          <div>
+            <div class="text-[10px] font-bold uppercase text-discord-textMuted tracking-wider mb-1">Roles</div>
+            <div id="profileModalRoles" class="flex flex-wrap gap-1">
+              <span class="text-xs bg-discord-black px-2 py-0.5 rounded text-discord-textMuted">@everyone</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <button id="profileModalMessageBtn" class="w-full bg-discord-blurple hover:bg-discord-blurpleHover text-white py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-comment"></i>
+            <span>Send Direct Message</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSIGN ROLE MODAL -->
+  <div id="assignRoleModal" class="hidden fixed inset-0 bg-black/80 z-[120] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-discord-sidebar w-full max-w-xs rounded-xl shadow-2xl relative p-5 border border-discord-hover">
+      <h3 class="text-base font-bold text-discord-textHeader mb-3" id="assignRoleTitle">Assign Role</h3>
+      <div id="assignRoleOptionsList" class="space-y-2 max-h-48 overflow-y-auto mb-4"></div>
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeModal('assignRoleModal')" class="text-xs text-discord-textMuted hover:underline px-3 py-1.5 font-bold">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- PUBLIC DISCOVERY MODAL -->
   <div id="discoverModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-discord-sidebar w-full max-w-xl rounded-xl shadow-2xl relative p-6 border border-discord-hover">
@@ -593,6 +711,8 @@
     let activeRealtimeGlobal = null;
     
     let lastMessageTimeMap = {}; 
+    let contextTarget = null; // Stores target user info for right-click context menu
+    let targetEditingChannelId = null; // Channel selected for channel settings
 
     function handleFileUpload(inputId, hiddenInputId) {
       const fileInput = document.getElementById(inputId);
@@ -686,6 +806,10 @@
       updateUserBar();
       setupGlobalRealtime();
       loadServersFromDB().then(() => switchServer(currentServerId));
+
+      // Global Context Menu Dismissal Listener
+      window.addEventListener('click', hideContextMenu);
+      window.addEventListener('scroll', hideContextMenu);
 
       setTimeout(() => {
         document.getElementById('loadingScreen').classList.add('opacity-0');
@@ -808,7 +932,8 @@
             .select(`
                 user_id,
                 role,
-                profiles ( display_name, avatar_url, is_guest )
+                role_id,
+                profiles ( display_name, avatar_url, is_guest, status_quote )
             `)
             .eq('server_id', currentServerId);
             
@@ -909,7 +1034,6 @@
       const searchQuery = (document.getElementById('publicSearchInput')?.value || '').toLowerCase();
       container.innerHTML = '<div class="flex justify-center p-6 text-discord-textMuted"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>';
 
-      // 1. Fetch public servers (needs_invite is false or null)
       const { data: pubServers, error: srvErr } = await client
         .from('servers')
         .select('*')
@@ -920,12 +1044,10 @@
         return;
       }
 
-      // 2. Fetch all server_members joined with profiles to filter non-guest user counts
       const { data: memberRows } = await client
         .from('server_members')
         .select('server_id, user_id, profiles(is_guest)');
 
-      // Count non-guest members per server
       const countsMap = {};
       if (memberRows) {
         memberRows.forEach(m => {
@@ -935,13 +1057,11 @@
         });
       }
 
-      // 3. Map servers with real counts & sort descending
       const sortedServers = pubServers.map(s => ({
         ...s,
         memberCount: countsMap[s.id] || 1
       })).sort((a, b) => b.memberCount - a.memberCount);
 
-      // Filter by search query
       const filtered = sortedServers.filter(s => s.name.toLowerCase().includes(searchQuery));
 
       container.innerHTML = '';
@@ -1001,7 +1121,7 @@
     }
 
     // =========================================================================
-    // 6. SERVER SETTINGS & GOVERNANCE (RESTORED)
+    // 6. SERVER SETTINGS & GOVERNANCE
     // =========================================================================
     async function openServerSettings() {
       const srv = servers.find(s => s.id === currentServerId);
@@ -1184,7 +1304,7 @@
     }
 
     // =========================================================================
-    // 8. SERVER CREATION & INVITES (DB STRICT)
+    // 8. SERVER CREATION, CHANNEL EDIT/DELETE & INVITES
     // =========================================================================
     async function handleCreateServer() {
       const name = document.getElementById('newServerName').value.trim();
@@ -1211,6 +1331,74 @@
       await loadServersFromDB();
       switchServer(newSrvId);
       showToast(`Created server ${name}`);
+    }
+
+    function canManageChannels() {
+      if (currentServerId === 'home' || currentServerId === 'dm') return false;
+      if (currentUser.isCEO) return true;
+      const srv = servers.find(s => s.id === currentServerId);
+      if (srv && srv.owner_id === currentUser.id) return true;
+      const myMemberRecord = currentServerMembers.find(m => m.user_id === currentUser.id);
+      if (myMemberRecord && myMemberRecord.role_id) {
+        const role = currentRolesCache.find(r => r.id === myMemberRecord.role_id);
+        if (role && (role.can_manage_settings || role.can_manage_messages)) return true;
+      }
+      return false;
+    }
+
+    function openChannelSettings(chanId) {
+      const chan = currentServerChannels.find(c => c.id === chanId);
+      if (!chan) return;
+
+      targetEditingChannelId = chanId;
+      document.getElementById('csInputName').value = chan.name;
+      document.getElementById('csSelectSlowmode').value = chan.slowmode || 0;
+
+      openModal('channelSettingsModal');
+    }
+
+    async function handleSaveChannelSettings() {
+      if (!targetEditingChannelId) return;
+
+      const newName = document.getElementById('csInputName').value.trim().toLowerCase().replace(/\s+/g, '-');
+      const newSlowmode = parseInt(document.getElementById('csSelectSlowmode').value) || 0;
+
+      if (!newName) return showToast("Channel name cannot be empty", "error");
+
+      const { error } = await client.from('channels').update({
+        name: newName,
+        slowmode: newSlowmode
+      }).eq('id', targetEditingChannelId);
+
+      if (error) {
+        showToast(error.message, "error");
+      } else {
+        showToast("Channel updated");
+        closeModal('channelSettingsModal');
+        await loadChannelsFromDB();
+        if (currentChannelId === targetEditingChannelId) {
+          switchChannel(targetEditingChannelId, newName, newSlowmode);
+        }
+      }
+    }
+
+    async function handleDeleteChannel() {
+      if (!targetEditingChannelId) return;
+      if (currentServerChannels.length <= 1) return showToast("Cannot delete the only channel in the server.", "error");
+      if (!confirm("Are you sure you want to delete this channel? All messages in it will be lost.")) return;
+
+      const { error } = await client.from('channels').delete().eq('id', targetEditingChannelId);
+
+      if (error) {
+        showToast(error.message, "error");
+      } else {
+        showToast("Channel deleted", "error");
+        closeModal('channelSettingsModal');
+        await loadChannelsFromDB();
+        if (currentServerChannels.length > 0) {
+          switchChannel(currentServerChannels[0].id, currentServerChannels[0].name, currentServerChannels[0].slowmode);
+        }
+      }
     }
 
     async function handleCreateChannel() {
@@ -1430,11 +1618,14 @@
           </div>`;
       });
 
+      const escapedName = resolvedName.replace(/'/g, "\\'");
+      const escapedAvatar = (resolvedAvatar || '').replace(/'/g, "\\'");
+
       div.innerHTML = `
-        <img src="${resolvedAvatar || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5 shadow-sm" />
+        <img src="${resolvedAvatar || 'https://placehold.co/80x80/5865f2/ffffff?text=U'}" onclick="openUserProfile('${msg.user_id}')" oncontextmenu="handleMemberContextMenu(event, '${msg.user_id}', '${escapedName}', '${escapedAvatar}')" class="w-10 h-10 rounded-full object-cover shrink-0 mt-0.5 shadow-sm cursor-pointer hover:opacity-80 transition-opacity member-context-trigger" />
         <div class="flex-1 min-w-0">
           <div class="flex items-baseline space-x-2">
-            <span class="font-bold text-sm text-discord-textHeader">${resolvedName}</span>
+            <span onclick="openUserProfile('${msg.user_id}')" oncontextmenu="handleMemberContextMenu(event, '${msg.user_id}', '${escapedName}', '${escapedAvatar}')" class="font-bold text-sm text-discord-textHeader cursor-pointer hover:underline member-context-trigger">${resolvedName}</span>
             <span class="text-[10px] text-discord-textMuted">${new Date(msg.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
           </div>
           <div id="msg_text_${msg.id}" class="text-sm text-gray-200 mt-0.5 break-words whitespace-pre-wrap leading-relaxed">${formattedText}</div>
@@ -1566,12 +1757,172 @@
     }
 
     // =========================================================================
-    // 10. USER UI, SETTINGS & FRIENDS
+    // 10. USER UI, PROFILE MODALS & RIGHT-CLICK CONTEXT MENU
     // =========================================================================
     function updateUserBar() {
       document.getElementById('userBarName').innerText = currentUser.name;
       document.getElementById('settingsUsername').value = currentUser.name;
       document.getElementById('userBarAvatar').src = currentUser.avatar;
+    }
+
+    async function openUserProfile(userId) {
+      let profile = null;
+      const memberObj = currentServerMembers.find(m => m.user_id === userId);
+      if (memberObj && memberObj.profiles) {
+        profile = { id: userId, ...memberObj.profiles };
+      } else {
+        const { data } = await client.from('profiles').select('*').eq('id', userId).single();
+        if (data) profile = data;
+      }
+
+      if (!profile) return showToast("User profile not found.", "error");
+
+      document.getElementById('profileModalName').innerText = profile.display_name || 'User';
+      document.getElementById('profileModalAvatar').src = profile.avatar_url || `https://placehold.co/80x80/5865f2/ffffff?text=${(profile.display_name || 'U')[0]}`;
+      
+      document.getElementById('profileModalGuestBadge').classList.toggle('hidden', !profile.is_guest);
+      
+      const isCEO = (profile.email && profile.email.toLowerCase() === CEO_EMAIL.toLowerCase()) || (profile.id === currentUser.id && currentUser.isCEO);
+      document.getElementById('profileModalCeoBadge').classList.toggle('hidden', !isCEO);
+
+      document.getElementById('profileModalStatus').innerText = profile.status_quote || 'Online';
+
+      const rolesContainer = document.getElementById('profileModalRoles');
+      rolesContainer.innerHTML = '<span class="text-xs bg-discord-black px-2 py-0.5 rounded text-discord-textMuted font-medium">@everyone</span>';
+
+      if (currentServerId !== 'home' && currentServerId !== 'dm') {
+        const targetMember = currentServerMembers.find(m => m.user_id === userId);
+        if (targetMember && targetMember.role) {
+          rolesContainer.innerHTML += `<span class="text-xs bg-discord-blurple/20 text-discord-blurple border border-discord-blurple/40 px-2 py-0.5 rounded font-bold">${targetMember.role.toUpperCase()}</span>`;
+        }
+      }
+
+      const msgBtn = document.getElementById('profileModalMessageBtn');
+      if (userId === currentUser.id) {
+        msgBtn.classList.add('hidden');
+      } else {
+        msgBtn.classList.remove('hidden');
+        msgBtn.onclick = () => {
+          closeModal('userProfileModal');
+          openDM(userId, profile.display_name || 'User');
+        };
+      }
+
+      openModal('userProfileModal');
+    }
+
+    function handleMemberContextMenu(e, userId, userName, userAvatar) {
+      e.preventDefault();
+      e.stopPropagation();
+      contextTarget = { id: userId, name: userName, avatar: userAvatar };
+
+      const menu = document.getElementById('customContextMenu');
+      
+      let x = e.clientX;
+      let y = e.clientY;
+      if (x + 200 > window.innerWidth) x = window.innerWidth - 205;
+      if (y + 200 > window.innerHeight) y = window.innerHeight - 205;
+
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+
+      const isSelf = userId === currentUser.id;
+      const srv = servers.find(s => s.id === currentServerId);
+      const isOwner = srv && srv.owner_id === currentUser.id;
+      const isCEO = currentUser.isCEO;
+
+      let canKick = !isSelf && (isCEO || isOwner);
+      let canBan = !isSelf && (isCEO || isOwner);
+      let canAssign = !isSelf && (isCEO || isOwner);
+
+      const myMemberRecord = currentServerMembers.find(m => m.user_id === currentUser.id);
+      if (myMemberRecord && myMemberRecord.role_id) {
+        const role = currentRolesCache.find(r => r.id === myMemberRecord.role_id);
+        if (role) {
+          if (role.can_kick) canKick = !isSelf;
+          if (role.can_ban) canBan = !isSelf;
+        }
+      }
+
+      document.getElementById('ctxModDivider').classList.toggle('hidden', !(canKick || canBan || canAssign));
+      document.getElementById('ctxKickBtn').classList.toggle('hidden', !canKick);
+      document.getElementById('ctxBanBtn').classList.toggle('hidden', !canBan);
+      document.getElementById('ctxAssignRoleBtn').classList.toggle('hidden', !canAssign);
+
+      menu.classList.remove('hidden');
+    }
+
+    function hideContextMenu() {
+      const menu = document.getElementById('customContextMenu');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    function ctxViewProfile() {
+      hideContextMenu();
+      if (contextTarget) openUserProfile(contextTarget.id);
+    }
+
+    function ctxMessageUser() {
+      hideContextMenu();
+      if (contextTarget && contextTarget.id !== currentUser.id) openDM(contextTarget.id, contextTarget.name);
+    }
+
+    async function ctxKickMember() {
+      hideContextMenu();
+      if (!contextTarget) return;
+      if (!confirm(`Kick ${contextTarget.name} from server?`)) return;
+
+      const { error } = await client.from('server_members').delete().eq('server_id', currentServerId).eq('user_id', contextTarget.id);
+      if (error) showToast(error.message, "error");
+      else {
+        showToast(`Kicked ${contextTarget.name}`);
+        loadMembersFromDB();
+      }
+    }
+
+    async function ctxBanMember() {
+      hideContextMenu();
+      if (!contextTarget) return;
+      if (!confirm(`Ban ${contextTarget.name} from server?`)) return;
+
+      const { error } = await client.from('server_members').delete().eq('server_id', currentServerId).eq('user_id', contextTarget.id);
+      if (error) showToast(error.message, "error");
+      else {
+        showToast(`Banned ${contextTarget.name}`, "error");
+        loadMembersFromDB();
+      }
+    }
+
+    async function ctxAssignRole() {
+      hideContextMenu();
+      if (!contextTarget) return;
+
+      document.getElementById('assignRoleTitle').innerText = `Role for ${contextTarget.name}`;
+      const listContainer = document.getElementById('assignRoleOptionsList');
+      listContainer.innerHTML = '<div class="text-xs text-discord-textMuted">Loading roles...</div>';
+
+      openModal('assignRoleModal');
+
+      const { data: roles } = await client.from('server_roles').select('*').eq('server_id', currentServerId);
+      listContainer.innerHTML = '';
+
+      if (!roles || roles.length === 0) {
+        listContainer.innerHTML = '<div class="text-xs text-discord-textMuted italic">No custom roles available. Create roles in Server Settings.</div>';
+        return;
+      }
+
+      roles.forEach(r => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full text-left px-3 py-2 rounded bg-discord-black hover:bg-discord-hover text-sm font-bold flex items-center justify-between transition-colors';
+        btn.innerHTML = `<span style="color:${r.color || '#fff'}">${r.name}</span><i class="fa-solid fa-plus text-xs text-discord-textMuted"></i>`;
+        btn.onclick = async () => {
+          await client.from('server_members').update({ role: r.name, role_id: r.id }).eq('server_id', currentServerId).eq('user_id', contextTarget.id);
+          showToast(`Assigned role ${r.name}`);
+          closeModal('assignRoleModal');
+          loadMembersFromDB();
+        };
+        listContainer.appendChild(btn);
+      });
     }
 
     async function saveUserSettings() {
@@ -1604,12 +1955,23 @@
       const voiceDiv = document.getElementById('voiceChannelsList');
       txtDiv.innerHTML = ''; voiceDiv.innerHTML = '';
 
+      const canManage = canManageChannels();
+
       channels.forEach(chan => {
-        const btn = document.createElement('button');
-        btn.onclick = () => switchChannel(chan.id, chan.name, chan.slowmode);
-        btn.className = `w-full flex items-center px-2 py-1.5 rounded text-sm font-medium text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors`;
+        const btn = document.createElement('div');
+        btn.className = `w-full flex items-center justify-between px-2 py-1.5 rounded text-sm font-medium text-discord-textMuted hover:bg-discord-hover hover:text-white transition-colors group cursor-pointer`;
         const icon = chan.type === 'voice' ? 'fa-volume-high' : 'fa-hashtag';
-        btn.innerHTML = `<i class="fa-solid ${icon} text-xs mr-2 opacity-60"></i><span class="truncate">${chan.name}</span>`;
+        
+        const cogHtml = canManage ? `<i onclick="event.stopPropagation(); openChannelSettings('${chan.id}')" class="fa-solid fa-gear text-xs text-discord-textMuted hover:text-white opacity-0 group-hover:opacity-100 transition-opacity p-1"></i>` : '';
+
+        btn.innerHTML = `
+          <div onclick="switchChannel('${chan.id}', '${chan.name}', ${chan.slowmode})" class="flex items-center min-w-0 flex-1 truncate">
+            <i class="fa-solid ${icon} text-xs mr-2 opacity-60"></i>
+            <span class="truncate">${chan.name}</span>
+          </div>
+          ${cogHtml}
+        `;
+
         if (chan.type === 'voice') voiceDiv.appendChild(btn); else txtDiv.appendChild(btn);
       });
     }
@@ -1633,7 +1995,7 @@
             if (m.profiles) {
                 const groupKey = m.role || 'member';
                 if (!groups[groupKey]) groups[groupKey] = { name: groupKey.toUpperCase(), color: '#ffffff', members: [] };
-                groups[groupKey].members.push(m.profiles);
+                groups[groupKey].members.push({ id: m.user_id, ...m.profiles });
             }
         });
 
@@ -1645,11 +2007,16 @@
             grpDiv.innerHTML = `<h3 class="text-[11px] font-bold uppercase text-discord-textMuted tracking-wide mb-2">${grp.name} — ${grp.members.length}</h3>`;
             
             grp.members.forEach(p => {
-                const displayName = p.display_name;
+                const displayName = p.display_name || 'User';
                 const avatar = p.avatar_url || `https://placehold.co/80x80/5865f2/ffffff?text=${displayName[0]}`;
+                const escapedName = displayName.replace(/'/g, "\\'");
+                const escapedAvatar = avatar.replace(/'/g, "\\'");
 
                 const memberDiv = document.createElement('div');
-                memberDiv.className = 'flex items-center space-x-2 p-1.5 hover:bg-discord-hover/60 rounded cursor-pointer transition-colors';
+                memberDiv.className = 'flex items-center space-x-2 p-1.5 hover:bg-discord-hover/60 rounded cursor-pointer transition-colors member-context-trigger';
+                memberDiv.onclick = () => openUserProfile(p.id);
+                memberDiv.oncontextmenu = (e) => handleMemberContextMenu(e, p.id, escapedName, escapedAvatar);
+
                 memberDiv.innerHTML = `
                     <div class="relative shrink-0">
                         <img src="${avatar}" class="w-8 h-8 rounded-full object-cover" />
