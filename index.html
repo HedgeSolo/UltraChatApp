@@ -76,8 +76,6 @@
     body.theme-hacker .text-discord-textHeader { color: #00ff66 !important; }
     body.theme-hacker .text-discord-textMuted { color: #008833 !important; }
     body.theme-hacker .bg-discord-input { background-color: #021a08 !important; color: #00ff66 !important; }
-
-    .yt-embed { width: 100%; max-width: 400px; aspect-ratio: 16/9; border-radius: 8px; margin-top: 8px; border: none; }
   </style>
 </head>
 <body class="h-full bg-discord-chat text-gray-200 select-none overflow-hidden font-sans flex theme-dark">
@@ -137,7 +135,7 @@
     
     <!-- Home Button (With Total Unread DMs Red Badge) -->
     <div class="relative group flex items-center justify-center w-full">
-      <div id="homeActivePill" class="absolute left-0 w-1 bg-white rounded-r transition-all duration-300 h-0"></div>
+      <div id="homeActivePill" class="absolute left-0 w-1 bg-white rounded-r transition-all duration-300 h-8"></div>
       <button onclick="switchServer('home')" id="btnHomeServer" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-discord-sidebar hover:bg-discord-blurple flex items-center justify-center text-white transition-all duration-300 relative">
         <i class="fa-brands fa-discord text-2xl"></i>
         <!-- Unread DMs Red Notification Badge -->
@@ -222,7 +220,7 @@
     <!-- Channels or DM List Container -->
     <div id="channelsContainer" class="flex-1 overflow-y-auto p-2 space-y-4">
       <!-- DM List Section -->
-      <div id="dmListGroup" class="hidden space-y-2">
+      <div id="dmListGroup" class="space-y-2">
         <button onclick="switchHomeTab('friends')" id="btnFriendsTab" class="w-full flex items-center px-2 py-2 rounded-md text-sm font-bold text-discord-textMuted hover:bg-discord-hover hover:text-discord-textHeader transition-colors">
           <i class="fa-solid fa-user-group text-base mr-3 w-5 text-center"></i>
           <span>Friends</span>
@@ -236,7 +234,7 @@
       <!-- Server Channels Section -->
       <div id="serverChannelsGroup" class="hidden">
         <div id="textChannelsGroup" class="mb-4">
-          <div class="flex items-center justify-between px-2 text-[11px] font-bold text-discord-textMuted uppercase tracking-wider mb-1 group cursor-pointer hover:text-white transition-colors" onclick="toggleCategory('textChannelsList', 'textCatChevron')">
+          <div class="flex items-center justify-between px-2 text-[11px] font-bold text-discord-textMuted uppercase tracking-wider mb-1 group cursor-pointer hover:text-white transition-colors">
             <span class="flex items-center space-x-1">
               <i id="textCatChevron" class="fa-solid fa-chevron-down text-[9px] mr-1 transition-transform"></i>
               Text Channels
@@ -247,7 +245,7 @@
         </div>
 
         <div id="voiceChannelsGroup">
-          <div class="flex items-center justify-between px-2 text-[11px] font-bold text-discord-textMuted uppercase tracking-wider mb-1 group cursor-pointer hover:text-white transition-colors" onclick="toggleCategory('voiceChannelsList', 'voiceCatChevron')">
+          <div class="flex items-center justify-between px-2 text-[11px] font-bold text-discord-textMuted uppercase tracking-wider mb-1 group cursor-pointer hover:text-white transition-colors">
             <span class="flex items-center space-x-1">
               <i id="voiceCatChevron" class="fa-solid fa-chevron-down text-[9px] mr-1 transition-transform"></i>
               Voice Channels
@@ -303,7 +301,7 @@
     <div class="flex-1 flex min-h-0 relative">
       
       <!-- FRIENDS PANEL -->
-      <div id="friendsViewPanel" class="hidden flex-1 flex-col p-6 overflow-y-auto">
+      <div id="friendsViewPanel" class="flex-1 flex-col p-6 overflow-y-auto">
         <div class="flex border-b border-discord-hover pb-4 space-x-6 mb-6">
           <button onclick="setFriendsSubTab('online')" id="ftab-online" class="text-sm font-bold text-white bg-discord-hover px-3 py-1.5 rounded transition-colors">Online</button>
           <button onclick="setFriendsSubTab('all')" id="ftab-all" class="text-sm font-bold text-discord-textMuted hover:bg-discord-hover hover:text-white px-3 py-1.5 rounded transition-colors">All</button>
@@ -323,7 +321,7 @@
       </div>
 
       <!-- CHAT FEED PANEL -->
-      <div id="chatFeedPanel" class="flex-1 flex flex-col min-w-0 h-full">
+      <div id="chatFeedPanel" class="hidden flex-1 flex flex-col min-w-0 h-full">
         <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-2 scroll-smooth"></div>
 
         <!-- Image preview bar -->
@@ -345,7 +343,7 @@
           <div class="bg-discord-input rounded-lg flex items-center px-4 py-2.5 shadow-inner relative group space-x-2">
             <label id="btnAttachImage" class="cursor-pointer text-discord-textMuted hover:text-discord-textHeader transition-colors p-1" title="Attach Image">
               <i class="fa-solid fa-circle-plus text-lg"></i>
-              <input type="file" id="msgImageFileInput" accept="image/*" class="hidden" onchange="handleMessageImageSelect(event)" />
+              <input type="file" id="msgImageFileInput" accept="image/*" class="hidden" />
             </label>
 
             <textarea id="messageInput" rows="1" oninput="autoGrowInput(this); handleMessageInputMention(event);" onkeydown="handleInputKeydown(event)" placeholder="Message..." class="bg-transparent text-base text-discord-textHeader placeholder-discord-textMuted flex-1 outline-none resize-none max-h-[40vh] overflow-y-auto leading-relaxed py-1"></textarea>
@@ -2029,6 +2027,7 @@
     }
 
     function closeConfirmModal(accepted) {
+      closeModal('closeConfirmModal');
       closeModal('confirmModal');
       if (accepted && typeof confirmCallback === 'function') {
         confirmCallback();
