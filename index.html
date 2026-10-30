@@ -792,6 +792,27 @@
     handleFileUpload('ssInputIconFile', 'ssInputIcon');
     handleFileUpload('newServerIconFile', 'newServerIcon');
 
+    // Helper: Ensure server has default "Member" role and return it
+    async function getOrCreateDefaultRole(serverId) {
+      let { data: memberRole } = await client.from('server_roles').select('*').eq('server_id', serverId).eq('name', 'Member').maybeSingle();
+      if (!memberRole) {
+        const { data: newRole } = await client.from('server_roles').insert({
+          server_id: serverId,
+          name: 'Member',
+          color: '#949ba4',
+          bypass_slowmode: false,
+          can_kick: false,
+          can_ban: false,
+          can_manage_messages: false,
+          can_manage_settings: false,
+          can_send_images: true,
+          can_add_reactions: true
+        }).select().single();
+        memberRole = newRole;
+      }
+      return memberRole;
+    }
+
     // =========================================================================
     // 2. THEMES & INITIALIZATION
     // =========================================================================
@@ -1130,6 +1151,53 @@
       renderServerList();
     }
 
+    async function handleCreateServer() {
+      const name = document.getElementById('newServerName').value.trim();
+      const icon = document.getElementById('newServerIcon').value.trim();
+      if (!name) return showToast("Server name required", "error");
+
+      const serverId = 'srv_' + Date.now();
+      const { error: srvErr } = await client.from('servers').insert({
+        id: serverId,
+        name: name,
+        icon: icon,
+        owner_id: currentUser.id
+      });
+
+      if (srvErr) return showToast(srvErr.message, "error");
+
+      // Auto-create default Member role
+      const defaultRole = await getOrCreateDefaultRole(serverId);
+
+      // Create default General channel
+      await client.from('channels').insert({
+        id: 'chan_' + Date.now(),
+        server_id: serverId,
+        name: 'general',
+        type: 'text',
+        slowmode: 0,
+        allowed_roles_view: '[]',
+        allowed_roles_send: '[]',
+        is_private: false
+      });
+
+      // Insert server owner as member with Member role_id
+      await client.from('server_members').insert({
+        server_id: serverId,
+        user_id: currentUser.id,
+        role: 'owner',
+        role_id: defaultRole?.id || null
+      });
+
+      showToast("Server created!");
+      closeModal('createServerModal');
+      document.getElementById('newServerName').value = '';
+      document.getElementById('newServerIcon').value = '';
+
+      await loadServersFromDB();
+      switchServer(serverId);
+    }
+
     // =========================================================================
     // 5. PUBLIC SERVER DISCOVERY
     // =========================================================================
@@ -1212,10 +1280,13 @@
     }
 
     async function joinServerFromDiscovery(serverId) {
+      const defaultRole = await getOrCreateDefaultRole(serverId);
+
       const { error } = await client.from('server_members').insert({
         server_id: serverId,
         user_id: currentUser.id,
-        role: 'member'
+        role: 'Member',
+        role_id: defaultRole?.id || null
       });
 
       if (error && error.code !== '23505') {
@@ -1580,7 +1651,8 @@
             type: typeInput.value,
             slowmode: parseInt(slowmodeInput.value) || 0,
             allowed_roles_view: '[]',
-            allowed_roles_send: '[]'
+            allowed_roles_send: '[]',
+            is_private: false
         };
 
         const { error } = await client.from('channels').insert(chanData);
@@ -1662,10 +1734,13 @@
         const { data: invite, error: inviteErr } = await client.from('server_invites').select('server_id').eq('code', code).single();
         if (inviteErr || !invite) return showToast("Invalid or expired invite code.", "error");
 
+        const defaultRole = await getOrCreateDefaultRole(invite.server_id);
+
         const { error: joinErr } = await client.from('server_members').insert({
             server_id: invite.server_id,
             user_id: currentUser.id,
-            role: 'member'
+            role: 'Member',
+            role_id: defaultRole?.id || null
         });
 
         if (joinErr) {
