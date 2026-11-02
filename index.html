@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NexusBrowser OS - Web Browser</title>
+  <title>SneakyKidVille OS - Web Portal & Privacy Shield</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,18 +13,20 @@
       theme: {
         extend: {
           colors: {
-            browser: {
-              bg: '#0d0f12',
-              glass: 'rgba(22, 26, 33, 0.75)',
-              border: 'rgba(255, 255, 255, 0.08)',
-              header: '#161a21',
-              sidebar: '#12151b',
-              tabActive: '#1e232d',
-              tabInactive: '#14171d',
-              accent: '#6366f1',
-              accentHover: '#4f46e5',
-              omnibox: '#101216',
-              card: '#181c24'
+            sneaky: {
+              bg: '#0a0d14',
+              glass: 'rgba(18, 24, 38, 0.75)',
+              border: 'rgba(255, 255, 255, 0.1)',
+              header: '#111622',
+              sidebar: '#0d111a',
+              tabActive: '#1a2234',
+              tabInactive: '#121724',
+              accent: '#3b82f6',
+              neonGreen: '#10b981',
+              neonPink: '#ec4899',
+              neonCyan: '#06b6d4',
+              omnibox: '#0d111a',
+              card: '#151c2c'
             }
           },
           backdropBlur: {
@@ -38,59 +40,85 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- Supabase JS Library v2 -->
+  <!-- Supabase JS Library v2 (Optional Cloud Persistence) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     /* Custom Scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.35); }
 
     /* Custom Theme Overrides */
-    body.theme-amoled { --bg-color: #000000; --card-color: #080808; }
-    body.theme-amoled .bg-browser-bg { background-color: #000000 !important; }
-    body.theme-amoled .bg-browser-header { background-color: #050505 !important; }
-    body.theme-amoled .bg-browser-card { background-color: #0a0a0a !important; }
+    body.theme-matrix {
+      --bg-color: #030a05;
+      --accent: #10b981;
+      background-color: #030a05 !important;
+    }
+    body.theme-matrix .bg-sneaky-bg { background-color: #030a05 !important; }
+    body.theme-matrix .bg-sneaky-header { background-color: #08140a !important; }
+    body.theme-matrix .border-sneaky-border { border-color: rgba(16, 185, 129, 0.2) !important; }
+    body.theme-matrix .text-indigo-400, body.theme-matrix .text-emerald-400 { color: #10b981 !important; }
 
-    body.theme-neon { --accent-color: #00ffcc; }
-    body.theme-neon .text-browser-accent { color: #00ffcc !important; }
-    body.theme-neon .bg-browser-accent { background-color: #00ffcc !important; color: #000 !important; }
+    body.theme-cyber {
+      background: linear-gradient(135deg, #090514 0%, #0d0d1a 100%) !important;
+    }
+    body.theme-cyber .bg-sneaky-header { background-color: #120a24 !important; }
 
-    body.theme-sunset { background: linear-gradient(135deg, #1f122e 0%, #0d0f12 100%) !important; }
+    body.theme-space {
+      background: linear-gradient(135deg, #050b18 0%, #0a1128 100%) !important;
+    }
+    body.theme-space .bg-sneaky-header { background-color: #0c1836 !important; }
 
-    /* Glass Effect */
+    body.theme-amoled {
+      background-color: #000000 !important;
+    }
+    body.theme-amoled .bg-sneaky-bg { background-color: #000000 !important; }
+    body.theme-amoled .bg-sneaky-header { background-color: #050505 !important; }
+    body.theme-amoled .bg-sneaky-card { background-color: #0a0a0a !important; }
+
+    body.theme-candy {
+      background: linear-gradient(135deg, #18061a 0%, #200826 100%) !important;
+    }
+    body.theme-candy .text-indigo-400 { color: #f472b6 !important; }
+    body.theme-candy .bg-indigo-600 { background-color: #ec4899 !important; }
+
+    /* Glass Panels & Glow Effects */
     .glass-panel {
-      background: rgba(22, 26, 33, 0.7);
+      background: rgba(21, 28, 44, 0.7);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
+
+    .glow-box-green { box-shadow: 0 0 15px rgba(16, 185, 129, 0.35); }
+    .glow-box-pink { box-shadow: 0 0 15px rgba(236, 72, 153, 0.35); }
+    .glow-box-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.35); }
 
     /* Pulse Load Animation */
     @keyframes progressAnim {
       0% { width: 0%; }
-      50% { width: 70%; }
+      50% { width: 75%; }
       100% { width: 100%; }
     }
-    .loading-bar-active { animation: progressAnim 1.2s ease-in-out infinite; }
+    .loading-bar-active { animation: progressAnim 1s ease-in-out infinite; }
   </style>
 </head>
-<body class="h-full bg-browser-bg text-gray-200 overflow-hidden font-sans flex flex-col theme-dark">
+<body class="h-full bg-sneaky-bg text-gray-200 overflow-hidden font-sans flex flex-col theme-cyber">
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer" class="fixed top-4 right-4 z-[300] flex flex-col space-y-2 pointer-events-none"></div>
 
-  <!-- TOP WINDOW RAIL & TITLE BAR -->
-  <header class="h-9 bg-browser-header border-b border-browser-border px-3 flex items-center justify-between shrink-0 select-none text-xs text-gray-400">
-    <div class="flex items-center space-x-2">
-      <!-- Simulated Window Control Dots -->
-      <div class="flex items-center space-x-1.5 mr-2">
-        <button onclick="simulateWindowAction('close')" class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group" title="Close Window">
+  <!-- TOP WINDOW RAIL & BRANDING HEADER -->
+  <header class="h-10 bg-sneaky-header border-b border-sneaky-border px-3 flex items-center justify-between shrink-0 select-none text-xs text-gray-300">
+    <div class="flex items-center space-x-3">
+      <!-- Simulated Window Control Buttons -->
+      <div class="flex items-center space-x-1.5 mr-1">
+        <button onclick="showToast('SneakyKidVille window remains open!', 'info')" class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group" title="Close Window">
           <i class="fa-solid fa-xmark text-[8px] text-black opacity-0 group-hover:opacity-100"></i>
         </button>
-        <button onclick="simulateWindowAction('minimize')" class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors flex items-center justify-center group" title="Minimize">
+        <button onclick="showToast('SneakyKidVille minimized to bar', 'info')" class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors flex items-center justify-center group" title="Minimize">
           <i class="fa-solid fa-minus text-[8px] text-black opacity-0 group-hover:opacity-100"></i>
         </button>
         <button onclick="toggleFullscreen()" class="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center group" title="Maximize">
@@ -98,189 +126,267 @@
         </button>
       </div>
 
-      <div class="flex items-center space-x-2 font-bold text-gray-300">
-        <i class="fa-solid fa-compass text-indigo-400"></i>
-        <span id="windowTitle">NexusBrowser OS v3.0</span>
+      <!-- App Logo Branding -->
+      <div class="flex items-center space-x-2 font-black text-sm tracking-wide text-white">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 to-pink-500 flex items-center justify-center text-xs text-black font-extrabold shadow-lg">
+          <i class="fa-solid fa-user-ninja"></i>
+        </div>
+        <span class="bg-gradient-to-r from-cyan-400 via-pink-400 to-yellow-300 bg-clip-text text-transparent">SneakyKidVille OS</span>
+        <span class="text-[9px] bg-indigo-500/30 text-indigo-300 px-1.5 py-0.5 rounded-full border border-indigo-400/30 font-semibold uppercase">v4.0 Ultra</span>
       </div>
     </div>
 
-    <!-- Right Controls: Profile Sync, Split View Toggle, Theme -->
+    <!-- VPN PRIVACY SHIELD TOOLBAR MODULE -->
     <div class="flex items-center space-x-3">
-      <button onclick="toggleSplitView()" id="btnSplitView" class="hover:text-white px-2 py-1 rounded hover:bg-white/5 transition-colors flex items-center space-x-1" title="Toggle Split View Mode (Side-by-side tabs)">
+      <!-- VPN Status Badge & Indicator -->
+      <div id="vpnStatusCard" class="hidden sm:flex items-center space-x-2 bg-sneaky-omnibox px-2.5 py-1 rounded-full border border-sneaky-border text-[11px]">
+        <div id="vpnStatusLed" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse glow-box-green"></div>
+        <span id="vpnStatusLabel" class="font-bold text-emerald-400">VPN: ACTIVE</span>
+        <span class="text-gray-500">|</span>
+        <span id="vpnLocationLabel" class="text-gray-300 font-mono">🇯🇵 Tokyo</span>
+        <span class="text-gray-500">|</span>
+        <span id="vpnPingLabel" class="text-xs text-cyan-400 font-mono">24 ms</span>
+      </div>
+
+      <!-- VPN Toggle Switch -->
+      <button onclick="toggleVpnShield()" id="btnVpnToggle" class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-bold text-xs shadow-md">
+        <i class="fa-solid fa-shield-halved text-sm" id="vpnShieldIcon"></i>
+        <span id="vpnBtnText">Shield ON</span>
+      </button>
+
+      <!-- VPN Location Selector Dropdown -->
+      <select id="vpnLocationSelect" onchange="changeVpnLocation(this.value)" class="bg-sneaky-omnibox text-gray-200 border border-sneaky-border text-xs rounded-lg px-2 py-1 outline-none focus:border-indigo-500 font-semibold cursor-pointer">
+        <option value="tokyo">🇯🇵 Tokyo, JP</option>
+        <option value="ny">🇺🇸 New York, US</option>
+        <option value="london">🇬🇧 London, UK</option>
+        <option value="zurich">🇨🇭 Zurich, CH</option>
+        <option value="singapore">🇸🇬 Singapore, SG</option>
+      </select>
+
+      <div class="h-4 w-[1px] bg-sneaky-border"></div>
+
+      <!-- Split View Mode Button -->
+      <button onclick="toggleSplitView()" id="btnSplitView" class="hover:text-white px-2 py-1 rounded hover:bg-white/10 transition-colors flex items-center space-x-1 text-cyan-400" title="Toggle Split View Mode">
         <i class="fa-solid fa-columns text-sm"></i>
-        <span class="text-[11px] font-medium hidden sm:inline">Split View</span>
+        <span class="text-[11px] font-semibold hidden md:inline">Split Screen</span>
       </button>
 
-      <button onclick="openModal('syncModal')" id="btnSyncProfile" class="hover:text-white px-2 py-1 rounded hover:bg-white/5 transition-colors flex items-center space-x-1 text-indigo-400">
-        <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
-        <span id="syncStatusText" class="text-[11px] font-semibold">Cloud Sync</span>
-      </button>
-
-      <div class="h-3 w-[1px] bg-browser-border"></div>
-
-      <button onclick="openModal('settingsModal')" class="hover:text-white p-1 hover:bg-white/5 rounded transition-colors" title="Settings">
-        <i class="fa-solid fa-gear"></i>
-      </button>
+      <!-- Theme Selector Dropdown -->
+      <select onchange="applyTheme(this.value)" class="bg-sneaky-omnibox text-gray-200 border border-sneaky-border text-xs rounded-lg px-2 py-1 outline-none focus:border-indigo-500 font-semibold cursor-pointer">
+        <option value="cyber">🌌 Cyber Neon</option>
+        <option value="matrix">📟 Matrix Stealth</option>
+        <option value="space">🚀 Space Odyssey</option>
+        <option value="amoled">🖤 AMOLED Pitch</option>
+        <option value="candy">🍬 Candy Arcade</option>
+      </select>
     </div>
   </header>
 
-  <!-- MULTI-TAB BAR -->
-  <nav class="h-10 bg-browser-header border-b border-browser-border px-2 flex items-center space-x-1 shrink-0 overflow-x-auto no-scrollbar">
+  <!-- MULTI-TAB NAVIGATION BAR -->
+  <nav class="h-10 bg-sneaky-header border-b border-sneaky-border px-2 flex items-center space-x-1 shrink-0 overflow-x-auto no-scrollbar">
     <div id="tabsContainer" class="flex items-center space-x-1 flex-1 overflow-x-auto no-scrollbar"></div>
 
     <!-- New Tab Button -->
-    <button onclick="createNewTab()" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors shrink-0" title="New Tab (Ctrl+T)">
+    <button onclick="createNewTab()" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition-colors shrink-0" title="New Tab (Ctrl+T)">
       <i class="fa-solid fa-plus text-xs"></i>
     </button>
   </nav>
 
-  <!-- OMNIBOX & TOOLBAR HEADER -->
-  <div class="h-12 bg-browser-header border-b border-browser-border px-3 flex items-center space-x-2 shrink-0 z-20">
+  <!-- OMNIBOX & NAVIGATION TOOLBAR -->
+  <div class="h-12 bg-sneaky-header border-b border-sneaky-border px-3 flex items-center space-x-2 shrink-0 z-20">
     <!-- Navigation Buttons -->
-    <div class="flex items-center space-x-1 text-gray-400">
-      <button onclick="navigateHistory(-1)" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Back"><i class="fa-solid fa-arrow-left text-sm"></i></button>
-      <button onclick="navigateHistory(1)" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Forward"><i class="fa-solid fa-arrow-right text-sm"></i></button>
-      <button onclick="reloadCurrentTab()" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Reload (Ctrl+R)"><i class="fa-solid fa-rotate-right text-sm"></i></button>
-      <button onclick="navigateHome()" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Home"><i class="fa-solid fa-house text-sm"></i></button>
+    <div class="flex items-center space-x-1 text-gray-300">
+      <button onclick="navigateHistory(-1)" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Back"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+      <button onclick="navigateHistory(1)" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Forward"><i class="fa-solid fa-arrow-right text-sm"></i></button>
+      <button onclick="reloadCurrentTab()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Reload"><i class="fa-solid fa-rotate-right text-sm"></i></button>
+      <button onclick="navigateHome()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Home Dashboard"><i class="fa-solid fa-house text-sm"></i></button>
     </div>
 
     <!-- Omnibox Address Input -->
     <div class="flex-1 relative flex items-center">
       <div class="absolute left-3 flex items-center space-x-2 text-xs">
-        <button onclick="openModal('securityModal')" id="btnSecurityBadge" class="flex items-center space-x-1 text-emerald-400 hover:text-emerald-300" title="Security & Connection Info">
-          <i class="fa-solid fa-lock"></i>
+        <button onclick="openModal('vpnModal')" class="flex items-center space-x-1 text-emerald-400 hover:text-emerald-300" title="VPN & Security Settings">
+          <i class="fa-solid fa-lock text-xs"></i>
         </button>
       </div>
 
-      <input type="text" id="omniboxInput" onkeydown="handleOmniboxKeydown(event)" placeholder="Search with DuckDuckGo or enter web address..." class="w-full bg-browser-omnibox text-sm text-gray-100 pl-9 pr-10 py-1.5 rounded-lg border border-browser-border outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono" />
+      <input type="text" id="omniboxInput" onkeydown="handleOmniboxKeydown(event)" placeholder="Search web or enter address (e.g. sneaky://snake, sneaky://pong, sneaky://draw)..." class="w-full bg-sneaky-omnibox text-sm text-gray-100 pl-9 pr-24 py-1.5 rounded-xl border border-sneaky-border outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-mono shadow-inner" />
 
-      <button onclick="toggleBookmarkCurrentTab()" id="btnBookmarkStar" class="absolute right-3 text-gray-500 hover:text-yellow-400 transition-colors" title="Bookmark Page">
+      <!-- Search Engine Switcher inside Omnibox -->
+      <select id="searchEngineSelect" onchange="changeSearchEngine(this.value)" class="absolute right-8 text-[11px] bg-sneaky-card text-gray-300 border border-sneaky-border rounded-md px-1.5 py-0.5 outline-none font-semibold cursor-pointer">
+        <option value="kiddle">👧 Kiddle</option>
+        <option value="duckduckgo">🦆 DuckDuckGo</option>
+        <option value="google">🔍 Google</option>
+        <option value="ecosia">🌱 Ecosia</option>
+      </select>
+
+      <button onclick="toggleBookmarkCurrentTab()" id="btnBookmarkStar" class="absolute right-2 text-gray-400 hover:text-yellow-400 transition-colors" title="Bookmark Page">
         <i class="fa-solid fa-star text-xs"></i>
       </button>
     </div>
 
-    <!-- Quick Extension & Panel Action Tools -->
-    <div class="flex items-center space-x-1 text-gray-400">
-      <button onclick="toggleAdBlocker()" id="btnAdBlocker" class="p-2 text-emerald-400 hover:bg-white/5 rounded-lg transition-colors relative" title="AdBlock Shield Active">
-        <i class="fa-solid fa-shield-halved text-sm"></i>
-        <span id="adBlockCount" class="absolute -top-0.5 -right-0.5 bg-emerald-500 text-black text-[9px] font-black rounded-full w-3.5 h-3.5 flex items-center justify-center">0</span>
-      </button>
+    <!-- Quick Action Tools & Shortcuts -->
+    <div class="flex items-center space-x-1 text-gray-300">
+      <button onclick="navigateToUrl('sneaky://snake')" class="p-2 hover:text-pink-400 hover:bg-white/10 rounded-lg transition-colors" title="Play Snake Game"><i class="fa-solid fa-staff-snake text-sm"></i></button>
+      <button onclick="navigateToUrl('sneaky://pong')" class="p-2 hover:text-cyan-400 hover:bg-white/10 rounded-lg transition-colors" title="Play Pong Arcade"><i class="fa-solid fa-table-tennis-paddle-ball text-sm"></i></button>
+      <button onclick="navigateToUrl('sneaky://draw')" class="p-2 hover:text-yellow-400 hover:bg-white/10 rounded-lg transition-colors" title="Open Doodle Draw Pad"><i class="fa-solid fa-palette text-sm"></i></button>
+      
+      <div class="h-4 w-[1px] bg-sneaky-border my-auto"></div>
 
-      <button onclick="toggleReaderMode()" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Reader / Text Mode"><i class="fa-solid fa-book-open text-sm"></i></button>
-      <button onclick="toggleDevTools()" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="DevTools Console (Ctrl+Shift+I)"><i class="fa-solid fa-code text-sm"></i></button>
-      <button onclick="toggleDrawer('history')" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="History (Ctrl+H)"><i class="fa-solid fa-clock-rotate-left text-sm"></i></button>
-      <button onclick="toggleDrawer('bookmarks')" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Bookmarks Manager"><i class="fa-solid fa-bookmark text-sm"></i></button>
-      <button onclick="toggleDrawer('downloads')" class="p-2 hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Downloads Log"><i class="fa-solid fa-download text-sm"></i></button>
+      <button onclick="toggleReaderMode()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Toggle Reader Mode"><i class="fa-solid fa-book-open text-sm"></i></button>
+      <button onclick="toggleDevTools()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="DevTools Console"><i class="fa-solid fa-code text-sm"></i></button>
+      <button onclick="toggleDrawer('history')" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Browsing History"><i class="fa-solid fa-clock-rotate-left text-sm"></i></button>
+      <button onclick="toggleDrawer('bookmarks')" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Bookmarks Manager"><i class="fa-solid fa-bookmark text-sm"></i></button>
     </div>
   </div>
 
-  <!-- BOOKMARKS BAR (Under Omnibox) -->
-  <div id="bookmarksBar" class="h-8 bg-browser-sidebar border-b border-browser-border px-3 flex items-center space-x-2 text-xs text-gray-300 overflow-x-auto no-scrollbar shrink-0">
+  <!-- BOOKMARKS BAR -->
+  <div id="bookmarksBar" class="h-8 bg-sneaky-sidebar border-b border-sneaky-border px-3 flex items-center space-x-2 text-xs text-gray-300 overflow-x-auto no-scrollbar shrink-0">
     <div id="bookmarksQuickList" class="flex items-center space-x-2 flex-1"></div>
-    <button onclick="openModal('addBookmarkModal')" class="hover:text-white text-gray-400 text-xs px-2 py-0.5 rounded hover:bg-white/5"><i class="fa-solid fa-plus mr-1"></i>Add</button>
+    <button onclick="openModal('addBookmarkModal')" class="hover:text-white text-gray-400 text-xs px-2 py-0.5 rounded hover:bg-white/10 flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i><span>Bookmark</span></button>
   </div>
 
-  <!-- MAIN VIEWPORT AREA (Supports Single / Split View Modes) -->
-  <main id="mainViewportContainer" class="flex-1 flex min-h-0 relative overflow-hidden bg-browser-bg">
+  <!-- MAIN VIEWPORT CONTAINER (Single or Split View) -->
+  <main id="mainViewportContainer" class="flex-1 flex min-h-0 relative overflow-hidden bg-sneaky-bg">
     
     <!-- PRIMARY VIEWPORT -->
     <div id="primaryViewport" class="flex-1 flex flex-col min-w-0 h-full relative">
-      <!-- Loading Progress Indicator Bar -->
-      <div id="primaryLoadingBar" class="h-0.5 bg-indigo-500 hidden w-full loading-bar-active shrink-0"></div>
-      
+      <div id="primaryLoadingBar" class="h-0.5 bg-cyan-400 hidden w-full loading-bar-active shrink-0"></div>
       <div id="primaryContentArea" class="flex-1 w-full h-full relative"></div>
     </div>
 
     <!-- SECONDARY VIEWPORT (Split Screen) -->
-    <div id="secondaryViewport" class="hidden flex-1 flex flex-col min-w-0 h-full relative border-l border-browser-border">
-      <div id="secondaryLoadingBar" class="h-0.5 bg-indigo-500 hidden w-full loading-bar-active shrink-0"></div>
+    <div id="secondaryViewport" class="hidden flex-1 flex flex-col min-w-0 h-full relative border-l border-sneaky-border">
+      <div id="secondaryLoadingBar" class="h-0.5 bg-pink-400 hidden w-full loading-bar-active shrink-0"></div>
       <div id="secondaryContentArea" class="flex-1 w-full h-full relative"></div>
     </div>
 
   </main>
 
-  <!-- DEVTOOLS PANEL (BOTTOM SPLIT DRAWER) -->
-  <aside id="devToolsDrawer" class="hidden h-64 bg-browser-card border-t border-browser-border flex flex-col shrink-0 z-30 font-mono text-xs">
-    <div class="h-8 bg-browser-header px-3 border-b border-browser-border flex items-center justify-between text-gray-400">
+  <!-- DEVTOOLS PANEL (BOTTOM DRAWER) -->
+  <aside id="devToolsDrawer" class="hidden h-64 bg-sneaky-card border-t border-sneaky-border flex flex-col shrink-0 z-30 font-mono text-xs">
+    <div class="h-8 bg-sneaky-header px-3 border-b border-sneaky-border flex items-center justify-between text-gray-400">
       <div class="flex space-x-4 font-bold">
-        <button onclick="switchDevTab('console')" id="devTab-console" class="text-white border-b-2 border-indigo-500 pb-1">Console</button>
-        <button onclick="switchDevTab('elements')" id="devTab-elements" class="hover:text-white pb-1">Elements / Inspector</button>
-        <button onclick="switchDevTab('network')" id="devTab-network" class="hover:text-white pb-1">Network Log</button>
-        <button onclick="switchDevTab('storage')" id="devTab-storage" class="hover:text-white pb-1">Storage & State</button>
+        <button onclick="switchDevTab('console')" id="devTab-console" class="text-white border-b-2 border-cyan-400 pb-1">Console</button>
+        <button onclick="switchDevTab('elements')" id="devTab-elements" class="hover:text-white pb-1">DOM Inspector</button>
+        <button onclick="switchDevTab('network')" id="devTab-network" class="hover:text-white pb-1">Network Activity</button>
+        <button onclick="switchDevTab('storage')" id="devTab-storage" class="hover:text-white pb-1">Local Storage</button>
       </div>
       <button onclick="toggleDevTools()" class="hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <div class="flex-1 p-3 overflow-y-auto space-y-2 bg-browser-omnibox text-gray-300">
+    <div class="flex-1 p-3 overflow-y-auto space-y-2 bg-sneaky-omnibox text-gray-300">
       <!-- CONSOLE VIEW -->
       <div id="devContent-console" class="space-y-1 h-full flex flex-col">
-        <div id="consoleLogOutput" class="flex-1 overflow-y-auto space-y-1 font-mono text-[11px] text-green-400">
-          <div>[NexusBrowser DevTools Engine Initialized]</div>
+        <div id="consoleLogOutput" class="flex-1 overflow-y-auto space-y-1 font-mono text-[11px] text-emerald-400">
+          <div>[SneakyKidVille DevTools Engine Ready]</div>
         </div>
-        <div class="flex items-center space-x-2 pt-2 border-t border-browser-border">
-          <span class="text-indigo-400 font-bold">&gt;</span>
-          <input type="text" id="consoleInput" onkeydown="handleConsoleEval(event)" placeholder="Evaluate JavaScript in active frame context..." class="w-full bg-transparent outline-none text-white font-mono text-xs" />
+        <div class="flex items-center space-x-2 pt-2 border-t border-sneaky-border">
+          <span class="text-cyan-400 font-bold">&gt;</span>
+          <input type="text" id="consoleInput" onkeydown="handleConsoleEval(event)" placeholder="Evaluate JavaScript code..." class="w-full bg-transparent outline-none text-white font-mono text-xs" />
         </div>
       </div>
 
-      <!-- ELEMENTS VIEW -->
+      <!-- DOM INSPECTOR VIEW -->
       <div id="devContent-elements" class="hidden space-y-1 text-indigo-300">
         <div class="text-gray-400">&lt;!DOCTYPE html&gt;</div>
-        <div class="pl-2">&lt;html lang="en"&gt;</div>
-        <div class="pl-4 text-emerald-400" id="devFrameDomPreview">&lt;head&gt;...&lt;/head&gt; &lt;body&gt;Virtual Web View Frame Context Active&lt;/body&gt;</div>
+        <div class="pl-2">&lt;html lang="en" class="sneaky-os"&gt;</div>
+        <div class="pl-4 text-emerald-400" id="devFrameDomPreview">&lt;head&gt;...&lt;/head&gt; &lt;body&gt;SneakyKidVille Active Frame Sandbox Context&lt;/body&gt;</div>
         <div class="pl-2">&lt;/html&gt;</div>
       </div>
 
       <!-- NETWORK VIEW -->
       <div id="devContent-network" class="hidden space-y-1">
         <table class="w-full text-left text-[11px]">
-          <thead class="text-gray-500 border-b border-browser-border">
-            <tr><th>Name</th><th>Status</th><th>Type</th><th>Time</th></tr>
+          <thead class="text-gray-500 border-b border-sneaky-border">
+            <tr><th>Resource</th><th>Status</th><th>Type</th><th>Latency</th></tr>
           </thead>
           <tbody id="networkLogTableBody" class="text-gray-300">
-            <tr><td>https://duckduckgo.com</td><td class="text-emerald-400">200 OK</td><td>document</td><td>120ms</td></tr>
+            <tr><td>https://kiddle.co</td><td class="text-emerald-400">200 OK</td><td>document</td><td>32ms</td></tr>
+            <tr><td>VPN Tunnel (Encrypted)</td><td class="text-cyan-400">AES-256</td><td>websocket</td><td>24ms</td></tr>
           </tbody>
         </table>
       </div>
 
       <!-- STORAGE VIEW -->
       <div id="devContent-storage" class="hidden space-y-2">
-        <div class="text-xs font-bold text-gray-400 uppercase">Local Storage Keys</div>
+        <div class="text-xs font-bold text-gray-400 uppercase">Local Storage Persistence Keys</div>
         <div id="devStorageKeys" class="space-y-1 text-[11px] font-mono text-amber-300"></div>
       </div>
     </div>
   </aside>
 
-  <!-- DRAWERS (History, Bookmarks, Downloads) -->
-  <aside id="sideDrawer" class="hidden fixed top-21 right-0 bottom-0 w-80 bg-browser-card border-l border-browser-border shadow-2xl z-40 flex flex-col">
-    <div class="p-4 border-b border-browser-border flex justify-between items-center bg-browser-header">
+  <!-- DRAWERS (History, Bookmarks) -->
+  <aside id="sideDrawer" class="hidden fixed top-22 right-0 bottom-0 w-80 bg-sneaky-card border-l border-sneaky-border shadow-2xl z-40 flex flex-col">
+    <div class="p-4 border-b border-sneaky-border flex justify-between items-center bg-sneaky-header">
       <h3 id="drawerTitle" class="font-bold text-sm text-white flex items-center gap-2">
-        <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i>
+        <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
         <span>Browsing History</span>
       </h3>
       <button onclick="toggleDrawer(null)" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <!-- Search Input in Drawer -->
-    <div class="p-3 border-b border-browser-border">
-      <input type="text" id="drawerSearchInput" oninput="filterDrawerItems(this.value)" placeholder="Search records..." class="w-full bg-browser-omnibox px-3 py-1.5 rounded text-xs text-gray-200 outline-none border border-browser-border" />
+    <div class="p-3 border-b border-sneaky-border">
+      <input type="text" id="drawerSearchInput" oninput="filterDrawerItems(this.value)" placeholder="Search entries..." class="w-full bg-sneaky-omnibox px-3 py-1.5 rounded-lg text-xs text-gray-200 outline-none border border-sneaky-border" />
     </div>
 
     <div id="drawerListContainer" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
 
-    <div id="drawerFooter" class="p-3 border-t border-browser-border flex justify-between items-center bg-browser-header">
+    <div class="p-3 border-t border-sneaky-border flex justify-between items-center bg-sneaky-header">
       <button onclick="clearCurrentDrawerData()" class="text-xs text-red-400 hover:text-red-300 font-bold flex items-center gap-1">
         <i class="fa-solid fa-trash"></i>
-        <span>Clear All Data</span>
+        <span>Clear Storage</span>
       </button>
     </div>
   </aside>
 
   <!-- MODALS -->
 
+  <!-- VPN MODAL -->
+  <div id="vpnModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="bg-sneaky-card border border-sneaky-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-sneaky-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+          <span>VPN & Privacy Shield Status</span>
+        </h3>
+        <button onclick="closeModal('vpnModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-3 bg-sneaky-omnibox border border-sneaky-border rounded-xl space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">Shield Protection:</span>
+            <span id="modalVpnStatus" class="font-bold text-emerald-400">Active • AES-256 Encryption</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">Virtual Assigned IP:</span>
+            <span id="modalVpnIp" class="font-mono text-cyan-400 font-bold">185.220.101.45</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">Server Node Location:</span>
+            <span id="modalVpnLoc" class="font-bold text-white">🇯🇵 Tokyo, Japan</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">Simulated Bandwidth:</span>
+            <span id="modalVpnBandwidth" class="font-mono text-pink-400">4.8 MB/s Encrypted</span>
+          </div>
+        </div>
+
+        <p class="text-gray-400 leading-relaxed">
+          SneakyKidVille OS routes all embedded web traffic through virtual stealth tunnels to keep browsing safe, private, and fun.
+        </p>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="closeModal('vpnModal')" class="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-500">Close Panel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ADD BOOKMARK MODAL -->
-  <div id="addBookmarkModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-browser-card border border-browser-border rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
+  <div id="addBookmarkModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="bg-sneaky-card border border-sneaky-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <h3 class="text-base font-bold text-white flex items-center gap-2">
         <i class="fa-solid fa-star text-yellow-400"></i>
         <span>Add New Bookmark</span>
@@ -288,256 +394,109 @@
       <div class="space-y-3 text-xs">
         <div>
           <label class="block text-gray-400 mb-1 font-semibold">Title</label>
-          <input type="text" id="bmInputTitle" placeholder="Wikipedia" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500" />
+          <input type="text" id="bmInputTitle" placeholder="NASA Kids Club" class="w-full bg-sneaky-omnibox border border-sneaky-border rounded-lg p-2.5 text-white outline-none focus:border-cyan-500" />
         </div>
         <div>
           <label class="block text-gray-400 mb-1 font-semibold">URL</label>
-          <input type="text" id="bmInputUrl" placeholder="https://wikipedia.org" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500" />
+          <input type="text" id="bmInputUrl" placeholder="https://nasa.gov" class="w-full bg-sneaky-omnibox border border-sneaky-border rounded-lg p-2.5 text-white outline-none focus:border-cyan-500" />
         </div>
       </div>
       <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="closeModal('addBookmarkModal')" class="px-4 py-1.5 rounded text-xs text-gray-400 hover:text-white">Cancel</button>
-        <button onclick="saveNewBookmark()" class="px-4 py-1.5 rounded text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-500 transition-colors">Save Bookmark</button>
+        <button onclick="closeModal('addBookmarkModal')" class="px-4 py-2 rounded-xl text-xs text-gray-400 hover:text-white">Cancel</button>
+        <button onclick="saveNewBookmark()" class="px-5 py-2 rounded-xl text-xs font-bold bg-cyan-600 text-white hover:bg-cyan-500">Save Bookmark</button>
       </div>
     </div>
   </div>
 
-  <!-- ADD SPEED DIAL SHORTCUT MODAL -->
-  <div id="addShortcutModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-browser-card border border-browser-border rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <h3 class="text-base font-bold text-white flex items-center gap-2">
-        <i class="fa-solid fa-grid-plus text-indigo-400"></i>
-        <span>Add Speed Dial Shortcut</span>
-      </h3>
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-gray-400 mb-1 font-semibold">Shortcut Name</label>
-          <input type="text" id="scInputTitle" placeholder="GitHub" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500" />
-        </div>
-        <div>
-          <label class="block text-gray-400 mb-1 font-semibold">URL</label>
-          <input type="text" id="scInputUrl" placeholder="https://github.com" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500" />
-        </div>
-        <div>
-          <label class="block text-gray-400 mb-1 font-semibold">Icon Class (FontAwesome)</label>
-          <input type="text" id="scInputIcon" placeholder="fa-brands fa-github" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500" />
-        </div>
-      </div>
-      <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="closeModal('addShortcutModal')" class="px-4 py-1.5 rounded text-xs text-gray-400 hover:text-white">Cancel</button>
-        <button onclick="saveNewShortcut()" class="px-4 py-1.5 rounded text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-500 transition-colors">Add Shortcut</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- BROWSER SETTINGS MODAL -->
-  <div id="settingsModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-browser-card border border-browser-border rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-5">
-      <div class="flex justify-between items-center border-b border-browser-border pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-gear text-indigo-400"></i>
-          <span>Browser Settings & Customization</span>
-        </h3>
-        <button onclick="closeModal('settingsModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <div class="space-y-4 text-xs">
-        <div>
-          <label class="block text-gray-400 mb-1 font-semibold">Default Search Engine</label>
-          <select id="settingSearchEngine" onchange="updateSettings()" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500">
-            <option value="duckduckgo">DuckDuckGo (Privacy Focus)</option>
-            <option value="google">Google Search</option>
-            <option value="bing">Microsoft Bing</option>
-            <option value="ecosia">Ecosia (Plant Trees)</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-gray-400 mb-1 font-semibold">Visual Theme</label>
-          <select id="settingTheme" onchange="applyTheme(this.value)" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500">
-            <option value="dark">Nexus Dark Glass</option>
-            <option value="amoled">Pitch Black AMOLED</option>
-            <option value="neon">Cyberpunk Neon</option>
-            <option value="sunset">Sunset Wave</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-gray-400 mb-1 font-semibold">User Agent Simulation</label>
-          <select id="settingUserAgent" onchange="updateSettings()" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500">
-            <option value="chrome_desktop">Mozilla/5.0 (Windows NT 10.0; Chrome/122.0)</option>
-            <option value="safari_mac">Mozilla/5.0 (Macintosh; Intel Mac OS X 14_3; Safari)</option>
-            <option value="firefox_desktop">Mozilla/5.0 (X11; Linux x86_64; Firefox/123.0)</option>
-            <option value="mobile_iphone">Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X)</option>
-          </select>
-        </div>
-
-        <div class="pt-2 border-t border-browser-border space-y-2">
-          <label class="flex items-center justify-between cursor-pointer">
-            <span class="text-gray-300 font-medium">Enable AdBlock Shield Simulator</span>
-            <input type="checkbox" id="settingAdBlock" onchange="updateSettings()" checked class="w-4 h-4 accent-indigo-500" />
-          </label>
-
-          <label class="flex items-center justify-between cursor-pointer">
-            <span class="text-gray-300 font-medium">Enforce HTTPS Secure Requests</span>
-            <input type="checkbox" id="settingHttpsEnforce" onchange="updateSettings()" checked class="w-4 h-4 accent-indigo-500" />
-          </label>
-        </div>
-      </div>
-
-      <div class="flex justify-end pt-3 border-t border-browser-border">
-        <button onclick="closeModal('settingsModal')" class="px-5 py-1.5 rounded text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-500 transition-colors">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- SECURITY & SSL INFO MODAL -->
-  <div id="securityModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-browser-card border border-browser-border rounded-xl max-w-sm w-full p-5 shadow-2xl space-y-3">
-      <div class="flex items-center space-x-3 text-emerald-400">
-        <i class="fa-solid fa-shield-check text-2xl"></i>
-        <div>
-          <h4 class="font-bold text-sm text-white">Secure Connection</h4>
-          <p class="text-[11px] text-gray-400">TLS 1.3 / 256-bit Encryption Active</p>
-        </div>
-      </div>
-      <p class="text-xs text-gray-300 leading-relaxed bg-browser-omnibox p-3 rounded border border-browser-border">
-        Your information (passwords, cookies, messages) is encrypted in transit. Privacy Shield is active and blocking trackers.
-      </p>
-      <div class="flex justify-end">
-        <button onclick="closeModal('securityModal')" class="px-4 py-1 rounded text-xs font-bold bg-browser-header text-white border border-browser-border">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- SUPABASE CLOUD SYNC & AUTH MODAL -->
-  <div id="syncModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-browser-card border border-browser-border rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <div class="flex justify-between items-center border-b border-browser-border pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
-          <span>Supabase Profile Sync</span>
-        </h3>
-        <button onclick="closeModal('syncModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <div id="syncAuthStatusView" class="space-y-3 text-xs">
-        <p class="text-gray-400">Connect to your Supabase account to sync bookmarks, browsing history, and preferences across all devices.</p>
-
-        <div>
-          <label class="block text-gray-400 mb-1 font-semibold">Email</label>
-          <input type="email" id="syncEmailInput" placeholder="user@nexus.io" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500" />
-        </div>
-        <div>
-          <label class="block text-gray-400 mb-1 font-semibold">Password</label>
-          <input type="password" id="syncPasswordInput" class="w-full bg-browser-omnibox border border-browser-border rounded p-2 text-white outline-none focus:border-indigo-500" />
-        </div>
-
-        <div class="flex space-x-2 pt-2">
-          <button onclick="handleSupabaseLogin()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded transition-colors">Log In & Sync</button>
-          <button onclick="handleSupabaseSignup()" class="flex-1 border border-indigo-500 text-indigo-400 hover:bg-indigo-500/10 font-bold py-2 rounded transition-colors">Sign Up</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CORE BROWSER JAVASCRIPT LOGIC -->
+  <!-- CORE JAVASCRIPT APP LOGIC -->
   <script>
     // =========================================================================
-    // 1. STATE & SUPABASE CLIENT INITIALIZATION
+    // 1. STATE & INITIALIZATION
     // =========================================================================
-    const SUPABASE_URL = "https://unjvzzlwxpmiqyrovbce.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuanZ6emx3eHBtaXF5cm92YmNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODE1MDAsImV4cCI6MjEwODg1NzUwMH0.WKKvm2xkIJf8nJLy8eV4ndQZ7LF1qp5ExHGX6LL3a_A";
-    const { createClient } = supabase;
-    const sbClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     let tabs = [];
     let activeTabId = null;
     let splitTabId = null;
     let isSplitView = false;
     let activeDrawer = null;
 
+    let vpnState = {
+      active: true,
+      location: 'tokyo',
+      ip: '185.220.101.45',
+      ping: 24,
+      locations: {
+        tokyo: { name: '🇯🇵 Tokyo, JP', ip: '185.220.101.45', ping: 24 },
+        ny: { name: '🇺🇸 New York, US', ip: '104.244.76.12', ping: 48 },
+        london: { name: '🇬🇧 London, UK', ip: '185.220.102.8', ping: 38 },
+        zurich: { name: '🇨🇭 Zurich, CH', ip: '193.138.218.3', ping: 52 },
+        singapore: { name: '🇸🇬 Singapore, SG', ip: '103.253.25.10', ping: 31 }
+      }
+    };
+
     let bookmarks = [
-      { id: '1', title: 'Wikipedia', url: 'https://wikipedia.org', icon: 'fa-solid fa-globe' },
-      { id: '2', title: 'Internet Archive', url: 'https://archive.org', icon: 'fa-solid fa-vault' },
-      { id: '3', title: 'DuckDuckGo', url: 'https://duckduckgo.com', icon: 'fa-solid fa-shield-cat' },
-      { id: '4', title: 'Arcade Canvas', url: 'nexus://games', icon: 'fa-solid fa-gamepad' },
-      { id: '5', title: 'JS Code Editor', url: 'nexus://code', icon: 'fa-solid fa-code' }
+      { id: '1', title: 'Scratch', url: 'https://scratch.mit.edu', icon: 'fa-solid fa-cat' },
+      { id: '2', title: 'NASA Kids', url: 'https://www.nasa.gov/learning-resources/nasa-kids-club', icon: 'fa-solid fa-rocket' },
+      { id: '3', title: 'PBS Kids', url: 'https://pbskids.org', icon: 'fa-solid fa-tv' },
+      { id: '4', title: 'Code.org', url: 'https://code.org', icon: 'fa-solid fa-laptop-code' },
+      { id: '5', title: 'Snake Game', url: 'sneaky://snake', icon: 'fa-solid fa-staff-snake' },
+      { id: '6', title: 'Pong Arcade', url: 'sneaky://pong', icon: 'fa-solid fa-table-tennis-paddle-ball' },
+      { id: '7', title: 'Doodle Pad', url: 'sneaky://draw', icon: 'fa-solid fa-palette' }
     ];
 
-    let speedDialShortcuts = [
-      { id: 's1', title: 'Wikipedia', url: 'https://wikipedia.org', icon: 'fa-solid fa-globe' },
-      { id: 's2', title: 'DuckDuckGo', url: 'https://duckduckgo.com', icon: 'fa-solid fa-magnifying-glass' },
-      { id: 's3', title: 'Hacker News', url: 'https://news.ycombinator.com', icon: 'fa-brands fa-y-combinator' },
-      { id: 's4', title: 'GitHub', url: 'https://github.com', icon: 'fa-brands fa-github' },
-      { id: 's5', title: 'Internet Archive', url: 'https://archive.org', icon: 'fa-solid fa-vault' },
-      { id: 's6', title: 'Arcade Game', url: 'nexus://games', icon: 'fa-solid fa-gamepad' },
-      { id: 's7', title: 'Code Editor', url: 'nexus://code', icon: 'fa-solid fa-laptop-code' }
+    let speedDialPortals = [
+      { title: 'Scratch MIT', desc: 'Create Games & Animations', url: 'https://scratch.mit.edu', icon: 'fa-solid fa-cat', color: 'from-amber-500 to-orange-500' },
+      { title: 'NASA Kids Club', desc: 'Explore Space & Science', url: 'https://www.nasa.gov/learning-resources/nasa-kids-club', icon: 'fa-solid fa-rocket', color: 'from-blue-600 to-indigo-600' },
+      { title: 'PBS Kids', desc: 'Fun Educational Games', url: 'https://pbskids.org', icon: 'fa-solid fa-gamepad', color: 'from-emerald-500 to-teal-600' },
+      { title: 'Code.org', desc: 'Learn Coding for Kids', url: 'https://code.org', icon: 'fa-solid fa-code', color: 'from-purple-600 to-pink-600' },
+      { title: 'Chess.com', desc: 'Play Chess Online', url: 'https://www.chess.com', icon: 'fa-solid fa-chess', color: 'from-yellow-600 to-amber-700' },
+      { title: 'Nat Geo Kids', desc: 'Animals & Planet Earth', url: 'https://kids.nationalgeographic.com', icon: 'fa-solid fa-earth-americas', color: 'from-yellow-500 to-green-600' }
     ];
 
     let historyLog = [];
-    let downloadsLog = [];
-    let blockedAdsCount = 14;
+    let searchEngine = 'kiddle';
+    let currentTheme = 'cyber';
 
-    let browserSettings = {
-      searchEngine: 'duckduckgo',
-      theme: 'dark',
-      userAgent: 'chrome_desktop',
-      adBlockEnabled: true,
-      httpsEnforce: true
-    };
-
-    let activeDevTab = 'console';
-
-    // =========================================================================
-    // 2. LIFECYCLE & INITIAL LOAD
-    // =========================================================================
     window.addEventListener('load', () => {
       loadSavedState();
       setupKeyboardShortcuts();
-      
-      // Initialize with default New Tab
-      createNewTab('nexus://newtab');
+      createNewTab('sneaky://newtab');
       renderBookmarksBar();
-      updateClock();
-      setInterval(updateClock, 1000);
+      startVpnPingFluctuator();
     });
 
     function loadSavedState() {
-      const savedBm = localStorage.getItem('nexus_bookmarks');
+      const savedBm = localStorage.getItem('sneaky_bookmarks');
       if (savedBm) bookmarks = JSON.parse(savedBm);
 
-      const savedHist = localStorage.getItem('nexus_history');
+      const savedHist = localStorage.getItem('sneaky_history');
       if (savedHist) historyLog = JSON.parse(savedHist);
 
-      const savedSettings = localStorage.getItem('nexus_settings');
-      if (savedSettings) {
-        browserSettings = JSON.parse(savedSettings);
-        applyTheme(browserSettings.theme);
+      const savedVpn = localStorage.getItem('sneaky_vpn');
+      if (savedVpn) {
+        vpnState = JSON.parse(savedVpn);
+        updateVpnUI();
       }
     }
 
     function saveState() {
-      localStorage.setItem('nexus_bookmarks', JSON.stringify(bookmarks));
-      localStorage.setItem('nexus_history', JSON.stringify(historyLog));
-      localStorage.setItem('nexus_settings', JSON.stringify(browserSettings));
+      localStorage.setItem('sneaky_bookmarks', JSON.stringify(bookmarks));
+      localStorage.setItem('sneaky_history', JSON.stringify(historyLog));
+      localStorage.setItem('sneaky_vpn', JSON.stringify(vpnState));
     }
 
     // =========================================================================
-    // 3. TAB MANAGEMENT & NAVIGATION
+    // 2. TAB MANAGEMENT & NAVIGATION
     // =========================================================================
-    function createNewTab(url = 'nexus://newtab') {
+    function createNewTab(url = 'sneaky://newtab') {
       const tabId = 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
       const newTab = {
         id: tabId,
-        title: 'New Tab',
+        title: getUrlTitle(url),
         url: url,
-        favicon: 'fa-solid fa-globe',
-        isLoading: false,
-        isPinned: false,
+        favicon: getUrlIcon(url),
         historyStack: [url],
         historyIndex: 0,
-        mode: 'standard' // 'standard', 'reader', 'iframe_blocked'
+        mode: 'standard'
       };
 
       tabs.push(newTab);
@@ -551,7 +510,7 @@
       const currentTab = getActiveTab();
       if (!currentTab) return;
 
-      document.getElementById('omniboxInput').value = (currentTab.url === 'nexus://newtab') ? '' : currentTab.url;
+      document.getElementById('omniboxInput').value = (currentTab.url === 'sneaky://newtab') ? '' : currentTab.url;
       renderViewport('primaryContentArea', currentTab);
 
       if (isSplitView && splitTabId) {
@@ -563,16 +522,12 @@
     function closeTab(tabId, e) {
       if (e) e.stopPropagation();
       if (tabs.length === 1) {
-        createNewTab('nexus://newtab');
+        createNewTab('sneaky://newtab');
       }
 
       tabs = tabs.filter(t => t.id !== tabId);
-      if (activeTabId === tabId) {
-        activeTabId = tabs[tabs.length - 1].id;
-      }
-      if (splitTabId === tabId) {
-        splitTabId = null;
-      }
+      if (activeTabId === tabId) activeTabId = tabs[tabs.length - 1].id;
+      if (splitTabId === tabId) splitTabId = null;
 
       switchTab(activeTabId);
     }
@@ -589,12 +544,12 @@
         const isActive = (tab.id === activeTabId);
         const tabEl = document.createElement('div');
         tabEl.onclick = () => switchTab(tab.id);
-        tabEl.className = `group flex items-center space-x-2 px-3 py-1.5 rounded-t-lg border-t border-x border-browser-border text-xs cursor-pointer transition-all min-w-[120px] max-w-[200px] shrink-0 ${
-          isActive ? 'bg-browser-tabActive text-white font-bold border-b-2 border-b-indigo-500' : 'bg-browser-tabInactive text-gray-400 hover:bg-white/5'
+        tabEl.className = `group flex items-center space-x-2 px-3 py-1.5 rounded-t-xl border-t border-x border-sneaky-border text-xs cursor-pointer transition-all min-w-[130px] max-w-[210px] shrink-0 ${
+          isActive ? 'bg-sneaky-tabActive text-white font-bold border-b-2 border-b-cyan-400 shadow-lg' : 'bg-sneaky-tabInactive text-gray-400 hover:bg-white/5'
         }`;
 
         tabEl.innerHTML = `
-          <i class="${tab.favicon} text-[11px] text-indigo-400 shrink-0"></i>
+          <i class="${tab.favicon} text-[11px] text-cyan-400 shrink-0"></i>
           <span class="truncate flex-1">${escapeHTML(tab.title)}</span>
           <button onclick="closeTab('${tab.id}', event)" class="opacity-0 group-hover:opacity-100 p-0.5 hover:text-red-400 rounded transition-opacity shrink-0">
             <i class="fa-solid fa-xmark text-[10px]"></i>
@@ -606,22 +561,19 @@
     }
 
     // =========================================================================
-    // 4. OMNIBOX & URL RESOLUTION ENGINE
+    // 3. OMNIBOX & URL RESOLUTION
     // =========================================================================
     function handleOmniboxKeydown(e) {
       if (e.key === 'Enter') {
-        const inputVal = e.target.value.trim();
-        if (!inputVal) return;
-
-        const resolvedUrl = resolveUrlOrSearch(inputVal);
-        navigateToUrl(resolvedUrl);
+        const val = e.target.value.trim();
+        if (!val) return;
+        navigateToUrl(resolveUrlOrSearch(val));
       }
     }
 
     function resolveUrlOrSearch(query) {
-      if (query.startsWith('nexus://')) return query;
+      if (query.startsWith('sneaky://')) return query;
 
-      // Regex check for standard domain / URL format
       const urlPattern = /^(https?:\/\/)?([\w\d\-_]+\.)+[\w\d\-_]+(\/.*)?$/i;
       if (urlPattern.test(query)) {
         if (!query.startsWith('http://') && !query.startsWith('https://')) {
@@ -630,16 +582,14 @@
         return query;
       }
 
-      // Default to search engine
-      const searchEngines = {
+      const engines = {
+        kiddle: 'https://www.kiddle.co/s.php?q=',
         duckduckgo: 'https://duckduckgo.com/?q=',
         google: 'https://www.google.com/search?q=',
-        bing: 'https://www.bing.com/search?q=',
         ecosia: 'https://www.ecosia.org/search?q='
       };
 
-      const baseSearch = searchEngines[browserSettings.searchEngine] || searchEngines.duckduckgo;
-      return baseSearch + encodeURIComponent(query);
+      return (engines[searchEngine] || engines.kiddle) + encodeURIComponent(query);
     }
 
     function navigateToUrl(url) {
@@ -647,7 +597,8 @@
       if (!tab) return;
 
       tab.url = url;
-      tab.title = formatUrlTitle(url);
+      tab.title = getUrlTitle(url);
+      tab.favicon = getUrlIcon(url);
       tab.mode = 'standard';
 
       if (tab.historyIndex < tab.historyStack.length - 1) {
@@ -656,24 +607,30 @@
       tab.historyStack.push(url);
       tab.historyIndex = tab.historyStack.length - 1;
 
-      // Log to Browsing History
       logHistory(tab.title, url);
-
-      document.getElementById('omniboxInput').value = (url === 'nexus://newtab') ? '' : url;
+      document.getElementById('omniboxInput').value = (url === 'sneaky://newtab') ? '' : url;
       renderTabsBar();
       renderViewport('primaryContentArea', tab);
     }
 
-    function formatUrlTitle(url) {
-      if (url === 'nexus://newtab') return 'New Tab';
-      if (url === 'nexus://games') return 'Arcade Canvas';
-      if (url === 'nexus://code') return 'Code Playground';
+    function getUrlTitle(url) {
+      if (url === 'sneaky://newtab') return 'Sneaky Portal';
+      if (url === 'sneaky://snake') return 'Arcade Snake';
+      if (url === 'sneaky://pong') return 'Pong Arcade';
+      if (url === 'sneaky://draw') return 'Doodle Pad';
       try {
-        const parsed = new URL(url);
-        return parsed.hostname.replace('www.', '');
+        return new URL(url).hostname.replace('www.', '');
       } catch (e) {
         return url;
       }
+    }
+
+    function getUrlIcon(url) {
+      if (url === 'sneaky://newtab') return 'fa-solid fa-house';
+      if (url === 'sneaky://snake') return 'fa-solid fa-staff-snake';
+      if (url === 'sneaky://pong') return 'fa-solid fa-table-tennis-paddle-ball';
+      if (url === 'sneaky://draw') return 'fa-solid fa-palette';
+      return 'fa-solid fa-globe';
     }
 
     function reloadCurrentTab() {
@@ -682,58 +639,56 @@
     }
 
     function navigateHome() {
-      navigateToUrl('nexus://newtab');
+      navigateToUrl('sneaky://newtab');
     }
 
-    function navigateHistory(direction) {
+    function navigateHistory(dir) {
       const tab = getActiveTab();
       if (!tab) return;
-
-      const newIndex = tab.historyIndex + direction;
-      if (newIndex >= 0 && newIndex < tab.historyStack.length) {
-        tab.historyIndex = newIndex;
-        tab.url = tab.historyStack[newIndex];
-        document.getElementById('omniboxInput').value = (tab.url === 'nexus://newtab') ? '' : tab.url;
+      const newIdx = tab.historyIndex + dir;
+      if (newIdx >= 0 && newIdx < tab.historyStack.length) {
+        tab.historyIndex = newIdx;
+        tab.url = tab.historyStack[newIdx];
+        document.getElementById('omniboxInput').value = (tab.url === 'sneaky://newtab') ? '' : tab.url;
         renderViewport('primaryContentArea', tab);
       }
     }
 
     // =========================================================================
-    // 5. MULTI-MODE VIEWPORT RENDERER (IFrame, Reader Mode, Embedded Apps)
+    // 4. MULTI-MODE VIEWPORT RENDERER
     // =========================================================================
-    function renderViewport(targetContainerId, tab) {
-      const container = document.getElementById(targetContainerId);
+    function renderViewport(targetId, tab) {
+      const container = document.getElementById(targetId);
       container.innerHTML = '';
 
-      if (tab.url === 'nexus://newtab') {
-        renderSpeedDialDashboard(container);
+      if (tab.url === 'sneaky://newtab') {
+        renderSpeedDialPortal(container);
         return;
       }
-
-      if (tab.url === 'nexus://games') {
-        renderArcadeGameApp(container);
+      if (tab.url === 'sneaky://snake') {
+        renderSnakeGameApp(container);
         return;
       }
-
-      if (tab.url === 'nexus://code') {
-        renderCodePlaygroundApp(container);
+      if (tab.url === 'sneaky://pong') {
+        renderPongGameApp(container);
         return;
       }
-
+      if (tab.url === 'sneaky://draw') {
+        renderDoodlePadApp(container);
+        return;
+      }
       if (tab.mode === 'reader') {
         renderReaderViewMode(container, tab.url);
         return;
       }
 
-      // Detect known framing restrictions (e.g. Google, X, Facebook) or render Sandbox IFrame
-      const isKnownBlocked = isFrameBlockedDomain(tab.url);
-
-      if (isKnownBlocked || tab.mode === 'iframe_blocked') {
+      const isKnownFrameBlocked = isBlockedFrameDomain(tab.url);
+      if (isKnownFrameBlocked || tab.mode === 'iframe_blocked') {
         renderIframeBlockedFallback(container, tab.url);
         return;
       }
 
-      // Standard Responsive IFrame View
+      // Standard Responsive Sandbox Frame
       const iframe = document.createElement('iframe');
       iframe.src = tab.url;
       iframe.className = 'w-full h-full border-0 bg-white';
@@ -747,31 +702,31 @@
       container.appendChild(iframe);
     }
 
-    function isFrameBlockedDomain(url) {
-      const blockedList = ['google.com', 'x.com', 'twitter.com', 'facebook.com', 'github.com/login'];
+    function isBlockedFrameDomain(url) {
+      const blockedList = ['google.com', 'x.com', 'twitter.com', 'facebook.com', 'youtube.com'];
       return blockedList.some(domain => url.includes(domain));
     }
 
     function renderIframeBlockedFallback(container, url) {
       container.innerHTML = `
-        <div class="h-full flex flex-col items-center justify-center p-8 bg-browser-card text-center space-y-4">
-          <div class="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xl border border-indigo-500/20">
+        <div class="h-full flex flex-col items-center justify-center p-8 bg-sneaky-card text-center space-y-4">
+          <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-3xl border border-cyan-500/30 shadow-xl">
             <i class="fa-solid fa-shield-cat"></i>
           </div>
           <div class="max-w-md space-y-2">
-            <h3 class="text-lg font-bold text-white">Framing Restricted by Website</h3>
+            <h3 class="text-lg font-bold text-white">Framing Restricted by Web Server</h3>
             <p class="text-xs text-gray-400 leading-relaxed">
-              <span class="font-mono text-indigo-300">${escapeHTML(url)}</span> restricts embedding in iframe containers due to security policies (X-Frame-Options / CSP headers).
+              <span class="font-mono text-cyan-300">${escapeHTML(url)}</span> prevents direct embedding via strict X-Frame-Options policies.
             </p>
           </div>
           <div class="flex flex-wrap gap-2 pt-2">
-            <button onclick="switchTabMode('reader')" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center space-x-2 transition-colors">
+            <button onclick="switchTabMode('reader')" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center space-x-2 transition-all shadow-lg">
               <i class="fa-solid fa-book-open"></i>
-              <span>Switch to Reader Mode</span>
+              <span>Launch Reader Mode</span>
             </button>
-            <a href="${escapeHTML(url)}" target="_blank" class="px-4 py-2 rounded-lg bg-browser-header hover:bg-white/10 text-gray-200 font-bold text-xs border border-browser-border flex items-center space-x-2 transition-colors">
+            <a href="${escapeHTML(url)}" target="_blank" class="px-5 py-2.5 rounded-xl bg-sneaky-header hover:bg-white/10 text-gray-200 font-bold text-xs border border-sneaky-border flex items-center space-x-2 transition-colors">
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span>Open in External Window</span>
+              <span>Open in New Window</span>
             </a>
           </div>
         </div>
@@ -788,106 +743,108 @@
 
     function renderReaderViewMode(container, url) {
       container.innerHTML = `
-        <div class="h-full overflow-y-auto p-8 bg-browser-omnibox text-gray-200 font-serif leading-relaxed max-w-3xl mx-auto space-y-6">
-          <div class="border-b border-browser-border pb-4 font-sans">
-            <div class="text-xs text-indigo-400 font-mono font-bold uppercase tracking-wider">Reader Mode Extractor</div>
-            <h1 class="text-2xl font-bold text-white mt-1">${escapeHTML(formatUrlTitle(url))} Article</h1>
-            <div class="text-xs text-gray-500 mt-1">${escapeHTML(url)}</div>
+        <div class="h-full overflow-y-auto p-8 bg-sneaky-omnibox text-gray-200 font-serif leading-relaxed max-w-3xl mx-auto space-y-6">
+          <div class="border-b border-sneaky-border pb-4 font-sans">
+            <div class="text-xs text-cyan-400 font-mono font-bold uppercase tracking-wider">Reader Mode Text Extractor</div>
+            <h1 class="text-2xl font-bold text-white mt-1">${escapeHTML(getUrlTitle(url))}</h1>
+            <div class="text-xs text-gray-500 mt-1 font-mono">${escapeHTML(url)}</div>
           </div>
           <p class="text-base text-gray-300">
-            This clean reader view extracts core textual content, removing distractions, advertisements, and background scripts for optimal reading.
+            This distraction-free reader view removes scripts, banners, and framing limits for clean reading.
           </p>
-          <div class="p-4 bg-browser-card rounded border border-browser-border text-sm font-sans italic text-gray-400">
-            "Simple, uncluttered web browsing powered by NexusBrowser OS."
+          <div class="p-4 bg-sneaky-card rounded-xl border border-sneaky-border text-sm font-sans italic text-gray-400">
+            "Protected & optimized by SneakyKidVille OS Privacy Shield."
           </div>
         </div>
       `;
     }
 
     // =========================================================================
-    // 6. SPEED DIAL / NEW TAB DASHBOARD
+    // 5. SPEED DIAL & DASHBOARD
     // =========================================================================
-    function renderSpeedDialDashboard(container) {
+    function renderSpeedDialPortal(container) {
       container.innerHTML = `
-        <div class="h-full overflow-y-auto p-8 flex flex-col items-center justify-center space-y-8 bg-gradient-to-b from-browser-bg to-browser-sidebar">
+        <div class="h-full overflow-y-auto p-8 flex flex-col items-center justify-center space-y-8 bg-gradient-to-b from-sneaky-bg via-sneaky-sidebar to-sneaky-bg">
           
-          <!-- Live Digital Clock & Greeting -->
+          <!-- Header Greeting -->
           <div class="text-center space-y-2">
-            <div id="speedDialClock" class="text-5xl font-extrabold text-white tracking-tight font-mono">12:00 PM</div>
-            <div id="speedDialGreeting" class="text-sm font-semibold text-indigo-400 uppercase tracking-widest">Welcome to NexusBrowser OS</div>
+            <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight flex items-center justify-center gap-3">
+              <i class="fa-solid fa-user-ninja text-cyan-400"></i>
+              <span class="bg-gradient-to-r from-cyan-400 via-pink-400 to-yellow-300 bg-clip-text text-transparent">SneakyKidVille Portal</span>
+            </h1>
+            <p class="text-xs font-semibold text-gray-400 tracking-wider uppercase">Safe • Encrypted • Ultra-Fun Kid OS</p>
           </div>
 
-          <!-- Central Search Bar -->
-          <div class="w-full max-w-xl relative">
-            <input type="text" onkeydown="if(e.key==='Enter') navigateToUrl(resolveUrlOrSearch(this.value))" placeholder="Search the web or type a URL..." class="w-full bg-browser-card border border-browser-border text-gray-100 pl-12 pr-4 py-3.5 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xl text-sm" />
-            <i class="fa-solid fa-magnifying-glass text-gray-400 absolute left-4 top-4 text-base"></i>
+          <!-- Quick Arcade Bar -->
+          <div class="flex flex-wrap justify-center gap-3">
+            <button onclick="navigateToUrl('sneaky://snake')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs hover:scale-105 transition-all shadow-lg flex items-center space-x-2">
+              <i class="fa-solid fa-staff-snake"></i>
+              <span>Play Snake</span>
+            </button>
+            <button onclick="navigateToUrl('sneaky://pong')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs hover:scale-105 transition-all shadow-lg flex items-center space-x-2">
+              <i class="fa-solid fa-table-tennis-paddle-ball"></i>
+              <span>Play Pong</span>
+            </button>
+            <button onclick="navigateToUrl('sneaky://draw')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-xs hover:scale-105 transition-all shadow-lg flex items-center space-x-2">
+              <i class="fa-solid fa-palette"></i>
+              <span>Doodle Pad</span>
+            </button>
           </div>
 
-          <!-- Speed Dial Shortcuts Grid -->
-          <div class="w-full max-w-3xl space-y-3">
-            <div class="flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-wider">
-              <span>Speed Dial Shortcuts</span>
-              <button onclick="openModal('addShortcutModal')" class="hover:text-white flex items-center space-x-1"><i class="fa-solid fa-plus"></i><span>Add</span></button>
+          <!-- Speed Dial Cards Grid -->
+          <div class="w-full max-w-4xl space-y-3">
+            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider flex justify-between items-center px-1">
+              <span>Kid Favorite Destinations</span>
+              <span class="text-cyan-400"><i class="fa-solid fa-shield-check mr-1"></i>Shield Protected</span>
             </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="speedDialGrid"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="speedDialCardsGrid"></div>
           </div>
 
         </div>
       `;
 
-      renderSpeedDialGrid();
-    }
+      const grid = document.getElementById('speedDialCardsGrid');
+      speedDialPortals.forEach(portal => {
+        const card = document.createElement('div');
+        card.onclick = () => navigateToUrl(portal.url);
+        card.className = 'glass-panel p-4 rounded-2xl flex items-center space-x-4 cursor-pointer hover:border-cyan-400/50 hover:scale-[1.02] transition-all group';
 
-    function renderSpeedDialGrid() {
-      const grid = document.getElementById('speedDialGrid');
-      if (!grid) return;
-
-      grid.innerHTML = '';
-      speedDialShortcuts.forEach(sc => {
-        const item = document.createElement('div');
-        item.onclick = () => navigateToUrl(sc.url);
-        item.className = 'glass-panel p-4 rounded-xl flex items-center space-x-3 cursor-pointer hover:bg-white/10 hover:border-indigo-500/50 transition-all group';
-
-        item.innerHTML = `
-          <div class="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/20 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-            <i class="${sc.icon}"></i>
+        card.innerHTML = `
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-tr ${portal.color} text-white flex items-center justify-center text-xl shadow-lg shrink-0">
+            <i class="${portal.icon}"></i>
           </div>
           <div class="min-w-0 flex-1">
-            <div class="font-bold text-sm text-white truncate">${escapeHTML(sc.title)}</div>
-            <div class="text-[10px] text-gray-400 truncate">${escapeHTML(sc.url)}</div>
+            <div class="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors truncate">${escapeHTML(portal.title)}</div>
+            <div class="text-[11px] text-gray-400 truncate">${escapeHTML(portal.desc)}</div>
           </div>
         `;
-        grid.appendChild(item);
+        grid.appendChild(card);
       });
     }
 
-    function updateClock() {
-      const clockEl = document.getElementById('speedDialClock');
-      if (clockEl) {
-        const now = new Date();
-        clockEl.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      }
-    }
+    // =========================================================================
+    // 6. BUILT-IN MINI-APPS (Snake, Pong, Doodle Pad)
+    // =========================================================================
 
-    // =========================================================================
-    // 7. BUILT-IN EMBEDDED APPS (Games & Code Editor)
-    // =========================================================================
-    function renderArcadeGameApp(container) {
+    // --- SNAKE GAME ---
+    function renderSnakeGameApp(container) {
       container.innerHTML = `
-        <div class="h-full flex flex-col items-center justify-center p-6 bg-browser-omnibox space-y-4">
+        <div class="h-full flex flex-col items-center justify-center p-6 bg-sneaky-omnibox space-y-4">
           <div class="text-center space-y-1">
-            <h2 class="text-xl font-bold text-white flex items-center justify-center gap-2">
-              <i class="fa-solid fa-gamepad text-indigo-400"></i>
-              <span>Arcade Canvas Snake</span>
+            <h2 class="text-2xl font-black text-white flex items-center justify-center gap-2">
+              <i class="fa-solid fa-staff-snake text-emerald-400"></i>
+              <span>Arcade Snake</span>
             </h2>
-            <p class="text-xs text-gray-400">Use Arrow Keys to control the snake</p>
+            <div class="text-xs text-gray-400 space-x-4 font-mono">
+              <span>Score: <strong id="snakeScore" class="text-emerald-400">0</strong></span>
+              <span>High Score: <strong id="snakeHighScore" class="text-yellow-400">0</strong></span>
+            </div>
           </div>
 
-          <canvas id="gameCanvas" width="400" height="400" class="bg-black border-2 border-indigo-500/40 rounded-xl shadow-2xl"></canvas>
+          <canvas id="snakeCanvas" width="400" height="400" class="bg-black border-2 border-emerald-500/40 rounded-2xl shadow-2xl glow-box-green"></canvas>
 
-          <div class="flex space-x-4">
-            <button onclick="startSnakeGame()" class="px-6 py-2 rounded-lg bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 transition-colors">Start Game</button>
+          <div class="flex space-x-3">
+            <button onclick="startSnakeGame()" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-lg">Restart Game</button>
           </div>
         </div>
       `;
@@ -895,95 +852,318 @@
       setTimeout(startSnakeGame, 100);
     }
 
-    let gameInterval = null;
+    let snakeTimer = null;
     function startSnakeGame() {
-      const canvas = document.getElementById('gameCanvas');
+      const canvas = document.getElementById('snakeCanvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
       let snake = [{ x: 200, y: 200 }];
       let food = { x: 100, y: 100 };
       let dx = 20, dy = 0;
+      let score = 0;
+      let highScore = parseInt(localStorage.getItem('sneaky_snake_high') || '0');
 
-      if (gameInterval) clearInterval(gameInterval);
+      document.getElementById('snakeHighScore').innerText = highScore;
+      if (snakeTimer) clearInterval(snakeTimer);
 
       document.onkeydown = (e) => {
-        if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -20; }
-        if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 20; }
-        if (e.key === 'ArrowLeft' && dx === 0) { dx = -20; dy = 0; }
-        if (e.key === 'ArrowRight' && dx === 0) { dx = 20; dy = 0; }
+        if ((e.key === 'ArrowUp' || e.key === 'w') && dy === 0) { dx = 0; dy = -20; }
+        if ((e.key === 'ArrowDown' || e.key === 's') && dy === 0) { dx = 0; dy = 20; }
+        if ((e.key === 'ArrowLeft' || e.key === 'a') && dx === 0) { dx = -20; dy = 0; }
+        if ((e.key === 'ArrowRight' || e.key === 'd') && dx === 0) { dx = 20; dy = 0; }
       };
 
-      gameInterval = setInterval(() => {
+      snakeTimer = setInterval(() => {
         const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-        
-        // Wrap around boundaries
-        if (head.x < 0) head.x = 380;
-        if (head.x >= 400) head.x = 0;
-        if (head.y < 0) head.y = 380;
-        if (head.y >= 400) head.y = 0;
+
+        if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400 || snake.some(s => s.x === head.x && s.y === head.y)) {
+          clearInterval(snakeTimer);
+          playAudioTone(150, 0.3);
+          showToast(`Game Over! Score: ${score}`, 'danger');
+          return;
+        }
 
         snake.unshift(head);
 
         if (head.x === food.x && head.y === food.y) {
+          score += 10;
+          document.getElementById('snakeScore').innerText = score;
+          if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('sneaky_snake_high', highScore);
+            document.getElementById('snakeHighScore').innerText = highScore;
+          }
+          playAudioTone(600, 0.1);
           food = { x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20 };
         } else {
           snake.pop();
         }
 
-        ctx.fillStyle = '#0a0a0c';
+        ctx.fillStyle = '#0a0d14';
         ctx.fillRect(0, 0, 400, 400);
 
+        // Render Snake
         ctx.fillStyle = '#10b981';
-        snake.forEach(s => ctx.fillRect(s.x, s.y, 18, 18));
+        snake.forEach((s, i) => {
+          ctx.fillStyle = i === 0 ? '#34d399' : '#10b981';
+          ctx.fillRect(s.x, s.y, 18, 18);
+        });
 
-        ctx.fillStyle = '#ef4444';
+        // Render Food
+        ctx.fillStyle = '#ec4899';
         ctx.fillRect(food.x, food.y, 18, 18);
-      }, 120);
+      }, 110);
     }
 
-    function renderCodePlaygroundApp(container) {
+    // --- PONG GAME ---
+    function renderPongGameApp(container) {
       container.innerHTML = `
-        <div class="h-full flex flex-col p-4 bg-browser-omnibox space-y-3 font-mono">
-          <div class="flex justify-between items-center text-xs border-b border-browser-border pb-2">
-            <span class="font-bold text-indigo-400 flex items-center gap-2"><i class="fa-solid fa-code"></i> Live JavaScript Sandbox</span>
-            <button onclick="runCodePlayground()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1 rounded transition-colors">Run Code</button>
+        <div class="h-full flex flex-col items-center justify-center p-6 bg-sneaky-omnibox space-y-4">
+          <div class="text-center space-y-1">
+            <h2 class="text-2xl font-black text-white flex items-center justify-center gap-2">
+              <i class="fa-solid fa-table-tennis-paddle-ball text-cyan-400"></i>
+              <span>Retro Arcade Pong</span>
+            </h2>
+            <div class="text-xs text-gray-400 space-x-6 font-mono">
+              <span>Player: <strong id="pongP1Score" class="text-cyan-400">0</strong></span>
+              <span>CPU: <strong id="pongP2Score" class="text-pink-400">0</strong></span>
+            </div>
           </div>
-          <textarea id="codeSourceInput" class="flex-1 bg-black p-3 text-xs text-green-400 outline-none rounded border border-browser-border resize-none" placeholder="// Write JavaScript here..."></textarea>
-          <div id="codeConsoleOutput" class="h-32 bg-browser-card p-3 text-xs text-gray-300 overflow-y-auto rounded border border-browser-border">Output will appear here...</div>
+
+          <canvas id="pongCanvas" width="500" height="350" class="bg-black border-2 border-cyan-500/40 rounded-2xl shadow-2xl glow-box-blue"></canvas>
+
+          <div class="flex space-x-3">
+            <button onclick="startPongGame()" class="px-6 py-2.5 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition-all shadow-lg">Start Match</button>
+          </div>
         </div>
       `;
 
-      document.getElementById('codeSourceInput').value = `// JavaScript Sandbox Example\nconst message = "Hello from NexusBrowser OS!";\nconsole.log(message);\nMath.sqrt(144);`;
+      setTimeout(startPongGame, 100);
     }
 
-    function runCodePlayground() {
-      const src = document.getElementById('codeSourceInput').value;
-      const out = document.getElementById('codeConsoleOutput');
-      try {
-        const res = eval(src);
-        out.innerText = `Result: ${res}`;
-      } catch (e) {
-        out.innerText = `Error: ${e.message}`;
+    let pongTimer = null;
+    function startPongGame() {
+      const canvas = document.getElementById('pongCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let ball = { x: 250, y: 175, dx: 4, dy: 3 };
+      let p1 = { y: 130, score: 0 };
+      let p2 = { y: 130, score: 0 };
+
+      if (pongTimer) clearInterval(pongTimer);
+
+      canvas.onmousemove = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        p1.y = e.clientY - rect.top - 40;
+      };
+
+      pongTimer = setInterval(() => {
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+
+        // CPU AI Paddle Movement
+        p2.y += (ball.y - (p2.y + 40)) * 0.1;
+
+        // Wall Bounces
+        if (ball.y <= 0 || ball.y >= 350) ball.dy *= -1;
+
+        // P1 Paddle Bounce
+        if (ball.x <= 20 && ball.y >= p1.y && ball.y <= p1.y + 80) {
+          ball.dx *= -1.05;
+          playAudioTone(400, 0.05);
+        }
+
+        // P2 Paddle Bounce
+        if (ball.x >= 480 && ball.y >= p2.y && ball.y <= p2.y + 80) {
+          ball.dx *= -1.05;
+          playAudioTone(350, 0.05);
+        }
+
+        // Score Check
+        if (ball.x < 0) {
+          p2.score++;
+          document.getElementById('pongP2Score').innerText = p2.score;
+          ball = { x: 250, y: 175, dx: 4, dy: 3 };
+        }
+        if (ball.x > 500) {
+          p1.score++;
+          document.getElementById('pongP1Score').innerText = p1.score;
+          ball = { x: 250, y: 175, dx: -4, dy: 3 };
+        }
+
+        // Clear Canvas
+        ctx.fillStyle = '#0a0d14';
+        ctx.fillRect(0, 0, 500, 350);
+
+        // Center line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(250, 0); ctx.lineTo(250, 350);
+        ctx.stroke();
+
+        // Paddles
+        ctx.fillStyle = '#06b6d4';
+        ctx.fillRect(10, p1.y, 10, 80);
+
+        ctx.fillStyle = '#ec4899';
+        ctx.fillRect(480, p2.y, 10, 80);
+
+        // Ball
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+      }, 1000 / 60);
+    }
+
+    // --- DOODLE DRAW PAD ---
+    function renderDoodlePadApp(container) {
+      container.innerHTML = `
+        <div class="h-full flex flex-col p-4 bg-sneaky-omnibox space-y-3">
+          <!-- Toolbar Controls -->
+          <div class="flex flex-wrap items-center justify-between gap-2 p-2 bg-sneaky-card rounded-xl border border-sneaky-border text-xs">
+            <div class="flex items-center space-x-3">
+              <span class="font-bold text-white flex items-center gap-1"><i class="fa-solid fa-palette text-pink-400"></i> Canvas Pad</span>
+              <input type="color" id="drawColor" value="#06b6d4" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0" />
+              
+              <label class="text-gray-400 font-semibold">Brush Size:</label>
+              <input type="range" id="drawSize" min="2" max="30" value="6" class="w-24 accent-pink-500" />
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button onclick="clearDoodleCanvas()" class="px-3 py-1.5 rounded-lg bg-red-600/30 text-red-300 border border-red-500/30 hover:bg-red-600/50 font-bold">Clear</button>
+              <button onclick="downloadDoodleImage()" class="px-4 py-1.5 rounded-lg bg-pink-600 text-white hover:bg-pink-500 font-bold shadow-md">Export PNG</button>
+            </div>
+          </div>
+
+          <!-- Drawing Canvas -->
+          <div class="flex-1 w-full relative rounded-2xl overflow-hidden border border-sneaky-border bg-white cursor-crosshair">
+            <canvas id="doodleCanvas" class="w-full h-full block"></canvas>
+          </div>
+        </div>
+      `;
+
+      setTimeout(initDoodleCanvas, 100);
+    }
+
+    function initDoodleCanvas() {
+      const canvas = document.getElementById('doodleCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+
+      let painting = false;
+
+      function startPosition(e) { painting = true; draw(e); }
+      function finishedPosition() { painting = false; ctx.beginPath(); }
+      function draw(e) {
+        if (!painting) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineWidth = document.getElementById('drawSize').value;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = document.getElementById('drawColor').value;
+
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      }
+
+      canvas.addEventListener('mousedown', startPosition);
+      canvas.addEventListener('mouseup', finishedPosition);
+      canvas.addEventListener('mousemove', draw);
+    }
+
+    function clearDoodleCanvas() {
+      const canvas = document.getElementById('doodleCanvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
 
+    function downloadDoodleImage() {
+      const canvas = document.getElementById('doodleCanvas');
+      if (!canvas) return;
+      const link = document.createElement('a');
+      link.download = 'sneaky-doodle.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Doodle saved as PNG!', 'success');
+    }
+
+    function playAudioTone(freq, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
     // =========================================================================
-    // 8. SPLIT VIEW & DRAWERS & DEVTOOLS
+    // 7. VPN SHIELD & LOCATION SWITCHING
+    // =========================================================================
+    function toggleVpnShield() {
+      vpnState.active = !vpnState.active;
+      updateVpnUI();
+      saveState();
+      showToast(vpnState.active ? "VPN Shield Activated" : "VPN Shield Paused", vpnState.active ? "success" : "danger");
+    }
+
+    function changeVpnLocation(locKey) {
+      if (vpnState.locations[locKey]) {
+        vpnState.location = locKey;
+        vpnState.ip = vpnState.locations[locKey].ip;
+        vpnState.ping = vpnState.locations[locKey].ping;
+        updateVpnUI();
+        saveState();
+        showToast(`Connected to Virtual Node: ${vpnState.locations[locKey].name}`, "info");
+      }
+    }
+
+    function updateVpnUI() {
+      const loc = vpnState.locations[vpnState.location];
+      document.getElementById('vpnStatusLabel').innerText = vpnState.active ? "VPN: ACTIVE" : "VPN: PAUSED";
+      document.getElementById('vpnStatusLabel').className = vpnState.active ? "font-bold text-emerald-400" : "font-bold text-red-400";
+      document.getElementById('vpnStatusLed').className = vpnState.active ? "w-2 h-2 rounded-full bg-emerald-400 animate-pulse glow-box-green" : "w-2 h-2 rounded-full bg-red-500";
+      document.getElementById('vpnLocationLabel').innerText = loc.name;
+      document.getElementById('vpnBtnText').innerText = vpnState.active ? "Shield ON" : "Shield OFF";
+
+      document.getElementById('modalVpnStatus').innerText = vpnState.active ? "Active • AES-256 Encrypted" : "Disabled";
+      document.getElementById('modalVpnIp').innerText = vpnState.ip;
+      document.getElementById('modalVpnLoc').innerText = loc.name;
+    }
+
+    function startVpnPingFluctuator() {
+      setInterval(() => {
+        if (vpnState.active) {
+          const jitter = Math.floor(Math.random() * 6) - 3;
+          const currentPing = Math.max(12, vpnState.ping + jitter);
+          document.getElementById('vpnPingLabel').innerText = currentPing + " ms";
+        }
+      }, 2000);
+    }
+
+    // =========================================================================
+    // 8. SPLIT VIEW & DEVTOOLS & DRAWERS
     // =========================================================================
     function toggleSplitView() {
       isSplitView = !isSplitView;
       const sec = document.getElementById('secondaryViewport');
-      
       if (isSplitView) {
         sec.classList.remove('hidden');
-        if (tabs.length > 1) {
-          splitTabId = tabs[tabs.length - 1].id;
-        } else {
-          splitTabId = activeTabId;
-        }
+        splitTabId = tabs.length > 1 ? tabs[tabs.length - 1].id : activeTabId;
         renderViewport('secondaryContentArea', tabs.find(t => t.id === splitTabId) || getActiveTab());
-        showToast("Split View Enabled", "info");
+        showToast("Split Screen Mode Active", "info");
       } else {
         sec.classList.add('hidden');
         splitTabId = null;
@@ -1001,8 +1181,7 @@
       });
 
       document.getElementById(`devContent-${tab}`).classList.remove('hidden');
-      document.getElementById(`devTab-${tab}`).className = 'text-white border-b-2 border-indigo-500 pb-1';
-
+      document.getElementById(`devTab-${tab}`).className = 'text-white border-b-2 border-cyan-400 pb-1';
       if (tab === 'storage') renderDevStorage();
     }
 
@@ -1010,15 +1189,13 @@
       if (e.key === 'Enter') {
         const val = e.target.value;
         if (!val) return;
-
         const out = document.getElementById('consoleLogOutput');
         const entry = document.createElement('div');
-        entry.className = 'text-gray-300';
         try {
           const res = eval(val);
-          entry.innerHTML = `<span class="text-indigo-400">&gt; ${escapeHTML(val)}</span> = <span class="text-amber-300">${escapeHTML(String(res))}</span>`;
+          entry.innerHTML = `<span class="text-cyan-400">&gt; ${escapeHTML(val)}</span> = <span class="text-amber-300">${escapeHTML(String(res))}</span>`;
         } catch (err) {
-          entry.innerHTML = `<span class="text-indigo-400">&gt; ${escapeHTML(val)}</span> = <span class="text-red-400">${escapeHTML(err.message)}</span>`;
+          entry.innerHTML = `<span class="text-cyan-400">&gt; ${escapeHTML(val)}</span> = <span class="text-red-400">${escapeHTML(err.message)}</span>`;
         }
         out.appendChild(entry);
         e.target.value = '';
@@ -1044,27 +1221,24 @@
 
       activeDrawer = type;
       drawer.classList.remove('hidden');
-
       const title = document.getElementById('drawerTitle');
+
       if (type === 'history') {
-        title.innerHTML = `<i class="fa-solid fa-clock-rotate-left text-indigo-400"></i><span>Browsing History</span>`;
+        title.innerHTML = `<i class="fa-solid fa-clock-rotate-left text-cyan-400"></i><span>Browsing History</span>`;
         renderHistoryDrawer();
       } else if (type === 'bookmarks') {
-        title.innerHTML = `<i class="fa-solid fa-bookmark text-indigo-400"></i><span>Bookmarks Manager</span>`;
+        title.innerHTML = `<i class="fa-solid fa-bookmark text-cyan-400"></i><span>Bookmarks Manager</span>`;
         renderBookmarksDrawer();
-      } else if (type === 'downloads') {
-        title.innerHTML = `<i class="fa-solid fa-download text-indigo-400"></i><span>Downloads Log</span>`;
-        renderDownloadsDrawer();
       }
     }
 
     function logHistory(title, url) {
-      if (url === 'nexus://newtab') return;
+      if (url === 'sneaky://newtab') return;
       historyLog.unshift({
         id: 'h_' + Date.now(),
         title: title,
         url: url,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       saveState();
     }
@@ -1075,11 +1249,11 @@
       historyLog.forEach(h => {
         const item = document.createElement('div');
         item.onclick = () => navigateToUrl(h.url);
-        item.className = 'p-2.5 bg-browser-omnibox border border-browser-border rounded cursor-pointer hover:border-indigo-500 text-xs space-y-1';
+        item.className = 'p-2.5 bg-sneaky-omnibox border border-sneaky-border rounded-xl cursor-pointer hover:border-cyan-400 text-xs space-y-1';
         item.innerHTML = `
           <div class="font-bold text-white truncate">${escapeHTML(h.title)}</div>
           <div class="text-[10px] text-gray-400 truncate">${escapeHTML(h.url)}</div>
-          <div class="text-[9px] text-indigo-400">${h.timestamp}</div>
+          <div class="text-[9px] text-cyan-400">${h.time}</div>
         `;
         container.appendChild(item);
       });
@@ -1091,44 +1265,28 @@
       bookmarks.forEach(bm => {
         const item = document.createElement('div');
         item.onclick = () => navigateToUrl(bm.url);
-        item.className = 'p-2.5 bg-browser-omnibox border border-browser-border rounded cursor-pointer hover:border-indigo-500 text-xs flex justify-between items-center';
+        item.className = 'p-2.5 bg-sneaky-omnibox border border-sneaky-border rounded-xl cursor-pointer hover:border-cyan-400 text-xs flex justify-between items-center';
         item.innerHTML = `
           <div class="min-w-0 flex-1">
             <div class="font-bold text-white truncate">${escapeHTML(bm.title)}</div>
             <div class="text-[10px] text-gray-400 truncate">${escapeHTML(bm.url)}</div>
           </div>
-          <button onclick="event.stopPropagation(); removeBookmark('${bm.id}')" class="text-red-400 hover:text-red-300 p-1"><i class="fa-solid fa-trash"></i></button>
+          <button onclick="event.stopPropagation(); removeBookmark('${bm.id}')" class="text-red-400 p-1"><i class="fa-solid fa-trash"></i></button>
         `;
         container.appendChild(item);
       });
     }
 
     function renderBookmarksBar() {
-      const quickList = document.getElementById('bookmarksQuickList');
-      quickList.innerHTML = '';
+      const list = document.getElementById('bookmarksQuickList');
+      list.innerHTML = '';
       bookmarks.forEach(bm => {
         const btn = document.createElement('button');
         btn.onclick = () => navigateToUrl(bm.url);
-        btn.className = 'hover:text-white text-gray-300 text-xs px-2 py-0.5 rounded hover:bg-white/5 flex items-center space-x-1 shrink-0';
-        btn.innerHTML = `<i class="${bm.icon || 'fa-solid fa-globe'} text-indigo-400 text-[10px]"></i><span>${escapeHTML(bm.title)}</span>`;
-        quickList.appendChild(btn);
+        btn.className = 'hover:text-white text-gray-300 text-xs px-2.5 py-1 rounded-lg hover:bg-white/10 flex items-center space-x-1.5 shrink-0 font-semibold';
+        btn.innerHTML = `<i class="${bm.icon || 'fa-solid fa-globe'} text-cyan-400 text-[10px]"></i><span>${escapeHTML(bm.title)}</span>`;
+        list.appendChild(btn);
       });
-    }
-
-    function toggleBookmarkCurrentTab() {
-      const tab = getActiveTab();
-      if (!tab) return;
-
-      const existing = bookmarks.find(b => b.url === tab.url);
-      if (existing) {
-        bookmarks = bookmarks.filter(b => b.url !== tab.url);
-        showToast("Bookmark removed", "info");
-      } else {
-        bookmarks.push({ id: 'bm_' + Date.now(), title: tab.title, url: tab.url, icon: 'fa-solid fa-globe' });
-        showToast("Bookmark saved!", "success");
-      }
-      saveState();
-      renderBookmarksBar();
     }
 
     function saveNewBookmark() {
@@ -1140,115 +1298,53 @@
       saveState();
       renderBookmarksBar();
       closeModal('addBookmarkModal');
-      showToast("Bookmark created!", "success");
+      showToast('Bookmark added!', 'success');
     }
 
-    function saveNewShortcut() {
-      const t = document.getElementById('scInputTitle').value.trim();
-      const u = document.getElementById('scInputUrl').value.trim();
-      const ic = document.getElementById('scInputIcon').value.trim() || 'fa-solid fa-link';
-      if (!t || !u) return;
+    function removeBookmark(id) {
+      bookmarks = bookmarks.filter(b => b.id !== id);
+      saveState();
+      renderBookmarksBar();
+      if (activeDrawer === 'bookmarks') renderBookmarksDrawer();
+      showToast('Bookmark removed', 'info');
+    }
 
-      speedDialShortcuts.push({ id: 'sc_' + Date.now(), title: t, url: u, icon: ic });
-      closeModal('addShortcutModal');
-      renderSpeedDialGrid();
-      showToast("Shortcut added!", "success");
+    function clearCurrentDrawerData() {
+      if (activeDrawer === 'history') historyLog = [];
+      if (activeDrawer === 'bookmarks') bookmarks = [];
+      saveState();
+      renderBookmarksBar();
+      toggleDrawer(activeDrawer);
+      showToast('Storage cleared', 'info');
     }
 
     // =========================================================================
-    // 9. SETTINGS & THEME ENGINE
+    // 9. THEMES & UTILITIES
     // =========================================================================
     function applyTheme(theme) {
-      document.body.className = `h-full bg-browser-bg text-gray-200 overflow-hidden font-sans flex flex-col theme-${theme}`;
-      browserSettings.theme = theme;
-      saveState();
+      currentTheme = theme;
+      document.body.className = `h-full bg-sneaky-bg text-gray-200 overflow-hidden font-sans flex flex-col theme-${theme}`;
+      showToast(`Theme switched to ${theme.toUpperCase()}`, 'info');
     }
 
-    function updateSettings() {
-      browserSettings.searchEngine = document.getElementById('settingSearchEngine').value;
-      browserSettings.userAgent = document.getElementById('settingUserAgent').value;
-      browserSettings.adBlockEnabled = document.getElementById('settingAdBlock').checked;
-      browserSettings.httpsEnforce = document.getElementById('settingHttpsEnforce').checked;
-      saveState();
-      showToast("Settings updated", "success");
+    function changeSearchEngine(engine) {
+      searchEngine = engine;
+      showToast(`Search engine set to ${engine.toUpperCase()}`, 'info');
     }
 
-    function toggleAdBlocker() {
-      browserSettings.adBlockEnabled = !browserSettings.adBlockEnabled;
-      const btn = document.getElementById('btnAdBlocker');
-      btn.className = `p-2 hover:bg-white/5 rounded-lg transition-colors relative ${browserSettings.adBlockEnabled ? 'text-emerald-400' : 'text-gray-500'}`;
-      showToast(browserSettings.adBlockEnabled ? "AdBlock Shield Enabled" : "AdBlock Shield Disabled", "info");
-    }
-
-    // =========================================================================
-    // 10. SUPABASE AUTH & CLOUD PERSISTENCE
-    // =========================================================================
-    async function handleSupabaseLogin() {
-      const email = document.getElementById('syncEmailInput').value;
-      const password = document.getElementById('syncPasswordInput').value;
-      if (!email || !password) return showToast("Email and password required", "danger");
-
-      const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
-      if (error) return showToast(error.message, "danger");
-
-      document.getElementById('syncStatusText').innerText = "Cloud Synced";
-      showToast("Logged in & profile synced!", "success");
-      closeModal('syncModal');
-    }
-
-    async function handleSupabaseSignup() {
-      const email = document.getElementById('syncEmailInput').value;
-      const password = document.getElementById('syncPasswordInput').value;
-      if (!email || !password) return showToast("Email and password required", "danger");
-
-      const { data, error } = await sbClient.auth.signUp({ email, password });
-      if (error) return showToast(error.message, "danger");
-
-      showToast("Account created! Logging in...", "success");
-      closeModal('syncModal');
-    }
-
-    // =========================================================================
-    // 11. KEYBOARD SHORTCUTS & UTILITIES
-    // =========================================================================
     function setupKeyboardShortcuts() {
       document.addEventListener('keydown', (e) => {
         if (e.ctrlKey || e.metaKey) {
-          if (e.key.toLowerCase() === 't') {
-            e.preventDefault();
-            createNewTab();
-          }
-          if (e.key.toLowerCase() === 'w') {
-            e.preventDefault();
-            if (activeTabId) closeTab(activeTabId);
-          }
-          if (e.key.toLowerCase() === 'r') {
-            e.preventDefault();
-            reloadCurrentTab();
-          }
-          if (e.key.toLowerCase() === 'l') {
-            e.preventDefault();
-            document.getElementById('omniboxInput').focus();
-          }
-          if (e.key.toLowerCase() === 'h') {
-            e.preventDefault();
-            toggleDrawer('history');
-          }
-          if (e.shiftKey && e.key.toLowerCase() === 'i') {
-            e.preventDefault();
-            toggleDevTools();
-          }
+          if (e.key.toLowerCase() === 't') { e.preventDefault(); createNewTab(); }
+          if (e.key.toLowerCase() === 'w') { e.preventDefault(); if (activeTabId) closeTab(activeTabId); }
+          if (e.key.toLowerCase() === 'r') { e.preventDefault(); reloadCurrentTab(); }
+          if (e.key.toLowerCase() === 'l') { e.preventDefault(); document.getElementById('omniboxInput').focus(); }
         }
       });
     }
 
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-    function simulateWindowAction(action) {
-      if (action === 'close') showToast("Window closure simulated", "info");
-      if (action === 'minimize') showToast("Browser minimized", "info");
-    }
 
     function toggleFullscreen() {
       if (!document.fullscreenElement) {
@@ -1261,17 +1357,17 @@
     function showToast(msg, type = 'info') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
-      toast.className = `p-3 rounded-lg text-xs font-bold text-white shadow-xl pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 ${
-        type === 'danger' ? 'bg-red-600' : (type === 'success' ? 'bg-emerald-600' : 'bg-indigo-600')
+      toast.className = `p-3.5 rounded-xl text-xs font-bold text-white shadow-2xl pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 flex items-center space-x-2 ${
+        type === 'danger' ? 'bg-red-600' : (type === 'success' ? 'bg-emerald-600' : 'bg-cyan-600')
       }`;
-      toast.innerText = msg;
+      toast.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${escapeHTML(msg)}</span>`;
       container.appendChild(toast);
 
       setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
       setTimeout(() => {
         toast.classList.add('opacity-0');
         setTimeout(() => toast.remove(), 300);
-      }, 3000);
+      }, 2800);
     }
 
     function escapeHTML(str) {
