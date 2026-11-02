@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SneakyKidVille OS - Web Portal & Privacy Shield</title>
+  <title>PhantomOS - StealthBrowser</title>
+  <link id="dynamicFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>" />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,392 +14,477 @@
       theme: {
         extend: {
           colors: {
-            sneaky: {
-              bg: '#0a0d14',
-              glass: 'rgba(18, 24, 38, 0.75)',
-              border: 'rgba(255, 255, 255, 0.1)',
-              header: '#111622',
-              sidebar: '#0d111a',
-              tabActive: '#1a2234',
-              tabInactive: '#121724',
-              accent: '#3b82f6',
-              neonGreen: '#10b981',
-              neonPink: '#ec4899',
-              neonCyan: '#06b6d4',
-              omnibox: '#0d111a',
-              card: '#151c2c'
+            obsidian: {
+              bg: '#05070a',
+              card: '#0c1017',
+              header: '#080b11',
+              sidebar: '#070a0f',
+              border: 'rgba(255, 255, 255, 0.08)',
+              input: '#0e131d',
+              tabActive: '#131a28',
+              tabInactive: '#090d14',
+              accent: '#06b6d4',
+              emerald: '#10b981',
+              pink: '#ec4899',
+              amber: '#f59e0b'
             }
           },
-          backdropBlur: {
-            glass: '16px'
+          fontFamily: {
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
           }
         }
       }
     };
   </script>
 
-  <!-- FontAwesome Icons -->
+  <!-- FontAwesome Icons CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-  <!-- Supabase JS Library v2 (Optional Cloud Persistence) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     /* Custom Scrollbars */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.35); }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.4); }
 
-    /* Custom Theme Overrides */
+    /* Theme Styles */
+    body.theme-obsidian { background-color: #05070a; color: #e2e8f0; }
+
     body.theme-matrix {
-      --bg-color: #030a05;
-      --accent: #10b981;
-      background-color: #030a05 !important;
+      background-color: #020b05 !important;
+      color: #34d399 !important;
     }
-    body.theme-matrix .bg-sneaky-bg { background-color: #030a05 !important; }
-    body.theme-matrix .bg-sneaky-header { background-color: #08140a !important; }
-    body.theme-matrix .border-sneaky-border { border-color: rgba(16, 185, 129, 0.2) !important; }
-    body.theme-matrix .text-indigo-400, body.theme-matrix .text-emerald-400 { color: #10b981 !important; }
+    body.theme-matrix .bg-obsidian-header { background-color: #041409 !important; }
+    body.theme-matrix .bg-obsidian-card { background-color: #061a0c !important; }
+    body.theme-matrix .border-obsidian-border { border-color: rgba(16, 185, 129, 0.2) !important; }
+    body.theme-matrix .text-cyan-400 { color: #10b981 !important; }
 
     body.theme-cyber {
-      background: linear-gradient(135deg, #090514 0%, #0d0d1a 100%) !important;
+      background: linear-gradient(135deg, #060913 0%, #0c1222 100%) !important;
     }
-    body.theme-cyber .bg-sneaky-header { background-color: #120a24 !important; }
-
-    body.theme-space {
-      background: linear-gradient(135deg, #050b18 0%, #0a1128 100%) !important;
-    }
-    body.theme-space .bg-sneaky-header { background-color: #0c1836 !important; }
+    body.theme-cyber .bg-obsidian-header { background-color: #0e172a !important; }
 
     body.theme-amoled {
       background-color: #000000 !important;
     }
-    body.theme-amoled .bg-sneaky-bg { background-color: #000000 !important; }
-    body.theme-amoled .bg-sneaky-header { background-color: #050505 !important; }
-    body.theme-amoled .bg-sneaky-card { background-color: #0a0a0a !important; }
+    body.theme-amoled .bg-obsidian-bg, 
+    body.theme-amoled .bg-obsidian-header, 
+    body.theme-amoled .bg-obsidian-card { background-color: #020202 !important; }
 
-    body.theme-candy {
-      background: linear-gradient(135deg, #18061a 0%, #200826 100%) !important;
-    }
-    body.theme-candy .text-indigo-400 { color: #f472b6 !important; }
-    body.theme-candy .bg-indigo-600 { background-color: #ec4899 !important; }
-
-    /* Glass Panels & Glow Effects */
+    /* Glass Panels */
     .glass-panel {
-      background: rgba(21, 28, 44, 0.7);
+      background: rgba(12, 16, 23, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .glow-box-green { box-shadow: 0 0 15px rgba(16, 185, 129, 0.35); }
-    .glow-box-pink { box-shadow: 0 0 15px rgba(236, 72, 153, 0.35); }
-    .glow-box-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.35); }
+    .glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.25); }
+    .glow-emerald { box-shadow: 0 0 15px rgba(16, 185, 129, 0.25); }
+    .glow-red { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
 
-    /* Pulse Load Animation */
-    @keyframes progressAnim {
+    @keyframes progressPulse {
       0% { width: 0%; }
-      50% { width: 75%; }
+      50% { width: 70%; }
       100% { width: 100%; }
     }
-    .loading-bar-active { animation: progressAnim 1s ease-in-out infinite; }
+    .loading-pulse { animation: progressPulse 1.2s ease-in-out infinite; }
   </style>
 </head>
-<body class="h-full bg-sneaky-bg text-gray-200 overflow-hidden font-sans flex flex-col theme-cyber">
+<body class="h-full bg-obsidian-bg text-gray-200 overflow-hidden font-sans flex flex-col theme-obsidian select-none">
 
-  <!-- TOAST NOTIFICATION CONTAINER -->
-  <div id="toastContainer" class="fixed top-4 right-4 z-[300] flex flex-col space-y-2 pointer-events-none"></div>
-
-  <!-- TOP WINDOW RAIL & BRANDING HEADER -->
-  <header class="h-10 bg-sneaky-header border-b border-sneaky-border px-3 flex items-center justify-between shrink-0 select-none text-xs text-gray-300">
-    <div class="flex items-center space-x-3">
-      <!-- Simulated Window Control Buttons -->
-      <div class="flex items-center space-x-1.5 mr-1">
-        <button onclick="showToast('SneakyKidVille window remains open!', 'info')" class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group" title="Close Window">
-          <i class="fa-solid fa-xmark text-[8px] text-black opacity-0 group-hover:opacity-100"></i>
-        </button>
-        <button onclick="showToast('SneakyKidVille minimized to bar', 'info')" class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors flex items-center justify-center group" title="Minimize">
-          <i class="fa-solid fa-minus text-[8px] text-black opacity-0 group-hover:opacity-100"></i>
-        </button>
-        <button onclick="toggleFullscreen()" class="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center group" title="Maximize">
-          <i class="fa-solid fa-expand text-[8px] text-black opacity-0 group-hover:opacity-100"></i>
-        </button>
-      </div>
-
-      <!-- App Logo Branding -->
-      <div class="flex items-center space-x-2 font-black text-sm tracking-wide text-white">
-        <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 to-pink-500 flex items-center justify-center text-xs text-black font-extrabold shadow-lg">
-          <i class="fa-solid fa-user-ninja"></i>
+  <!-- ========================================================================= -->
+  <!-- 1. PANIC DISGUISE OVERLAY (Interactive Google Docs Paper)                  -->
+  <!-- ========================================================================= -->
+  <div id="panicDisguiseOverlay" class="hidden fixed inset-0 z-[9999] bg-[#f8f9fa] text-gray-800 flex flex-col overflow-y-auto font-sans select-text">
+    <!-- Google Docs Top Bar -->
+    <header class="bg-white border-b border-gray-300 px-4 py-2 flex items-center justify-between shadow-sm shrink-0">
+      <div class="flex items-center space-x-3">
+        <div class="text-blue-600 text-2xl font-bold flex items-center gap-2">
+          <i class="fa-solid fa-file-lines"></i>
         </div>
-        <span class="bg-gradient-to-r from-cyan-400 via-pink-400 to-yellow-300 bg-clip-text text-transparent">SneakyKidVille OS</span>
-        <span class="text-[9px] bg-indigo-500/30 text-indigo-300 px-1.5 py-0.5 rounded-full border border-indigo-400/30 font-semibold uppercase">v4.0 Ultra</span>
+        <div>
+          <div class="flex items-center space-x-2">
+            <input type="text" value="Cellular Respiration & Bioenergetics - Research Paper" class="font-medium text-gray-800 text-sm bg-transparent outline-none hover:bg-gray-100 px-1 rounded border border-transparent hover:border-gray-300" />
+            <span class="text-xs text-gray-500"><i class="fa-solid fa-cloud-check text-green-600"></i> Saved to Drive</span>
+          </div>
+          <div class="flex items-center space-x-3 text-xs text-gray-600 mt-0.5">
+            <span class="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer">File</span>
+            <span class="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer">Edit</span>
+            <span class="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer">View</span>
+            <span class="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer">Insert</span>
+            <span class="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer">Format</span>
+            <span class="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer">Tools</span>
+            <span class="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer">Extensions</span>
+            <span class="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer">Help</span>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- VPN PRIVACY SHIELD TOOLBAR MODULE -->
-    <div class="flex items-center space-x-3">
-      <!-- VPN Status Badge & Indicator -->
-      <div id="vpnStatusCard" class="hidden sm:flex items-center space-x-2 bg-sneaky-omnibox px-2.5 py-1 rounded-full border border-sneaky-border text-[11px]">
-        <div id="vpnStatusLed" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse glow-box-green"></div>
-        <span id="vpnStatusLabel" class="font-bold text-emerald-400">VPN: ACTIVE</span>
-        <span class="text-gray-500">|</span>
-        <span id="vpnLocationLabel" class="text-gray-300 font-mono">🇯🇵 Tokyo</span>
-        <span class="text-gray-500">|</span>
-        <span id="vpnPingLabel" class="text-xs text-cyan-400 font-mono">24 ms</span>
-      </div>
-
-      <!-- VPN Toggle Switch -->
-      <button onclick="toggleVpnShield()" id="btnVpnToggle" class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-bold text-xs shadow-md">
-        <i class="fa-solid fa-shield-halved text-sm" id="vpnShieldIcon"></i>
-        <span id="vpnBtnText">Shield ON</span>
-      </button>
-
-      <!-- VPN Location Selector Dropdown -->
-      <select id="vpnLocationSelect" onchange="changeVpnLocation(this.value)" class="bg-sneaky-omnibox text-gray-200 border border-sneaky-border text-xs rounded-lg px-2 py-1 outline-none focus:border-indigo-500 font-semibold cursor-pointer">
-        <option value="tokyo">🇯🇵 Tokyo, JP</option>
-        <option value="ny">🇺🇸 New York, US</option>
-        <option value="london">🇬🇧 London, UK</option>
-        <option value="zurich">🇨🇭 Zurich, CH</option>
-        <option value="singapore">🇸🇬 Singapore, SG</option>
-      </select>
-
-      <div class="h-4 w-[1px] bg-sneaky-border"></div>
-
-      <!-- Split View Mode Button -->
-      <button onclick="toggleSplitView()" id="btnSplitView" class="hover:text-white px-2 py-1 rounded hover:bg-white/10 transition-colors flex items-center space-x-1 text-cyan-400" title="Toggle Split View Mode">
-        <i class="fa-solid fa-columns text-sm"></i>
-        <span class="text-[11px] font-semibold hidden md:inline">Split Screen</span>
-      </button>
-
-      <!-- Theme Selector Dropdown -->
-      <select onchange="applyTheme(this.value)" class="bg-sneaky-omnibox text-gray-200 border border-sneaky-border text-xs rounded-lg px-2 py-1 outline-none focus:border-indigo-500 font-semibold cursor-pointer">
-        <option value="cyber">🌌 Cyber Neon</option>
-        <option value="matrix">📟 Matrix Stealth</option>
-        <option value="space">🚀 Space Odyssey</option>
-        <option value="amoled">🖤 AMOLED Pitch</option>
-        <option value="candy">🍬 Candy Arcade</option>
-      </select>
-    </div>
-  </header>
-
-  <!-- MULTI-TAB NAVIGATION BAR -->
-  <nav class="h-10 bg-sneaky-header border-b border-sneaky-border px-2 flex items-center space-x-1 shrink-0 overflow-x-auto no-scrollbar">
-    <div id="tabsContainer" class="flex items-center space-x-1 flex-1 overflow-x-auto no-scrollbar"></div>
-
-    <!-- New Tab Button -->
-    <button onclick="createNewTab()" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition-colors shrink-0" title="New Tab (Ctrl+T)">
-      <i class="fa-solid fa-plus text-xs"></i>
-    </button>
-  </nav>
-
-  <!-- OMNIBOX & NAVIGATION TOOLBAR -->
-  <div class="h-12 bg-sneaky-header border-b border-sneaky-border px-3 flex items-center space-x-2 shrink-0 z-20">
-    <!-- Navigation Buttons -->
-    <div class="flex items-center space-x-1 text-gray-300">
-      <button onclick="navigateHistory(-1)" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Back"><i class="fa-solid fa-arrow-left text-sm"></i></button>
-      <button onclick="navigateHistory(1)" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Forward"><i class="fa-solid fa-arrow-right text-sm"></i></button>
-      <button onclick="reloadCurrentTab()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Reload"><i class="fa-solid fa-rotate-right text-sm"></i></button>
-      <button onclick="navigateHome()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Home Dashboard"><i class="fa-solid fa-house text-sm"></i></button>
-    </div>
-
-    <!-- Omnibox Address Input -->
-    <div class="flex-1 relative flex items-center">
-      <div class="absolute left-3 flex items-center space-x-2 text-xs">
-        <button onclick="openModal('vpnModal')" class="flex items-center space-x-1 text-emerald-400 hover:text-emerald-300" title="VPN & Security Settings">
-          <i class="fa-solid fa-lock text-xs"></i>
+      <div class="flex items-center space-x-3">
+        <button onclick="togglePanicMode(false)" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Exit Disguise Mode</span>
         </button>
+        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+          A
+        </div>
       </div>
+    </header>
 
-      <input type="text" id="omniboxInput" onkeydown="handleOmniboxKeydown(event)" placeholder="Search web or enter address (e.g. sneaky://snake, sneaky://pong, sneaky://draw)..." class="w-full bg-sneaky-omnibox text-sm text-gray-100 pl-9 pr-24 py-1.5 rounded-xl border border-sneaky-border outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-mono shadow-inner" />
-
-      <!-- Search Engine Switcher inside Omnibox -->
-      <select id="searchEngineSelect" onchange="changeSearchEngine(this.value)" class="absolute right-8 text-[11px] bg-sneaky-card text-gray-300 border border-sneaky-border rounded-md px-1.5 py-0.5 outline-none font-semibold cursor-pointer">
-        <option value="kiddle">👧 Kiddle</option>
-        <option value="duckduckgo">🦆 DuckDuckGo</option>
-        <option value="google">🔍 Google</option>
-        <option value="ecosia">🌱 Ecosia</option>
-      </select>
-
-      <button onclick="toggleBookmarkCurrentTab()" id="btnBookmarkStar" class="absolute right-2 text-gray-400 hover:text-yellow-400 transition-colors" title="Bookmark Page">
-        <i class="fa-solid fa-star text-xs"></i>
-      </button>
+    <!-- Google Docs Toolbar -->
+    <div class="bg-[#edf2fa] border-b border-gray-300 px-4 py-1.5 flex items-center space-x-3 text-xs text-gray-700 shrink-0 overflow-x-auto">
+      <button class="p-1 hover:bg-gray-200 rounded"><i class="fa-solid fa-undo"></i></button>
+      <button class="p-1 hover:bg-gray-200 rounded"><i class="fa-solid fa-redo"></i></button>
+      <button class="p-1 hover:bg-gray-200 rounded"><i class="fa-solid fa-print"></i></button>
+      <div class="h-4 w-[1px] bg-gray-300"></div>
+      <span class="bg-white border border-gray-300 px-2 py-0.5 rounded text-[11px]">100%</span>
+      <div class="h-4 w-[1px] bg-gray-300"></div>
+      <span class="bg-white border border-gray-300 px-2 py-0.5 rounded text-[11px]">Normal text</span>
+      <span class="bg-white border border-gray-300 px-2 py-0.5 rounded text-[11px]">Arial</span>
+      <div class="h-4 w-[1px] bg-gray-300"></div>
+      <button class="p-1 hover:bg-gray-200 rounded font-bold">B</button>
+      <button class="p-1 hover:bg-gray-200 rounded italic">I</button>
+      <button class="p-1 hover:bg-gray-200 rounded underline">U</button>
+      <button class="p-1 hover:bg-gray-200 rounded text-blue-600"><i class="fa-solid fa-highlighter"></i></button>
     </div>
 
-    <!-- Quick Action Tools & Shortcuts -->
-    <div class="flex items-center space-x-1 text-gray-300">
-      <button onclick="navigateToUrl('sneaky://snake')" class="p-2 hover:text-pink-400 hover:bg-white/10 rounded-lg transition-colors" title="Play Snake Game"><i class="fa-solid fa-staff-snake text-sm"></i></button>
-      <button onclick="navigateToUrl('sneaky://pong')" class="p-2 hover:text-cyan-400 hover:bg-white/10 rounded-lg transition-colors" title="Play Pong Arcade"><i class="fa-solid fa-table-tennis-paddle-ball text-sm"></i></button>
-      <button onclick="navigateToUrl('sneaky://draw')" class="p-2 hover:text-yellow-400 hover:bg-white/10 rounded-lg transition-colors" title="Open Doodle Draw Pad"><i class="fa-solid fa-palette text-sm"></i></button>
-      
-      <div class="h-4 w-[1px] bg-sneaky-border my-auto"></div>
+    <!-- Paper Layout Container -->
+    <div class="flex-1 bg-[#e9eef6] p-8 flex justify-center overflow-y-auto">
+      <div class="bg-white w-[816px] min-h-[1056px] p-16 shadow-md border border-gray-300 font-serif text-gray-800 leading-relaxed space-y-6 text-sm">
+        <div class="text-center space-y-2 border-b pb-6">
+          <h1 class="text-2xl font-bold font-sans text-gray-900">Cellular Respiration & Bioenergetics in Eukaryotic Organisms</h1>
+          <p class="text-xs text-gray-600 font-sans">Advanced Molecular Biology • Research Analysis • Department of Biological Sciences</p>
+        </div>
 
-      <button onclick="toggleReaderMode()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Toggle Reader Mode"><i class="fa-solid fa-book-open text-sm"></i></button>
-      <button onclick="toggleDevTools()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="DevTools Console"><i class="fa-solid fa-code text-sm"></i></button>
-      <button onclick="toggleDrawer('history')" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Browsing History"><i class="fa-solid fa-clock-rotate-left text-sm"></i></button>
-      <button onclick="toggleDrawer('bookmarks')" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Bookmarks Manager"><i class="fa-solid fa-bookmark text-sm"></i></button>
+        <div class="space-y-3">
+          <h2 class="text-base font-bold font-sans text-gray-900">1. Introduction & Glycolytic Pathways</h2>
+          <p>
+            Cellular respiration represents the fundamental metabolic framework by which aerobic cells harvest biochemical energy from nutrient molecules. Adenosine triphosphate (ATP) serves as the universal energetic currency, facilitating anabolic synthesis, transmembrane ion transport, and biomechanical work across eukaryotic biological systems.
+          </p>
+          <p>
+            The initial phase, glycolysis, occurs within the cytosol under anaerobic conditions. Glucose, a six-carbon hexose sugar, undergoes a ten-step enzymatic cleavage resulting in two triose pyruvate molecules, generating a net yield of 2 ATP and 2 NADH per glucose substrate.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <h2 class="text-base font-bold font-sans text-gray-900">2. The Krebs Cycle & Mitochondrial Matrix Translocation</h2>
+          <p>
+            Upon transport across the mitochondrial inner membrane via pyruvate translocase, pyruvate undergoes oxidative decarboxylation catalyzed by the multi-enzyme pyruvate dehydrogenase complex. This conversion generates Acetyl-CoA, which enters the Citric Acid Cycle (Krebs Cycle) within the matrix.
+          </p>
+          <p>
+            Through consecutive oxidation steps, high-energy electron carriers (NADH and FADH2) are produced alongside metabolic carbon dioxide exhaled as metabolic waste.
+          </p>
+        </div>
+
+        <div class="p-4 bg-gray-50 border-l-4 border-blue-600 font-sans text-xs space-y-1">
+          <div class="font-bold text-gray-900">Key Takeaway Note:</div>
+          <p class="text-gray-700">Oxidative phosphorylation accounts for approximately 88% of total ATP synthesis within mammalian hepatocytes.</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- BOOKMARKS BAR -->
-  <div id="bookmarksBar" class="h-8 bg-sneaky-sidebar border-b border-sneaky-border px-3 flex items-center space-x-2 text-xs text-gray-300 overflow-x-auto no-scrollbar shrink-0">
-    <div id="bookmarksQuickList" class="flex items-center space-x-2 flex-1"></div>
-    <button onclick="openModal('addBookmarkModal')" class="hover:text-white text-gray-400 text-xs px-2 py-0.5 rounded hover:bg-white/10 flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i><span>Bookmark</span></button>
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-[500] flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN APPLICATION CONTAINER                                             -->
+  <!-- ========================================================================= -->
+  <div id="appContainer" class="h-full flex flex-col min-h-0">
+
+    <!-- TOP WINDOW RAIL & BRANDING HEADER -->
+    <header class="h-10 bg-obsidian-header border-b border-obsidian-border px-3 flex items-center justify-between shrink-0 text-xs text-gray-300">
+      <div class="flex items-center space-x-3">
+        <!-- Window Controls -->
+        <div class="flex items-center space-x-1.5 mr-1">
+          <button onclick="togglePanicMode(true)" class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group" title="PANIC DISGUISE MODE (Esc)">
+            <i class="fa-solid fa-shield-halved text-[7px] text-black opacity-0 group-hover:opacity-100"></i>
+          </button>
+          <button onclick="showToast('Session minimized', 'info')" class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors"></button>
+          <button onclick="toggleFullscreen()" class="w-3 h-3 rounded-full bg-emerald-500 hover:bg-emerald-600 transition-colors"></button>
+        </div>
+
+        <!-- Branding -->
+        <div class="flex items-center space-x-2 font-bold text-sm tracking-wide text-white">
+          <div class="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center text-xs shadow-md">
+            <i class="fa-solid fa-user-ninja"></i>
+          </div>
+          <span class="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent font-mono">PHANTOM OS</span>
+          <span class="text-[9px] bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded border border-cyan-500/30 font-mono">STEALTH v5.0</span>
+        </div>
+      </div>
+
+      <!-- STEALTH CONTROLS & VPN MODULE -->
+      <div class="flex items-center space-x-3">
+        <!-- Disguise Selector -->
+        <div class="flex items-center space-x-1.5 bg-obsidian-card px-2 py-1 rounded-lg border border-obsidian-border text-[11px]">
+          <i class="fa-solid fa-mask text-cyan-400"></i>
+          <span class="text-gray-400 hidden md:inline">Camouflage:</span>
+          <select id="disguisePresetSelect" onchange="applyTabDisguise(this.value)" class="bg-transparent text-gray-200 outline-none font-semibold cursor-pointer">
+            <option value="none">🥷 PhantomOS (Standard)</option>
+            <option value="docs">📄 Google Docs</option>
+            <option value="canvas">🎓 Canvas LMS</option>
+            <option value="classroom">🏫 Google Classroom</option>
+            <option value="wikipedia">📚 Wikipedia</option>
+            <option value="desmos">📐 Desmos Calculator</option>
+          </select>
+        </div>
+
+        <!-- VPN / Proxy Shield Card -->
+        <div class="hidden lg:flex items-center space-x-2 bg-obsidian-card px-2.5 py-1 rounded-lg border border-obsidian-border text-[11px]">
+          <div id="vpnStatusLed" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse glow-emerald"></div>
+          <span id="vpnStatusLabel" class="font-mono font-bold text-emerald-400">PROXY: ACTIVE</span>
+          <span class="text-gray-600">|</span>
+          <span id="vpnLocationLabel" class="text-gray-300 font-mono">🇯🇵 Tokyo</span>
+          <span class="text-gray-600">|</span>
+          <span id="vpnPingLabel" class="text-cyan-400 font-mono">18 ms</span>
+        </div>
+
+        <!-- VPN Toggle Button -->
+        <button onclick="toggleVpnShield()" id="btnVpnToggle" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-bold text-xs">
+          <i class="fa-solid fa-shield-halved" id="vpnShieldIcon"></i>
+          <span id="vpnBtnText">Shield ON</span>
+        </button>
+
+        <!-- Node Location Dropdown -->
+        <select id="vpnLocationSelect" onchange="changeVpnLocation(this.value)" class="bg-obsidian-card text-gray-200 border border-obsidian-border text-xs rounded-lg px-2 py-1 outline-none font-mono cursor-pointer">
+          <option value="tokyo">🇯🇵 Tokyo, JP</option>
+          <option value="ny">🇺🇸 New York, US</option>
+          <option value="london">🇬🇧 London, UK</option>
+          <option value="zurich">🇨🇭 Zurich, CH</option>
+          <option value="singapore">🇸🇬 Singapore, SG</option>
+        </select>
+
+        <!-- Burn Session Nuke Button -->
+        <button onclick="triggerQuickNuke()" class="p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-500/30 transition-all glow-red" title="BURN SESSION / QUICK NUKE">
+          <i class="fa-solid fa-fire text-xs"></i>
+        </button>
+
+        <div class="h-4 w-[1px] bg-obsidian-border"></div>
+
+        <!-- Theme Selector -->
+        <select onchange="applyTheme(this.value)" class="bg-obsidian-card text-gray-200 border border-obsidian-border text-xs rounded-lg px-2 py-1 outline-none font-semibold cursor-pointer">
+          <option value="obsidian">🖤 Obsidian Stealth</option>
+          <option value="matrix">📟 Matrix Emerald</option>
+          <option value="cyber">🌌 Cyber Cyan</option>
+          <option value="amoled">⬛ AMOLED Pitch</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- MULTI-TAB BAR -->
+    <nav class="h-10 bg-obsidian-header border-b border-obsidian-border px-2 flex items-center space-x-1 shrink-0 overflow-x-auto no-scrollbar">
+      <div id="tabsContainer" class="flex items-center space-x-1 flex-1 overflow-x-auto no-scrollbar"></div>
+
+      <button onclick="createNewTab()" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors shrink-0" title="New Tab (Ctrl+T)">
+        <i class="fa-solid fa-plus text-xs"></i>
+      </button>
+    </nav>
+
+    <!-- OMNIBOX TOOLBAR -->
+    <div class="h-12 bg-obsidian-header border-b border-obsidian-border px-3 flex items-center space-x-2 shrink-0 z-20">
+      <!-- Navigation Buttons -->
+      <div class="flex items-center space-x-1 text-gray-400">
+        <button onclick="navigateHistory(-1)" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Back"><i class="fa-solid fa-arrow-left text-xs"></i></button>
+        <button onclick="navigateHistory(1)" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Forward"><i class="fa-solid fa-arrow-right text-xs"></i></button>
+        <button onclick="reloadCurrentTab()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Reload"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+        <button onclick="navigateHome()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Home Dashboard"><i class="fa-solid fa-house text-xs"></i></button>
+      </div>
+
+      <!-- Address Input Omnibox -->
+      <div class="flex-1 relative flex items-center">
+        <div class="absolute left-3 flex items-center space-x-2 text-xs">
+          <button onclick="openModal('vpnModal')" class="flex items-center space-x-1 text-emerald-400 hover:text-emerald-300" title="Proxy Config">
+            <i class="fa-solid fa-shield-halved text-xs"></i>
+          </button>
+        </div>
+
+        <input type="text" id="omniboxInput" onkeydown="handleOmniboxKeydown(event)" placeholder="Enter URL or search query (e.g. stealth://term, stealth://code, stealth://snake)..." class="w-full bg-obsidian-input text-xs text-gray-100 pl-9 pr-28 py-2 rounded-xl border border-obsidian-border outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono shadow-inner transition-all" />
+
+        <!-- Search Engine Selector -->
+        <select id="searchEngineSelect" onchange="changeSearchEngine(this.value)" class="absolute right-8 text-[11px] bg-obsidian-card text-gray-400 border border-obsidian-border rounded-md px-1.5 py-0.5 outline-none font-semibold cursor-pointer">
+          <option value="duckduckgo">🦆 DuckDuckGo</option>
+          <option value="google">🔍 Google</option>
+          <option value="ecosia">🌱 Ecosia</option>
+          <option value="wikipedia">📚 Wikipedia</option>
+        </select>
+
+        <button onclick="toggleBookmarkCurrentTab()" id="btnBookmarkStar" class="absolute right-2 text-gray-500 hover:text-yellow-400 transition-colors" title="Bookmark Page">
+          <i class="fa-solid fa-star text-xs"></i>
+        </button>
+      </div>
+
+      <!-- App & Tool Shortcuts -->
+      <div class="flex items-center space-x-1 text-gray-400">
+        <button onclick="navigateToUrl('stealth://term')" class="p-2 hover:text-emerald-400 hover:bg-white/10 rounded-lg transition-colors font-mono font-bold text-xs" title="Stealth Terminal">&gt;_</button>
+        <button onclick="navigateToUrl('stealth://code')" class="p-2 hover:text-cyan-400 hover:bg-white/10 rounded-lg transition-colors" title="JS Code Sandbox"><i class="fa-solid fa-code text-xs"></i></button>
+        <button onclick="navigateToUrl('stealth://snake')" class="p-2 hover:text-pink-400 hover:bg-white/10 rounded-lg transition-colors" title="Cyber Snake Game"><i class="fa-solid fa-staff-snake text-xs"></i></button>
+        
+        <div class="h-4 w-[1px] bg-obsidian-border my-auto"></div>
+
+        <button onclick="toggleSplitView()" id="btnSplitView" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-cyan-400" title="Toggle Split View Mode"><i class="fa-solid fa-columns text-xs"></i></button>
+        <button onclick="toggleReaderMode()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Toggle Smart Reader Mode"><i class="fa-solid fa-book-open text-xs"></i></button>
+        <button onclick="toggleDevTools()" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="DevTools Drawer"><i class="fa-solid fa-terminal text-xs"></i></button>
+        <button onclick="toggleDrawer('history')" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="History"><i class="fa-solid fa-clock-rotate-left text-xs"></i></button>
+        <button onclick="toggleDrawer('bookmarks')" class="p-2 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Bookmarks"><i class="fa-solid fa-bookmark text-xs"></i></button>
+      </div>
+    </div>
+
+    <!-- BOOKMARKS BAR -->
+    <div id="bookmarksBar" class="h-8 bg-obsidian-sidebar border-b border-obsidian-border px-3 flex items-center space-x-2 text-xs text-gray-300 overflow-x-auto no-scrollbar shrink-0">
+      <div id="bookmarksQuickList" class="flex items-center space-x-2 flex-1"></div>
+      <button onclick="openModal('addBookmarkModal')" class="hover:text-white text-gray-500 text-xs px-2 py-0.5 rounded hover:bg-white/10 flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i><span>Bookmark</span></button>
+    </div>
+
+    <!-- MAIN VIEWPORT CONTAINER -->
+    <main id="mainViewportContainer" class="flex-1 flex min-h-0 relative overflow-hidden bg-obsidian-bg">
+      <!-- Primary Viewport -->
+      <div id="primaryViewport" class="flex-1 flex flex-col min-w-0 h-full relative">
+        <div id="primaryLoadingBar" class="h-0.5 bg-cyan-400 hidden w-full loading-pulse shrink-0"></div>
+        <div id="primaryContentArea" class="flex-1 w-full h-full relative"></div>
+      </div>
+
+      <!-- Secondary Viewport (Split Screen) -->
+      <div id="secondaryViewport" class="hidden flex-1 flex flex-col min-w-0 h-full relative border-l border-obsidian-border">
+        <div id="secondaryLoadingBar" class="h-0.5 bg-pink-400 hidden w-full loading-pulse shrink-0"></div>
+        <div id="secondaryContentArea" class="flex-1 w-full h-full relative"></div>
+      </div>
+    </main>
+
+    <!-- DEVTOOLS DRAWER -->
+    <aside id="devToolsDrawer" class="hidden h-60 bg-obsidian-card border-t border-obsidian-border flex flex-col shrink-0 font-mono text-xs z-30">
+      <div class="h-8 bg-obsidian-header px-3 border-b border-obsidian-border flex items-center justify-between text-gray-400">
+        <div class="flex space-x-4 font-bold">
+          <button onclick="switchDevTab('console')" id="devTab-console" class="text-white border-b-2 border-cyan-400 pb-1">Console</button>
+          <button onclick="switchDevTab('network')" id="devTab-network" class="hover:text-white pb-1">Network Log</button>
+          <button onclick="switchDevTab('storage')" id="devTab-storage" class="hover:text-white pb-1">LocalStorage Inspector</button>
+        </div>
+        <button onclick="toggleDevTools()" class="hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="flex-1 p-3 overflow-y-auto space-y-2 bg-obsidian-input text-gray-300">
+        <!-- Console View -->
+        <div id="devContent-console" class="space-y-1 h-full flex flex-col">
+          <div id="consoleLogOutput" class="flex-1 overflow-y-auto space-y-1 font-mono text-[11px] text-emerald-400">
+            <div>[PhantomOS DevEngine v5.0 Ready]</div>
+          </div>
+          <div class="flex items-center space-x-2 pt-2 border-t border-obsidian-border">
+            <span class="text-cyan-400 font-bold">&gt;</span>
+            <input type="text" id="consoleInput" onkeydown="handleConsoleEval(event)" placeholder="Execute JavaScript snippet..." class="w-full bg-transparent outline-none text-white font-mono text-xs" />
+          </div>
+        </div>
+
+        <!-- Network View -->
+        <div id="devContent-network" class="hidden space-y-1">
+          <table class="w-full text-left text-[11px]">
+            <thead class="text-gray-500 border-b border-obsidian-border">
+              <tr><th>Endpoint</th><th>Status</th><th>Type</th><th>Proxy Tunnel</th></tr>
+            </thead>
+            <tbody id="networkLogTableBody" class="text-gray-300">
+              <tr><td>https://duckduckgo.com</td><td class="text-emerald-400">200 OK</td><td>document</td><td>Encrypted Tunnel</td></tr>
+              <tr><td>Proxy Router (Node JP)</td><td class="text-cyan-400">AES-256</td><td>websocket</td><td>Active (18ms)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Storage View -->
+        <div id="devContent-storage" class="hidden space-y-2">
+          <div class="text-xs font-bold text-gray-400 uppercase">Local Storage Persistence Keys</div>
+          <div id="devStorageKeys" class="space-y-1 text-[11px] font-mono text-amber-400"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- SIDE DRAWER (History / Bookmarks) -->
+    <aside id="sideDrawer" class="hidden fixed top-22 right-0 bottom-0 w-80 bg-obsidian-card border-l border-obsidian-border shadow-2xl z-40 flex flex-col">
+      <div class="p-4 border-b border-obsidian-border flex justify-between items-center bg-obsidian-header">
+        <h3 id="drawerTitle" class="font-bold text-sm text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
+          <span>Browsing History</span>
+        </h3>
+        <button onclick="toggleDrawer(null)" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-3 border-b border-obsidian-border">
+        <input type="text" id="drawerSearchInput" oninput="filterDrawerItems(this.value)" placeholder="Search entries..." class="w-full bg-obsidian-input px-3 py-1.5 rounded-lg text-xs text-gray-200 outline-none border border-obsidian-border" />
+      </div>
+
+      <div id="drawerListContainer" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+
+      <div class="p-3 border-t border-obsidian-border flex justify-between items-center bg-obsidian-header">
+        <button onclick="clearCurrentDrawerData()" class="text-xs text-red-400 hover:text-red-300 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-trash"></i>
+          <span>Clear Storage</span>
+        </button>
+      </div>
+    </aside>
+
   </div>
 
-  <!-- MAIN VIEWPORT CONTAINER (Single or Split View) -->
-  <main id="mainViewportContainer" class="flex-1 flex min-h-0 relative overflow-hidden bg-sneaky-bg">
-    
-    <!-- PRIMARY VIEWPORT -->
-    <div id="primaryViewport" class="flex-1 flex flex-col min-w-0 h-full relative">
-      <div id="primaryLoadingBar" class="h-0.5 bg-cyan-400 hidden w-full loading-bar-active shrink-0"></div>
-      <div id="primaryContentArea" class="flex-1 w-full h-full relative"></div>
-    </div>
+  <!-- ========================================================================= -->
+  <!-- MODALS                                                                    -->
+  <!-- ========================================================================= -->
 
-    <!-- SECONDARY VIEWPORT (Split Screen) -->
-    <div id="secondaryViewport" class="hidden flex-1 flex flex-col min-w-0 h-full relative border-l border-sneaky-border">
-      <div id="secondaryLoadingBar" class="h-0.5 bg-pink-400 hidden w-full loading-bar-active shrink-0"></div>
-      <div id="secondaryContentArea" class="flex-1 w-full h-full relative"></div>
-    </div>
-
-  </main>
-
-  <!-- DEVTOOLS PANEL (BOTTOM DRAWER) -->
-  <aside id="devToolsDrawer" class="hidden h-64 bg-sneaky-card border-t border-sneaky-border flex flex-col shrink-0 z-30 font-mono text-xs">
-    <div class="h-8 bg-sneaky-header px-3 border-b border-sneaky-border flex items-center justify-between text-gray-400">
-      <div class="flex space-x-4 font-bold">
-        <button onclick="switchDevTab('console')" id="devTab-console" class="text-white border-b-2 border-cyan-400 pb-1">Console</button>
-        <button onclick="switchDevTab('elements')" id="devTab-elements" class="hover:text-white pb-1">DOM Inspector</button>
-        <button onclick="switchDevTab('network')" id="devTab-network" class="hover:text-white pb-1">Network Activity</button>
-        <button onclick="switchDevTab('storage')" id="devTab-storage" class="hover:text-white pb-1">Local Storage</button>
-      </div>
-      <button onclick="toggleDevTools()" class="hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-
-    <div class="flex-1 p-3 overflow-y-auto space-y-2 bg-sneaky-omnibox text-gray-300">
-      <!-- CONSOLE VIEW -->
-      <div id="devContent-console" class="space-y-1 h-full flex flex-col">
-        <div id="consoleLogOutput" class="flex-1 overflow-y-auto space-y-1 font-mono text-[11px] text-emerald-400">
-          <div>[SneakyKidVille DevTools Engine Ready]</div>
-        </div>
-        <div class="flex items-center space-x-2 pt-2 border-t border-sneaky-border">
-          <span class="text-cyan-400 font-bold">&gt;</span>
-          <input type="text" id="consoleInput" onkeydown="handleConsoleEval(event)" placeholder="Evaluate JavaScript code..." class="w-full bg-transparent outline-none text-white font-mono text-xs" />
-        </div>
-      </div>
-
-      <!-- DOM INSPECTOR VIEW -->
-      <div id="devContent-elements" class="hidden space-y-1 text-indigo-300">
-        <div class="text-gray-400">&lt;!DOCTYPE html&gt;</div>
-        <div class="pl-2">&lt;html lang="en" class="sneaky-os"&gt;</div>
-        <div class="pl-4 text-emerald-400" id="devFrameDomPreview">&lt;head&gt;...&lt;/head&gt; &lt;body&gt;SneakyKidVille Active Frame Sandbox Context&lt;/body&gt;</div>
-        <div class="pl-2">&lt;/html&gt;</div>
-      </div>
-
-      <!-- NETWORK VIEW -->
-      <div id="devContent-network" class="hidden space-y-1">
-        <table class="w-full text-left text-[11px]">
-          <thead class="text-gray-500 border-b border-sneaky-border">
-            <tr><th>Resource</th><th>Status</th><th>Type</th><th>Latency</th></tr>
-          </thead>
-          <tbody id="networkLogTableBody" class="text-gray-300">
-            <tr><td>https://kiddle.co</td><td class="text-emerald-400">200 OK</td><td>document</td><td>32ms</td></tr>
-            <tr><td>VPN Tunnel (Encrypted)</td><td class="text-cyan-400">AES-256</td><td>websocket</td><td>24ms</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- STORAGE VIEW -->
-      <div id="devContent-storage" class="hidden space-y-2">
-        <div class="text-xs font-bold text-gray-400 uppercase">Local Storage Persistence Keys</div>
-        <div id="devStorageKeys" class="space-y-1 text-[11px] font-mono text-amber-300"></div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- DRAWERS (History, Bookmarks) -->
-  <aside id="sideDrawer" class="hidden fixed top-22 right-0 bottom-0 w-80 bg-sneaky-card border-l border-sneaky-border shadow-2xl z-40 flex flex-col">
-    <div class="p-4 border-b border-sneaky-border flex justify-between items-center bg-sneaky-header">
-      <h3 id="drawerTitle" class="font-bold text-sm text-white flex items-center gap-2">
-        <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
-        <span>Browsing History</span>
-      </h3>
-      <button onclick="toggleDrawer(null)" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-
-    <div class="p-3 border-b border-sneaky-border">
-      <input type="text" id="drawerSearchInput" oninput="filterDrawerItems(this.value)" placeholder="Search entries..." class="w-full bg-sneaky-omnibox px-3 py-1.5 rounded-lg text-xs text-gray-200 outline-none border border-sneaky-border" />
-    </div>
-
-    <div id="drawerListContainer" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
-
-    <div class="p-3 border-t border-sneaky-border flex justify-between items-center bg-sneaky-header">
-      <button onclick="clearCurrentDrawerData()" class="text-xs text-red-400 hover:text-red-300 font-bold flex items-center gap-1">
-        <i class="fa-solid fa-trash"></i>
-        <span>Clear Storage</span>
-      </button>
-    </div>
-  </aside>
-
-  <!-- MODALS -->
-
-  <!-- VPN MODAL -->
+  <!-- PROXY & VPN CONFIG MODAL -->
   <div id="vpnModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-md">
-    <div class="bg-sneaky-card border border-sneaky-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <div class="flex justify-between items-center border-b border-sneaky-border pb-3">
+    <div class="bg-obsidian-card border border-obsidian-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-obsidian-border pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-shield-halved text-emerald-400"></i>
-          <span>VPN & Privacy Shield Status</span>
+          <span>Proxy Router & VPN Configuration</span>
         </h3>
         <button onclick="closeModal('vpnModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div class="space-y-3 text-xs">
-        <div class="p-3 bg-sneaky-omnibox border border-sneaky-border rounded-xl space-y-2">
+        <div>
+          <label class="block text-gray-400 mb-1 font-semibold">CORS Proxy Engine</label>
+          <select id="proxyEngineSelect" onchange="changeProxyEngine(this.value)" class="w-full bg-obsidian-input border border-obsidian-border rounded-lg p-2 text-white outline-none">
+            <option value="corsproxy">https://corsproxy.io/? (Recommended)</option>
+            <option value="allorigins">https://api.allorigins.win/raw?url=</option>
+            <option value="direct">Direct Unproxied Fetch</option>
+          </select>
+        </div>
+
+        <div class="p-3 bg-obsidian-input border border-obsidian-border rounded-xl space-y-2">
           <div class="flex justify-between items-center">
-            <span class="text-gray-400">Shield Protection:</span>
-            <span id="modalVpnStatus" class="font-bold text-emerald-400">Active • AES-256 Encryption</span>
+            <span class="text-gray-400">Status:</span>
+            <span id="modalVpnStatus" class="font-bold text-emerald-400">Active • AES-256 Tunnel</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-gray-400">Virtual Assigned IP:</span>
+            <span class="text-gray-400">Assigned Stealth IP:</span>
             <span id="modalVpnIp" class="font-mono text-cyan-400 font-bold">185.220.101.45</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-gray-400">Server Node Location:</span>
+            <span class="text-gray-400">Current Region:</span>
             <span id="modalVpnLoc" class="font-bold text-white">🇯🇵 Tokyo, Japan</span>
           </div>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-400">Simulated Bandwidth:</span>
-            <span id="modalVpnBandwidth" class="font-mono text-pink-400">4.8 MB/s Encrypted</span>
-          </div>
         </div>
-
-        <p class="text-gray-400 leading-relaxed">
-          SneakyKidVille OS routes all embedded web traffic through virtual stealth tunnels to keep browsing safe, private, and fun.
-        </p>
       </div>
 
       <div class="flex justify-end pt-2">
-        <button onclick="closeModal('vpnModal')" class="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-500">Close Panel</button>
+        <button onclick="closeModal('vpnModal')" class="px-5 py-2 rounded-xl text-xs font-bold bg-cyan-600 text-white hover:bg-cyan-500">Save & Apply</button>
       </div>
     </div>
   </div>
 
   <!-- ADD BOOKMARK MODAL -->
   <div id="addBookmarkModal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-md">
-    <div class="bg-sneaky-card border border-sneaky-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+    <div class="bg-obsidian-card border border-obsidian-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <h3 class="text-base font-bold text-white flex items-center gap-2">
         <i class="fa-solid fa-star text-yellow-400"></i>
-        <span>Add New Bookmark</span>
+        <span>Add Bookmark</span>
       </h3>
       <div class="space-y-3 text-xs">
         <div>
           <label class="block text-gray-400 mb-1 font-semibold">Title</label>
-          <input type="text" id="bmInputTitle" placeholder="NASA Kids Club" class="w-full bg-sneaky-omnibox border border-sneaky-border rounded-lg p-2.5 text-white outline-none focus:border-cyan-500" />
+          <input type="text" id="bmInputTitle" placeholder="GitHub" class="w-full bg-obsidian-input border border-obsidian-border rounded-lg p-2.5 text-white outline-none" />
         </div>
         <div>
           <label class="block text-gray-400 mb-1 font-semibold">URL</label>
-          <input type="text" id="bmInputUrl" placeholder="https://nasa.gov" class="w-full bg-sneaky-omnibox border border-sneaky-border rounded-lg p-2.5 text-white outline-none focus:border-cyan-500" />
+          <input type="text" id="bmInputUrl" placeholder="https://github.com" class="w-full bg-obsidian-input border border-obsidian-border rounded-lg p-2.5 text-white outline-none" />
         </div>
       </div>
       <div class="flex justify-end space-x-2 pt-2">
@@ -408,7 +494,7 @@
     </div>
   </div>
 
-  <!-- CORE JAVASCRIPT APP LOGIC -->
+  <!-- CORE APPLICATION JAVASCRIPT LOGIC -->
   <script>
     // =========================================================================
     // 1. STATE & INITIALIZATION
@@ -418,76 +504,143 @@
     let splitTabId = null;
     let isSplitView = false;
     let activeDrawer = null;
+    let isPanicActive = false;
 
     let vpnState = {
       active: true,
       location: 'tokyo',
       ip: '185.220.101.45',
-      ping: 24,
+      ping: 18,
+      proxyEngine: 'corsproxy',
       locations: {
-        tokyo: { name: '🇯🇵 Tokyo, JP', ip: '185.220.101.45', ping: 24 },
-        ny: { name: '🇺🇸 New York, US', ip: '104.244.76.12', ping: 48 },
-        london: { name: '🇬🇧 London, UK', ip: '185.220.102.8', ping: 38 },
-        zurich: { name: '🇨🇭 Zurich, CH', ip: '193.138.218.3', ping: 52 },
-        singapore: { name: '🇸🇬 Singapore, SG', ip: '103.253.25.10', ping: 31 }
+        tokyo: { name: '🇯🇵 Tokyo, JP', ip: '185.220.101.45', ping: 18 },
+        ny: { name: '🇺🇸 New York, US', ip: '104.244.76.12', ping: 42 },
+        london: { name: '🇬🇧 London, UK', ip: '185.220.102.8', ping: 35 },
+        zurich: { name: '🇨🇭 Zurich, CH', ip: '193.138.218.3', ping: 49 },
+        singapore: { name: '🇸🇬 Singapore, SG', ip: '103.253.25.10', ping: 28 }
       }
     };
 
     let bookmarks = [
-      { id: '1', title: 'Scratch', url: 'https://scratch.mit.edu', icon: 'fa-solid fa-cat' },
-      { id: '2', title: 'NASA Kids', url: 'https://www.nasa.gov/learning-resources/nasa-kids-club', icon: 'fa-solid fa-rocket' },
-      { id: '3', title: 'PBS Kids', url: 'https://pbskids.org', icon: 'fa-solid fa-tv' },
-      { id: '4', title: 'Code.org', url: 'https://code.org', icon: 'fa-solid fa-laptop-code' },
-      { id: '5', title: 'Snake Game', url: 'sneaky://snake', icon: 'fa-solid fa-staff-snake' },
-      { id: '6', title: 'Pong Arcade', url: 'sneaky://pong', icon: 'fa-solid fa-table-tennis-paddle-ball' },
-      { id: '7', title: 'Doodle Pad', url: 'sneaky://draw', icon: 'fa-solid fa-palette' }
+      { id: '1', title: 'Wikipedia', url: 'https://wikipedia.org', icon: 'fa-solid fa-book' },
+      { id: '2', title: 'GitHub', url: 'https://github.com', icon: 'fa-brands fa-github' },
+      { id: '3', title: 'StackOverflow', url: 'https://stackoverflow.com', icon: 'fa-brands fa-stack-overflow' },
+      { id: '4', title: 'Code.org', url: 'https://code.org', icon: 'fa-solid fa-code' },
+      { id: '5', title: 'Stealth Terminal', url: 'stealth://term', icon: 'fa-solid fa-terminal' },
+      { id: '6', title: 'JS Sandbox', url: 'stealth://code', icon: 'fa-solid fa-laptop-code' },
+      { id: '7', title: 'Cyber Snake', url: 'stealth://snake', icon: 'fa-solid fa-staff-snake' }
     ];
 
     let speedDialPortals = [
-      { title: 'Scratch MIT', desc: 'Create Games & Animations', url: 'https://scratch.mit.edu', icon: 'fa-solid fa-cat', color: 'from-amber-500 to-orange-500' },
-      { title: 'NASA Kids Club', desc: 'Explore Space & Science', url: 'https://www.nasa.gov/learning-resources/nasa-kids-club', icon: 'fa-solid fa-rocket', color: 'from-blue-600 to-indigo-600' },
-      { title: 'PBS Kids', desc: 'Fun Educational Games', url: 'https://pbskids.org', icon: 'fa-solid fa-gamepad', color: 'from-emerald-500 to-teal-600' },
-      { title: 'Code.org', desc: 'Learn Coding for Kids', url: 'https://code.org', icon: 'fa-solid fa-code', color: 'from-purple-600 to-pink-600' },
-      { title: 'Chess.com', desc: 'Play Chess Online', url: 'https://www.chess.com', icon: 'fa-solid fa-chess', color: 'from-yellow-600 to-amber-700' },
-      { title: 'Nat Geo Kids', desc: 'Animals & Planet Earth', url: 'https://kids.nationalgeographic.com', icon: 'fa-solid fa-earth-americas', color: 'from-yellow-500 to-green-600' }
+      { title: 'Wikipedia Free Encyclopedia', desc: 'Global Research Database', url: 'https://wikipedia.org', icon: 'fa-solid fa-book', color: 'from-gray-700 to-gray-900' },
+      { title: 'GitHub Code Repositories', desc: 'Software Development & Logic', url: 'https://github.com', icon: 'fa-brands fa-github', color: 'from-slate-800 to-black' },
+      { title: 'StackOverflow', desc: 'Developer Q&A Knowledgebase', url: 'https://stackoverflow.com', icon: 'fa-brands fa-stack-overflow', color: 'from-amber-600 to-orange-800' },
+      { title: 'Code.org Computer Science', desc: 'Interactive Algorithmic Sandbox', url: 'https://code.org', icon: 'fa-solid fa-laptop-code', color: 'from-cyan-700 to-blue-900' },
+      { title: 'Mathway Calculator', desc: 'Algebraic & Calculus Solver', url: 'https://www.mathway.com', icon: 'fa-solid fa-calculator', color: 'from-emerald-700 to-teal-900' },
+      { title: 'Physics Sandbox Simulation', desc: 'Interactive Physics Engine', url: 'https://www.myphysicslab.com', icon: 'fa-solid fa-atom', color: 'from-purple-800 to-indigo-950' }
     ];
 
     let historyLog = [];
-    let searchEngine = 'kiddle';
-    let currentTheme = 'cyber';
+    let searchEngine = 'duckduckgo';
+    let currentTheme = 'obsidian';
 
     window.addEventListener('load', () => {
       loadSavedState();
       setupKeyboardShortcuts();
-      createNewTab('sneaky://newtab');
+      createNewTab('stealth://newtab');
       renderBookmarksBar();
       startVpnPingFluctuator();
     });
 
     function loadSavedState() {
-      const savedBm = localStorage.getItem('sneaky_bookmarks');
-      if (savedBm) bookmarks = JSON.parse(savedBm);
+      try {
+        const savedBm = localStorage.getItem('stealth_bookmarks');
+        if (savedBm) bookmarks = JSON.parse(savedBm);
 
-      const savedHist = localStorage.getItem('sneaky_history');
-      if (savedHist) historyLog = JSON.parse(savedHist);
+        const savedHist = localStorage.getItem('stealth_history');
+        if (savedHist) historyLog = JSON.parse(savedHist);
 
-      const savedVpn = localStorage.getItem('sneaky_vpn');
-      if (savedVpn) {
-        vpnState = JSON.parse(savedVpn);
-        updateVpnUI();
-      }
+        const savedVpn = localStorage.getItem('stealth_vpn');
+        if (savedVpn) {
+          vpnState = JSON.parse(savedVpn);
+          updateVpnUI();
+        }
+      } catch (e) {}
     }
 
     function saveState() {
-      localStorage.setItem('sneaky_bookmarks', JSON.stringify(bookmarks));
-      localStorage.setItem('sneaky_history', JSON.stringify(historyLog));
-      localStorage.setItem('sneaky_vpn', JSON.stringify(vpnState));
+      try {
+        localStorage.setItem('stealth_bookmarks', JSON.stringify(bookmarks));
+        localStorage.setItem('stealth_history', JSON.stringify(historyLog));
+        localStorage.setItem('stealth_vpn', JSON.stringify(vpnState));
+      } catch (e) {}
     }
 
     // =========================================================================
-    // 2. TAB MANAGEMENT & NAVIGATION
+    // 2. PANIC DISGUISE MODE & TAB CAMOUFLAGE
     // =========================================================================
-    function createNewTab(url = 'sneaky://newtab') {
+    function togglePanicMode(forceState) {
+      isPanicActive = (forceState !== undefined) ? forceState : !isPanicActive;
+      const overlay = document.getElementById('panicDisguiseOverlay');
+      const app = document.getElementById('appContainer');
+
+      if (isPanicActive) {
+        overlay.classList.remove('hidden');
+        app.classList.add('hidden');
+        document.title = "Cellular Respiration & Bioenergetics - Google Docs";
+        setFavicon("https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico");
+      } else {
+        overlay.classList.add('hidden');
+        app.classList.remove('hidden');
+        applyTabDisguise(document.getElementById('disguisePresetSelect').value);
+      }
+    }
+
+    function applyTabDisguise(presetKey) {
+      const presets = {
+        none: { title: 'PhantomOS - StealthBrowser', icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>" },
+        docs: { title: 'Cellular Respiration Research Paper - Google Docs', icon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
+        canvas: { title: 'Dashboard - Canvas LMS', icon: 'https://du11hjcvx0d57.cloudfront.net/images/favicon.ico' },
+        classroom: { title: 'Classes - Google Classroom', icon: 'https://ssl.gstatic.com/classroom/favicon.png' },
+        wikipedia: { title: 'Cellular respiration - Wikipedia', icon: 'https://en.wikipedia.org/static/favicon/wikipedia.ico' },
+        desmos: { title: 'Desmos | Graphing Calculator', icon: 'https://www.desmos.com/favicon.ico' }
+      };
+
+      const selected = presets[presetKey] || presets.none;
+      document.title = selected.title;
+      setFavicon(selected.icon);
+      showToast(`Tab disguise set: ${presetKey.toUpperCase()}`, 'info');
+    }
+
+    function setFavicon(url) {
+      let link = document.getElementById('dynamicFavicon');
+      if (!link) {
+        link = document.createElement('link');
+        link.id = 'dynamicFavicon';
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = url;
+    }
+
+    // =========================================================================
+    // 3. BURN SESSION / QUICK NUKE
+    // =========================================================================
+    function triggerQuickNuke() {
+      localStorage.clear();
+      historyLog = [];
+      bookmarks = [];
+      tabs = [];
+      showToast('SESSION BURNED! Storage purged.', 'danger');
+      setTimeout(() => {
+        location.reload();
+      }, 500);
+    }
+
+    // =========================================================================
+    // 4. TAB MANAGEMENT & NAVIGATION
+    // =========================================================================
+    function createNewTab(url = 'stealth://newtab') {
       const tabId = 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
       const newTab = {
         id: tabId,
@@ -510,7 +663,7 @@
       const currentTab = getActiveTab();
       if (!currentTab) return;
 
-      document.getElementById('omniboxInput').value = (currentTab.url === 'sneaky://newtab') ? '' : currentTab.url;
+      document.getElementById('omniboxInput').value = (currentTab.url === 'stealth://newtab') ? '' : currentTab.url;
       renderViewport('primaryContentArea', currentTab);
 
       if (isSplitView && splitTabId) {
@@ -522,7 +675,7 @@
     function closeTab(tabId, e) {
       if (e) e.stopPropagation();
       if (tabs.length === 1) {
-        createNewTab('sneaky://newtab');
+        createNewTab('stealth://newtab');
       }
 
       tabs = tabs.filter(t => t.id !== tabId);
@@ -544,13 +697,13 @@
         const isActive = (tab.id === activeTabId);
         const tabEl = document.createElement('div');
         tabEl.onclick = () => switchTab(tab.id);
-        tabEl.className = `group flex items-center space-x-2 px-3 py-1.5 rounded-t-xl border-t border-x border-sneaky-border text-xs cursor-pointer transition-all min-w-[130px] max-w-[210px] shrink-0 ${
-          isActive ? 'bg-sneaky-tabActive text-white font-bold border-b-2 border-b-cyan-400 shadow-lg' : 'bg-sneaky-tabInactive text-gray-400 hover:bg-white/5'
+        tabEl.className = `group flex items-center space-x-2 px-3 py-1.5 rounded-t-xl border-t border-x border-obsidian-border text-xs cursor-pointer transition-all min-w-[130px] max-w-[210px] shrink-0 ${
+          isActive ? 'bg-obsidian-tabActive text-white font-bold border-b-2 border-b-cyan-400 shadow-lg' : 'bg-obsidian-tabInactive text-gray-400 hover:bg-white/5'
         }`;
 
         tabEl.innerHTML = `
           <i class="${tab.favicon} text-[11px] text-cyan-400 shrink-0"></i>
-          <span class="truncate flex-1">${escapeHTML(tab.title)}</span>
+          <span class="truncate flex-1 font-mono">${escapeHTML(tab.title)}</span>
           <button onclick="closeTab('${tab.id}', event)" class="opacity-0 group-hover:opacity-100 p-0.5 hover:text-red-400 rounded transition-opacity shrink-0">
             <i class="fa-solid fa-xmark text-[10px]"></i>
           </button>
@@ -561,7 +714,7 @@
     }
 
     // =========================================================================
-    // 3. OMNIBOX & URL RESOLUTION
+    // 5. OMNIBOX & PROXY ROUTER ENGINE
     // =========================================================================
     function handleOmniboxKeydown(e) {
       if (e.key === 'Enter') {
@@ -572,7 +725,7 @@
     }
 
     function resolveUrlOrSearch(query) {
-      if (query.startsWith('sneaky://')) return query;
+      if (query.startsWith('stealth://')) return query;
 
       const urlPattern = /^(https?:\/\/)?([\w\d\-_]+\.)+[\w\d\-_]+(\/.*)?$/i;
       if (urlPattern.test(query)) {
@@ -583,13 +736,24 @@
       }
 
       const engines = {
-        kiddle: 'https://www.kiddle.co/s.php?q=',
         duckduckgo: 'https://duckduckgo.com/?q=',
         google: 'https://www.google.com/search?q=',
-        ecosia: 'https://www.ecosia.org/search?q='
+        ecosia: 'https://www.ecosia.org/search?q=',
+        wikipedia: 'https://en.wikipedia.org/w/index.php?search='
       };
 
-      return (engines[searchEngine] || engines.kiddle) + encodeURIComponent(query);
+      return (engines[searchEngine] || engines.duckduckgo) + encodeURIComponent(query);
+    }
+
+    function getProxiedUrl(targetUrl) {
+      if (targetUrl.startsWith('stealth://') || !vpnState.active) return targetUrl;
+
+      if (vpnState.proxyEngine === 'corsproxy') {
+        return `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+      } else if (vpnState.proxyEngine === 'allorigins') {
+        return `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      }
+      return targetUrl;
     }
 
     function navigateToUrl(url) {
@@ -608,16 +772,16 @@
       tab.historyIndex = tab.historyStack.length - 1;
 
       logHistory(tab.title, url);
-      document.getElementById('omniboxInput').value = (url === 'sneaky://newtab') ? '' : url;
+      document.getElementById('omniboxInput').value = (url === 'stealth://newtab') ? '' : url;
       renderTabsBar();
       renderViewport('primaryContentArea', tab);
     }
 
     function getUrlTitle(url) {
-      if (url === 'sneaky://newtab') return 'Sneaky Portal';
-      if (url === 'sneaky://snake') return 'Arcade Snake';
-      if (url === 'sneaky://pong') return 'Pong Arcade';
-      if (url === 'sneaky://draw') return 'Doodle Pad';
+      if (url === 'stealth://newtab') return 'Dashboard';
+      if (url === 'stealth://term') return 'Cyber Terminal';
+      if (url === 'stealth://code') return 'JS Sandbox';
+      if (url === 'stealth://snake') return 'Cyber Snake';
       try {
         return new URL(url).hostname.replace('www.', '');
       } catch (e) {
@@ -626,10 +790,10 @@
     }
 
     function getUrlIcon(url) {
-      if (url === 'sneaky://newtab') return 'fa-solid fa-house';
-      if (url === 'sneaky://snake') return 'fa-solid fa-staff-snake';
-      if (url === 'sneaky://pong') return 'fa-solid fa-table-tennis-paddle-ball';
-      if (url === 'sneaky://draw') return 'fa-solid fa-palette';
+      if (url === 'stealth://newtab') return 'fa-solid fa-house';
+      if (url === 'stealth://term') return 'fa-solid fa-terminal';
+      if (url === 'stealth://code') return 'fa-solid fa-code';
+      if (url === 'stealth://snake') return 'fa-solid fa-staff-snake';
       return 'fa-solid fa-globe';
     }
 
@@ -638,9 +802,7 @@
       if (tab) renderViewport('primaryContentArea', tab);
     }
 
-    function navigateHome() {
-      navigateToUrl('sneaky://newtab');
-    }
+    function navigateHome() { navigateToUrl('stealth://newtab'); }
 
     function navigateHistory(dir) {
       const tab = getActiveTab();
@@ -649,36 +811,36 @@
       if (newIdx >= 0 && newIdx < tab.historyStack.length) {
         tab.historyIndex = newIdx;
         tab.url = tab.historyStack[newIdx];
-        document.getElementById('omniboxInput').value = (tab.url === 'sneaky://newtab') ? '' : tab.url;
+        document.getElementById('omniboxInput').value = (tab.url === 'stealth://newtab') ? '' : tab.url;
         renderViewport('primaryContentArea', tab);
       }
     }
 
     // =========================================================================
-    // 4. MULTI-MODE VIEWPORT RENDERER
+    // 6. MULTI-MODE VIEWPORT RENDERER
     // =========================================================================
     function renderViewport(targetId, tab) {
       const container = document.getElementById(targetId);
       container.innerHTML = '';
 
-      if (tab.url === 'sneaky://newtab') {
-        renderSpeedDialPortal(container);
+      if (tab.url === 'stealth://newtab') {
+        renderSpeedDialDashboard(container);
         return;
       }
-      if (tab.url === 'sneaky://snake') {
-        renderSnakeGameApp(container);
+      if (tab.url === 'stealth://term') {
+        renderTerminalApp(container);
         return;
       }
-      if (tab.url === 'sneaky://pong') {
-        renderPongGameApp(container);
+      if (tab.url === 'stealth://code') {
+        renderCodeSandboxApp(container);
         return;
       }
-      if (tab.url === 'sneaky://draw') {
-        renderDoodlePadApp(container);
+      if (tab.url === 'stealth://snake') {
+        renderCyberSnakeApp(container);
         return;
       }
       if (tab.mode === 'reader') {
-        renderReaderViewMode(container, tab.url);
+        renderSmartReaderMode(container, tab.url);
         return;
       }
 
@@ -690,7 +852,7 @@
 
       // Standard Responsive Sandbox Frame
       const iframe = document.createElement('iframe');
-      iframe.src = tab.url;
+      iframe.src = getProxiedUrl(tab.url);
       iframe.className = 'w-full h-full border-0 bg-white';
       iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups";
 
@@ -709,24 +871,24 @@
 
     function renderIframeBlockedFallback(container, url) {
       container.innerHTML = `
-        <div class="h-full flex flex-col items-center justify-center p-8 bg-sneaky-card text-center space-y-4">
-          <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-3xl border border-cyan-500/30 shadow-xl">
+        <div class="h-full flex flex-col items-center justify-center p-8 bg-obsidian-card text-center space-y-4 font-mono">
+          <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-3xl border border-cyan-500/30 shadow-xl glow-cyan">
             <i class="fa-solid fa-shield-cat"></i>
           </div>
           <div class="max-w-md space-y-2">
-            <h3 class="text-lg font-bold text-white">Framing Restricted by Web Server</h3>
+            <h3 class="text-lg font-bold text-white">Framing Protection Detected</h3>
             <p class="text-xs text-gray-400 leading-relaxed">
-              <span class="font-mono text-cyan-300">${escapeHTML(url)}</span> prevents direct embedding via strict X-Frame-Options policies.
+              <span class="text-cyan-300 font-bold">${escapeHTML(url)}</span> prevents direct embedding via strict X-Frame-Options or CSP headers.
             </p>
           </div>
-          <div class="flex flex-wrap gap-2 pt-2">
+          <div class="flex flex-wrap justify-center gap-3 pt-2">
             <button onclick="switchTabMode('reader')" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center space-x-2 transition-all shadow-lg">
               <i class="fa-solid fa-book-open"></i>
-              <span>Launch Reader Mode</span>
+              <span>Smart Reader Extractor</span>
             </button>
-            <a href="${escapeHTML(url)}" target="_blank" class="px-5 py-2.5 rounded-xl bg-sneaky-header hover:bg-white/10 text-gray-200 font-bold text-xs border border-sneaky-border flex items-center space-x-2 transition-colors">
+            <a href="${escapeHTML(url)}" target="_blank" class="px-5 py-2.5 rounded-xl bg-obsidian-header hover:bg-white/10 text-gray-200 font-bold text-xs border border-obsidian-border flex items-center space-x-2 transition-colors">
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span>Open in New Window</span>
+              <span>Launch External Window</span>
             </a>
           </div>
         </div>
@@ -741,65 +903,61 @@
       }
     }
 
-    function renderReaderViewMode(container, url) {
+    function renderSmartReaderMode(container, url) {
       container.innerHTML = `
-        <div class="h-full overflow-y-auto p-8 bg-sneaky-omnibox text-gray-200 font-serif leading-relaxed max-w-3xl mx-auto space-y-6">
-          <div class="border-b border-sneaky-border pb-4 font-sans">
-            <div class="text-xs text-cyan-400 font-mono font-bold uppercase tracking-wider">Reader Mode Text Extractor</div>
+        <div class="h-full overflow-y-auto p-8 bg-obsidian-card text-gray-200 font-serif leading-relaxed max-w-3xl mx-auto space-y-6">
+          <div class="border-b border-obsidian-border pb-4 font-sans">
+            <div class="text-xs text-cyan-400 font-mono font-bold uppercase tracking-wider">Smart Reader Text Extractor</div>
             <h1 class="text-2xl font-bold text-white mt-1">${escapeHTML(getUrlTitle(url))}</h1>
             <div class="text-xs text-gray-500 mt-1 font-mono">${escapeHTML(url)}</div>
           </div>
           <p class="text-base text-gray-300">
-            This distraction-free reader view removes scripts, banners, and framing limits for clean reading.
+            This clean reader extraction mode bypasses script clutter and framing restrictions to display clean article content.
           </p>
-          <div class="p-4 bg-sneaky-card rounded-xl border border-sneaky-border text-sm font-sans italic text-gray-400">
-            "Protected & optimized by SneakyKidVille OS Privacy Shield."
+          <div class="p-4 bg-obsidian-input rounded-xl border border-obsidian-border text-xs font-mono text-cyan-400">
+            [Encrypted Proxy Stream Route: Active • Zero Scripts Loaded]
           </div>
         </div>
       `;
     }
 
     // =========================================================================
-    // 5. SPEED DIAL & DASHBOARD
+    // 7. SPEED DIAL DASHBOARD
     // =========================================================================
-    function renderSpeedDialPortal(container) {
+    function renderSpeedDialDashboard(container) {
       container.innerHTML = `
-        <div class="h-full overflow-y-auto p-8 flex flex-col items-center justify-center space-y-8 bg-gradient-to-b from-sneaky-bg via-sneaky-sidebar to-sneaky-bg">
-          
-          <!-- Header Greeting -->
+        <div class="h-full overflow-y-auto p-8 flex flex-col items-center justify-center space-y-8 bg-gradient-to-b from-obsidian-bg via-obsidian-card to-obsidian-bg">
           <div class="text-center space-y-2">
-            <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight flex items-center justify-center gap-3">
+            <h1 class="text-4xl font-black text-white tracking-tight flex items-center justify-center gap-3 font-mono">
               <i class="fa-solid fa-user-ninja text-cyan-400"></i>
-              <span class="bg-gradient-to-r from-cyan-400 via-pink-400 to-yellow-300 bg-clip-text text-transparent">SneakyKidVille Portal</span>
+              <span>PHANTOM OS</span>
             </h1>
-            <p class="text-xs font-semibold text-gray-400 tracking-wider uppercase">Safe • Encrypted • Ultra-Fun Kid OS</p>
+            <p class="text-xs font-mono font-bold text-cyan-400/80 tracking-widest uppercase">Stealth Environment • Encrypted Route</p>
           </div>
 
-          <!-- Quick Arcade Bar -->
+          <!-- Shortcuts Bar -->
           <div class="flex flex-wrap justify-center gap-3">
-            <button onclick="navigateToUrl('sneaky://snake')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs hover:scale-105 transition-all shadow-lg flex items-center space-x-2">
+            <button onclick="navigateToUrl('stealth://term')" class="px-5 py-2.5 rounded-xl bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 font-bold text-xs hover:bg-cyan-600/50 transition-all shadow-lg flex items-center space-x-2 font-mono">
+              <span>&gt;_ Stealth Terminal</span>
+            </button>
+            <button onclick="navigateToUrl('stealth://code')" class="px-5 py-2.5 rounded-xl bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-bold text-xs hover:bg-emerald-600/50 transition-all shadow-lg flex items-center space-x-2 font-mono">
+              <i class="fa-solid fa-code"></i>
+              <span>JS Sandbox</span>
+            </button>
+            <button onclick="navigateToUrl('stealth://snake')" class="px-5 py-2.5 rounded-xl bg-pink-600/30 text-pink-300 border border-pink-500/40 font-bold text-xs hover:bg-pink-600/50 transition-all shadow-lg flex items-center space-x-2 font-mono">
               <i class="fa-solid fa-staff-snake"></i>
-              <span>Play Snake</span>
-            </button>
-            <button onclick="navigateToUrl('sneaky://pong')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs hover:scale-105 transition-all shadow-lg flex items-center space-x-2">
-              <i class="fa-solid fa-table-tennis-paddle-ball"></i>
-              <span>Play Pong</span>
-            </button>
-            <button onclick="navigateToUrl('sneaky://draw')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-xs hover:scale-105 transition-all shadow-lg flex items-center space-x-2">
-              <i class="fa-solid fa-palette"></i>
-              <span>Doodle Pad</span>
+              <span>Cyber Snake</span>
             </button>
           </div>
 
-          <!-- Speed Dial Cards Grid -->
+          <!-- Speed Dial Cards -->
           <div class="w-full max-w-4xl space-y-3">
-            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider flex justify-between items-center px-1">
-              <span>Kid Favorite Destinations</span>
-              <span class="text-cyan-400"><i class="fa-solid fa-shield-check mr-1"></i>Shield Protected</span>
+            <div class="text-xs text-gray-400 font-mono font-bold uppercase tracking-wider flex justify-between items-center px-1">
+              <span>Stealth Quick Destinations</span>
+              <span class="text-emerald-400"><i class="fa-solid fa-shield-check mr-1"></i>Proxy Encrypted</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="speedDialCardsGrid"></div>
           </div>
-
         </div>
       `;
 
@@ -807,15 +965,15 @@
       speedDialPortals.forEach(portal => {
         const card = document.createElement('div');
         card.onclick = () => navigateToUrl(portal.url);
-        card.className = 'glass-panel p-4 rounded-2xl flex items-center space-x-4 cursor-pointer hover:border-cyan-400/50 hover:scale-[1.02] transition-all group';
+        card.className = 'glass-panel p-4 rounded-2xl flex items-center space-x-4 cursor-pointer hover:border-cyan-500/40 hover:scale-[1.02] transition-all group';
 
         card.innerHTML = `
           <div class="w-12 h-12 rounded-xl bg-gradient-to-tr ${portal.color} text-white flex items-center justify-center text-xl shadow-lg shrink-0">
             <i class="${portal.icon}"></i>
           </div>
-          <div class="min-w-0 flex-1">
-            <div class="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors truncate">${escapeHTML(portal.title)}</div>
-            <div class="text-[11px] text-gray-400 truncate">${escapeHTML(portal.desc)}</div>
+          <div class="min-w-0 flex-1 font-mono">
+            <div class="font-bold text-xs text-white group-hover:text-cyan-300 transition-colors truncate">${escapeHTML(portal.title)}</div>
+            <div class="text-[10px] text-gray-500 truncate mt-0.5">${escapeHTML(portal.desc)}</div>
           </div>
         `;
         grid.appendChild(card);
@@ -823,32 +981,153 @@
     }
 
     // =========================================================================
-    // 6. BUILT-IN MINI-APPS (Snake, Pong, Doodle Pad)
+    // 8. INTERACTIVE CYBER TERMINAL (stealth://term)
     // =========================================================================
-
-    // --- SNAKE GAME ---
-    function renderSnakeGameApp(container) {
+    function renderTerminalApp(container) {
       container.innerHTML = `
-        <div class="h-full flex flex-col items-center justify-center p-6 bg-sneaky-omnibox space-y-4">
-          <div class="text-center space-y-1">
-            <h2 class="text-2xl font-black text-white flex items-center justify-center gap-2">
-              <i class="fa-solid fa-staff-snake text-emerald-400"></i>
-              <span>Arcade Snake</span>
-            </h2>
-            <div class="text-xs text-gray-400 space-x-4 font-mono">
-              <span>Score: <strong id="snakeScore" class="text-emerald-400">0</strong></span>
-              <span>High Score: <strong id="snakeHighScore" class="text-yellow-400">0</strong></span>
-            </div>
+        <div class="h-full bg-black p-4 font-mono text-xs text-emerald-400 flex flex-col space-y-3 overflow-hidden select-text">
+          <div class="border-b border-emerald-900/60 pb-2 text-gray-500 flex justify-between items-center">
+            <span>PhantomOS Stealth CLI v5.0</span>
+            <span class="text-cyan-400">Type 'help' for commands</span>
           </div>
 
-          <canvas id="snakeCanvas" width="400" height="400" class="bg-black border-2 border-emerald-500/40 rounded-2xl shadow-2xl glow-box-green"></canvas>
+          <div id="termOutput" class="flex-1 overflow-y-auto space-y-2 leading-relaxed">
+            <div>[System Kernel Initialized]</div>
+            <div>[Stealth Tunnel Active • Encryption AES-256]</div>
+            <div class="text-gray-400">Type <span class="text-white font-bold">'help'</span> to view available commands.</div>
+          </div>
 
-          <div class="flex space-x-3">
-            <button onclick="startSnakeGame()" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-lg">Restart Game</button>
+          <div class="flex items-center space-x-2 pt-2 border-t border-emerald-900/60">
+            <span class="text-cyan-400 font-bold">phantom@stealth:~$</span>
+            <input type="text" id="termInput" onkeydown="handleTerminalCommand(event)" class="w-full bg-transparent text-white outline-none font-mono text-xs" autofocus />
           </div>
         </div>
       `;
+      setTimeout(() => { const inp = document.getElementById('termInput'); if (inp) inp.focus(); }, 100);
+    }
 
+    function handleTerminalCommand(e) {
+      if (e.key === 'Enter') {
+        const input = e.target.value.trim();
+        if (!input) return;
+
+        const output = document.getElementById('termOutput');
+        const cmdLine = document.createElement('div');
+        cmdLine.innerHTML = `<span class="text-cyan-400">phantom@stealth:~$</span> <span class="text-white">${escapeHTML(input)}</span>`;
+        output.appendChild(cmdLine);
+
+        const parts = input.split(' ');
+        const cmd = parts[0].toLowerCase();
+        const arg = parts.slice(1).join(' ');
+
+        const res = document.createElement('div');
+        res.className = 'text-emerald-300 pl-4 border-l-2 border-emerald-500/40';
+
+        switch (cmd) {
+          case 'help':
+            res.innerHTML = `
+              Available Commands:<br/>
+              - <span class="text-white">help</span>: Display this reference<br/>
+              - <span class="text-white">proxy &lt;url&gt;</span>: Route & load proxied website<br/>
+              - <span class="text-white">ping &lt;host&gt;</span>: Measure network route latency<br/>
+              - <span class="text-white">status</span>: View active proxy shield diagnostic<br/>
+              - <span class="text-white">clear</span>: Flush terminal console screen<br/>
+              - <span class="text-white">burn</span>: Immediate session purge<br/>
+              - <span class="text-white">theme &lt;name&gt;</span>: Switch theme (obsidian, matrix, cyber, amoled)
+            `;
+            break;
+          case 'clear':
+            output.innerHTML = '';
+            e.target.value = '';
+            return;
+          case 'status':
+            res.innerHTML = `Node: ${vpnState.locations[vpnState.location].name} | IP: ${vpnState.ip} | Ping: ${vpnState.ping}ms | Proxy Engine: ${vpnState.proxyEngine}`;
+            break;
+          case 'ping':
+            res.innerHTML = `Pinging ${escapeHTML(arg || '8.8.8.8')} with 32 bytes of data...<br/>Reply from ${arg || '8.8.8.8'}: time=${vpnState.ping + Math.floor(Math.random()*4)}ms TTL=118`;
+            break;
+          case 'proxy':
+            if (arg) {
+              res.innerHTML = `Routing request to ${escapeHTML(arg)}...`;
+              navigateToUrl(arg);
+            } else res.innerHTML = `Usage: proxy https://example.com`;
+            break;
+          case 'burn':
+            triggerQuickNuke();
+            return;
+          default:
+            res.innerHTML = `<span class="text-red-400">Command not recognized: '${cmd}'. Type 'help'.</span>`;
+        }
+
+        output.appendChild(res);
+        output.scrollTop = output.scrollHeight;
+        e.target.value = '';
+      }
+    }
+
+    // =========================================================================
+    // 9. JS CODE SANDBOX (stealth://code)
+    // =========================================================================
+    function renderCodeSandboxApp(container) {
+      container.innerHTML = `
+        <div class="h-full flex flex-col p-4 bg-obsidian-card space-y-3 font-mono">
+          <div class="flex justify-between items-center p-2 bg-obsidian-input rounded-xl border border-obsidian-border text-xs">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-code"></i> JavaScript Code Sandbox</span>
+            <button onclick="executeSandboxCode()" class="px-4 py-1.5 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-500 shadow-md">Run Script</button>
+          </div>
+          <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 min-h-0">
+            <textarea id="sandboxCodeInput" class="w-full h-full bg-black text-emerald-400 p-4 rounded-xl border border-obsidian-border outline-none font-mono text-xs leading-relaxed resize-none" placeholder="// Enter JavaScript code here...
+console.log('Hello from PhantomOS Stealth Sandbox!');
+const add = (a, b) => a + b;
+console.log('2 + 3 =', add(2, 3));"></textarea>
+            <div id="sandboxCodeOutput" class="w-full h-full bg-black text-gray-300 p-4 rounded-xl border border-obsidian-border font-mono text-xs overflow-y-auto space-y-1">
+              <div class="text-gray-500">[Console Output Ready]</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function executeSandboxCode() {
+      const code = document.getElementById('sandboxCodeInput').value;
+      const out = document.getElementById('sandboxCodeOutput');
+      out.innerHTML = '<div class="text-gray-500">[Executing...]</div>';
+
+      try {
+        let logs = [];
+        const customConsole = {
+          log: (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')),
+          error: (...args) => logs.push(`<span class="text-red-400">[Error] ${args.join(' ')}</span>`)
+        };
+        const run = new Function('console', code);
+        run(customConsole);
+
+        out.innerHTML = logs.map(l => `<div>${l}</div>`).join('') || '<div class="text-gray-500">[Code executed successfully with no console output]</div>';
+      } catch (err) {
+        out.innerHTML = `<div class="text-red-400">[Runtime Error]: ${escapeHTML(err.message)}</div>`;
+      }
+    }
+
+    // =========================================================================
+    // 10. RETRO CYBER SNAKE (stealth://snake)
+    // =========================================================================
+    function renderCyberSnakeApp(container) {
+      container.innerHTML = `
+        <div class="h-full flex flex-col items-center justify-center p-6 bg-black space-y-4 font-mono">
+          <div class="text-center space-y-1">
+            <h2 class="text-2xl font-bold text-white flex items-center justify-center gap-2">
+              <i class="fa-solid fa-staff-snake text-cyan-400"></i>
+              <span>CYBER SNAKE</span>
+            </h2>
+            <div class="text-xs text-gray-400 space-x-6">
+              <span>Score: <strong id="snakeScore" class="text-cyan-400">0</strong></span>
+              <span>High Score: <strong id="snakeHighScore" class="text-amber-400">0</strong></span>
+            </div>
+          </div>
+          <canvas id="snakeCanvas" width="400" height="400" class="bg-obsidian-card border-2 border-cyan-500/40 rounded-2xl shadow-2xl glow-cyan"></canvas>
+          <button onclick="startSnakeGame()" class="px-6 py-2.5 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 shadow-lg">Restart Game</button>
+        </div>
+      `;
       setTimeout(startSnakeGame, 100);
     }
 
@@ -862,7 +1141,7 @@
       let food = { x: 100, y: 100 };
       let dx = 20, dy = 0;
       let score = 0;
-      let highScore = parseInt(localStorage.getItem('sneaky_snake_high') || '0');
+      let highScore = parseInt(localStorage.getItem('stealth_snake_high') || '0');
 
       document.getElementById('snakeHighScore').innerText = highScore;
       if (snakeTimer) clearInterval(snakeTimer);
@@ -879,7 +1158,6 @@
 
         if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400 || snake.some(s => s.x === head.x && s.y === head.y)) {
           clearInterval(snakeTimer);
-          playAudioTone(150, 0.3);
           showToast(`Game Over! Score: ${score}`, 'danger');
           return;
         }
@@ -891,232 +1169,35 @@
           document.getElementById('snakeScore').innerText = score;
           if (score > highScore) {
             highScore = score;
-            localStorage.setItem('sneaky_snake_high', highScore);
+            localStorage.setItem('stealth_snake_high', highScore);
             document.getElementById('snakeHighScore').innerText = highScore;
           }
-          playAudioTone(600, 0.1);
           food = { x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20 };
-        } else {
-          snake.pop();
-        }
+        } else snake.pop();
 
-        ctx.fillStyle = '#0a0d14';
+        ctx.fillStyle = '#05070a';
         ctx.fillRect(0, 0, 400, 400);
 
-        // Render Snake
-        ctx.fillStyle = '#10b981';
+        // Snake
         snake.forEach((s, i) => {
-          ctx.fillStyle = i === 0 ? '#34d399' : '#10b981';
+          ctx.fillStyle = i === 0 ? '#06b6d4' : '#0891b2';
           ctx.fillRect(s.x, s.y, 18, 18);
         });
 
-        // Render Food
+        // Food
         ctx.fillStyle = '#ec4899';
         ctx.fillRect(food.x, food.y, 18, 18);
       }, 110);
     }
 
-    // --- PONG GAME ---
-    function renderPongGameApp(container) {
-      container.innerHTML = `
-        <div class="h-full flex flex-col items-center justify-center p-6 bg-sneaky-omnibox space-y-4">
-          <div class="text-center space-y-1">
-            <h2 class="text-2xl font-black text-white flex items-center justify-center gap-2">
-              <i class="fa-solid fa-table-tennis-paddle-ball text-cyan-400"></i>
-              <span>Retro Arcade Pong</span>
-            </h2>
-            <div class="text-xs text-gray-400 space-x-6 font-mono">
-              <span>Player: <strong id="pongP1Score" class="text-cyan-400">0</strong></span>
-              <span>CPU: <strong id="pongP2Score" class="text-pink-400">0</strong></span>
-            </div>
-          </div>
-
-          <canvas id="pongCanvas" width="500" height="350" class="bg-black border-2 border-cyan-500/40 rounded-2xl shadow-2xl glow-box-blue"></canvas>
-
-          <div class="flex space-x-3">
-            <button onclick="startPongGame()" class="px-6 py-2.5 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition-all shadow-lg">Start Match</button>
-          </div>
-        </div>
-      `;
-
-      setTimeout(startPongGame, 100);
-    }
-
-    let pongTimer = null;
-    function startPongGame() {
-      const canvas = document.getElementById('pongCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-
-      let ball = { x: 250, y: 175, dx: 4, dy: 3 };
-      let p1 = { y: 130, score: 0 };
-      let p2 = { y: 130, score: 0 };
-
-      if (pongTimer) clearInterval(pongTimer);
-
-      canvas.onmousemove = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        p1.y = e.clientY - rect.top - 40;
-      };
-
-      pongTimer = setInterval(() => {
-        ball.x += ball.dx;
-        ball.y += ball.dy;
-
-        // CPU AI Paddle Movement
-        p2.y += (ball.y - (p2.y + 40)) * 0.1;
-
-        // Wall Bounces
-        if (ball.y <= 0 || ball.y >= 350) ball.dy *= -1;
-
-        // P1 Paddle Bounce
-        if (ball.x <= 20 && ball.y >= p1.y && ball.y <= p1.y + 80) {
-          ball.dx *= -1.05;
-          playAudioTone(400, 0.05);
-        }
-
-        // P2 Paddle Bounce
-        if (ball.x >= 480 && ball.y >= p2.y && ball.y <= p2.y + 80) {
-          ball.dx *= -1.05;
-          playAudioTone(350, 0.05);
-        }
-
-        // Score Check
-        if (ball.x < 0) {
-          p2.score++;
-          document.getElementById('pongP2Score').innerText = p2.score;
-          ball = { x: 250, y: 175, dx: 4, dy: 3 };
-        }
-        if (ball.x > 500) {
-          p1.score++;
-          document.getElementById('pongP1Score').innerText = p1.score;
-          ball = { x: 250, y: 175, dx: -4, dy: 3 };
-        }
-
-        // Clear Canvas
-        ctx.fillStyle = '#0a0d14';
-        ctx.fillRect(0, 0, 500, 350);
-
-        // Center line
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-        ctx.setLineDash([6, 6]);
-        ctx.beginPath();
-        ctx.moveTo(250, 0); ctx.lineTo(250, 350);
-        ctx.stroke();
-
-        // Paddles
-        ctx.fillStyle = '#06b6d4';
-        ctx.fillRect(10, p1.y, 10, 80);
-
-        ctx.fillStyle = '#ec4899';
-        ctx.fillRect(480, p2.y, 10, 80);
-
-        // Ball
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, 7, 0, Math.PI * 2);
-        ctx.fill();
-      }, 1000 / 60);
-    }
-
-    // --- DOODLE DRAW PAD ---
-    function renderDoodlePadApp(container) {
-      container.innerHTML = `
-        <div class="h-full flex flex-col p-4 bg-sneaky-omnibox space-y-3">
-          <!-- Toolbar Controls -->
-          <div class="flex flex-wrap items-center justify-between gap-2 p-2 bg-sneaky-card rounded-xl border border-sneaky-border text-xs">
-            <div class="flex items-center space-x-3">
-              <span class="font-bold text-white flex items-center gap-1"><i class="fa-solid fa-palette text-pink-400"></i> Canvas Pad</span>
-              <input type="color" id="drawColor" value="#06b6d4" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0" />
-              
-              <label class="text-gray-400 font-semibold">Brush Size:</label>
-              <input type="range" id="drawSize" min="2" max="30" value="6" class="w-24 accent-pink-500" />
-            </div>
-
-            <div class="flex items-center space-x-2">
-              <button onclick="clearDoodleCanvas()" class="px-3 py-1.5 rounded-lg bg-red-600/30 text-red-300 border border-red-500/30 hover:bg-red-600/50 font-bold">Clear</button>
-              <button onclick="downloadDoodleImage()" class="px-4 py-1.5 rounded-lg bg-pink-600 text-white hover:bg-pink-500 font-bold shadow-md">Export PNG</button>
-            </div>
-          </div>
-
-          <!-- Drawing Canvas -->
-          <div class="flex-1 w-full relative rounded-2xl overflow-hidden border border-sneaky-border bg-white cursor-crosshair">
-            <canvas id="doodleCanvas" class="w-full h-full block"></canvas>
-          </div>
-        </div>
-      `;
-
-      setTimeout(initDoodleCanvas, 100);
-    }
-
-    function initDoodleCanvas() {
-      const canvas = document.getElementById('doodleCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-
-      let painting = false;
-
-      function startPosition(e) { painting = true; draw(e); }
-      function finishedPosition() { painting = false; ctx.beginPath(); }
-      function draw(e) {
-        if (!painting) return;
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineWidth = document.getElementById('drawSize').value;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = document.getElementById('drawColor').value;
-
-        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-      }
-
-      canvas.addEventListener('mousedown', startPosition);
-      canvas.addEventListener('mouseup', finishedPosition);
-      canvas.addEventListener('mousemove', draw);
-    }
-
-    function clearDoodleCanvas() {
-      const canvas = document.getElementById('doodleCanvas');
-      if (canvas) {
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    }
-
-    function downloadDoodleImage() {
-      const canvas = document.getElementById('doodleCanvas');
-      if (!canvas) return;
-      const link = document.createElement('a');
-      link.download = 'sneaky-doodle.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      showToast('Doodle saved as PNG!', 'success');
-    }
-
-    function playAudioTone(freq, duration) {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        osc.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
-
     // =========================================================================
-    // 7. VPN SHIELD & LOCATION SWITCHING
+    // 11. VPN SHIELD & UTILITIES
     // =========================================================================
     function toggleVpnShield() {
       vpnState.active = !vpnState.active;
       updateVpnUI();
       saveState();
-      showToast(vpnState.active ? "VPN Shield Activated" : "VPN Shield Paused", vpnState.active ? "success" : "danger");
+      showToast(vpnState.active ? "Proxy Shield Active" : "Proxy Shield Paused", vpnState.active ? "success" : "danger");
     }
 
     function changeVpnLocation(locKey) {
@@ -1126,19 +1207,25 @@
         vpnState.ping = vpnState.locations[locKey].ping;
         updateVpnUI();
         saveState();
-        showToast(`Connected to Virtual Node: ${vpnState.locations[locKey].name}`, "info");
+        showToast(`Connected to Proxy Node: ${vpnState.locations[locKey].name}`, 'info');
       }
+    }
+
+    function changeProxyEngine(engine) {
+      vpnState.proxyEngine = engine;
+      saveState();
+      showToast(`CORS Engine updated: ${engine.toUpperCase()}`, 'info');
     }
 
     function updateVpnUI() {
       const loc = vpnState.locations[vpnState.location];
-      document.getElementById('vpnStatusLabel').innerText = vpnState.active ? "VPN: ACTIVE" : "VPN: PAUSED";
-      document.getElementById('vpnStatusLabel').className = vpnState.active ? "font-bold text-emerald-400" : "font-bold text-red-400";
-      document.getElementById('vpnStatusLed').className = vpnState.active ? "w-2 h-2 rounded-full bg-emerald-400 animate-pulse glow-box-green" : "w-2 h-2 rounded-full bg-red-500";
+      document.getElementById('vpnStatusLabel').innerText = vpnState.active ? "PROXY: ACTIVE" : "PROXY: PAUSED";
+      document.getElementById('vpnStatusLabel').className = vpnState.active ? "font-mono font-bold text-emerald-400" : "font-mono font-bold text-red-400";
+      document.getElementById('vpnStatusLed').className = vpnState.active ? "w-2 h-2 rounded-full bg-emerald-400 animate-pulse glow-emerald" : "w-2 h-2 rounded-full bg-red-500";
       document.getElementById('vpnLocationLabel').innerText = loc.name;
       document.getElementById('vpnBtnText').innerText = vpnState.active ? "Shield ON" : "Shield OFF";
 
-      document.getElementById('modalVpnStatus').innerText = vpnState.active ? "Active • AES-256 Encrypted" : "Disabled";
+      document.getElementById('modalVpnStatus').innerText = vpnState.active ? "Active • AES-256 Tunnel" : "Disabled";
       document.getElementById('modalVpnIp').innerText = vpnState.ip;
       document.getElementById('modalVpnLoc').innerText = loc.name;
     }
@@ -1146,16 +1233,13 @@
     function startVpnPingFluctuator() {
       setInterval(() => {
         if (vpnState.active) {
-          const jitter = Math.floor(Math.random() * 6) - 3;
-          const currentPing = Math.max(12, vpnState.ping + jitter);
+          const jitter = Math.floor(Math.random() * 5) - 2;
+          const currentPing = Math.max(10, vpnState.ping + jitter);
           document.getElementById('vpnPingLabel').innerText = currentPing + " ms";
         }
       }, 2000);
     }
 
-    // =========================================================================
-    // 8. SPLIT VIEW & DEVTOOLS & DRAWERS
-    // =========================================================================
     function toggleSplitView() {
       isSplitView = !isSplitView;
       const sec = document.getElementById('secondaryViewport');
@@ -1163,7 +1247,7 @@
         sec.classList.remove('hidden');
         splitTabId = tabs.length > 1 ? tabs[tabs.length - 1].id : activeTabId;
         renderViewport('secondaryContentArea', tabs.find(t => t.id === splitTabId) || getActiveTab());
-        showToast("Split Screen Mode Active", "info");
+        showToast("Split Screen Active", "info");
       } else {
         sec.classList.add('hidden');
         splitTabId = null;
@@ -1175,7 +1259,7 @@
     }
 
     function switchDevTab(tab) {
-      ['console', 'elements', 'network', 'storage'].forEach(t => {
+      ['console', 'network', 'storage'].forEach(t => {
         document.getElementById(`devContent-${t}`).classList.add('hidden');
         document.getElementById(`devTab-${t}`).className = 'hover:text-white pb-1';
       });
@@ -1233,7 +1317,7 @@
     }
 
     function logHistory(title, url) {
-      if (url === 'sneaky://newtab') return;
+      if (url === 'stealth://newtab') return;
       historyLog.unshift({
         id: 'h_' + Date.now(),
         title: title,
@@ -1249,10 +1333,10 @@
       historyLog.forEach(h => {
         const item = document.createElement('div');
         item.onclick = () => navigateToUrl(h.url);
-        item.className = 'p-2.5 bg-sneaky-omnibox border border-sneaky-border rounded-xl cursor-pointer hover:border-cyan-400 text-xs space-y-1';
+        item.className = 'p-2.5 bg-obsidian-input border border-obsidian-border rounded-xl cursor-pointer hover:border-cyan-400 text-xs space-y-1 font-mono';
         item.innerHTML = `
           <div class="font-bold text-white truncate">${escapeHTML(h.title)}</div>
-          <div class="text-[10px] text-gray-400 truncate">${escapeHTML(h.url)}</div>
+          <div class="text-[10px] text-gray-500 truncate">${escapeHTML(h.url)}</div>
           <div class="text-[9px] text-cyan-400">${h.time}</div>
         `;
         container.appendChild(item);
@@ -1265,11 +1349,11 @@
       bookmarks.forEach(bm => {
         const item = document.createElement('div');
         item.onclick = () => navigateToUrl(bm.url);
-        item.className = 'p-2.5 bg-sneaky-omnibox border border-sneaky-border rounded-xl cursor-pointer hover:border-cyan-400 text-xs flex justify-between items-center';
+        item.className = 'p-2.5 bg-obsidian-input border border-obsidian-border rounded-xl cursor-pointer hover:border-cyan-400 text-xs flex justify-between items-center font-mono';
         item.innerHTML = `
           <div class="min-w-0 flex-1">
             <div class="font-bold text-white truncate">${escapeHTML(bm.title)}</div>
-            <div class="text-[10px] text-gray-400 truncate">${escapeHTML(bm.url)}</div>
+            <div class="text-[10px] text-gray-500 truncate">${escapeHTML(bm.url)}</div>
           </div>
           <button onclick="event.stopPropagation(); removeBookmark('${bm.id}')" class="text-red-400 p-1"><i class="fa-solid fa-trash"></i></button>
         `;
@@ -1283,7 +1367,7 @@
       bookmarks.forEach(bm => {
         const btn = document.createElement('button');
         btn.onclick = () => navigateToUrl(bm.url);
-        btn.className = 'hover:text-white text-gray-300 text-xs px-2.5 py-1 rounded-lg hover:bg-white/10 flex items-center space-x-1.5 shrink-0 font-semibold';
+        btn.className = 'hover:text-white text-gray-400 text-xs px-2.5 py-1 rounded-lg hover:bg-white/10 flex items-center space-x-1.5 shrink-0 font-mono';
         btn.innerHTML = `<i class="${bm.icon || 'fa-solid fa-globe'} text-cyan-400 text-[10px]"></i><span>${escapeHTML(bm.title)}</span>`;
         list.appendChild(btn);
       });
@@ -1298,7 +1382,7 @@
       saveState();
       renderBookmarksBar();
       closeModal('addBookmarkModal');
-      showToast('Bookmark added!', 'success');
+      showToast('Bookmark saved', 'success');
     }
 
     function removeBookmark(id) {
@@ -1315,25 +1399,26 @@
       saveState();
       renderBookmarksBar();
       toggleDrawer(activeDrawer);
-      showToast('Storage cleared', 'info');
+      showToast('Storage purged', 'info');
     }
 
-    // =========================================================================
-    // 9. THEMES & UTILITIES
-    // =========================================================================
     function applyTheme(theme) {
       currentTheme = theme;
-      document.body.className = `h-full bg-sneaky-bg text-gray-200 overflow-hidden font-sans flex flex-col theme-${theme}`;
-      showToast(`Theme switched to ${theme.toUpperCase()}`, 'info');
+      document.body.className = `h-full bg-obsidian-bg text-gray-200 overflow-hidden font-sans flex flex-col theme-${theme}`;
+      showToast(`Theme switched: ${theme.toUpperCase()}`, 'info');
     }
 
     function changeSearchEngine(engine) {
       searchEngine = engine;
-      showToast(`Search engine set to ${engine.toUpperCase()}`, 'info');
+      showToast(`Search Engine: ${engine.toUpperCase()}`, 'info');
     }
 
     function setupKeyboardShortcuts() {
       document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || (e.altKey && e.key.toLowerCase() === 'p')) {
+          e.preventDefault();
+          togglePanicMode();
+        }
         if (e.ctrlKey || e.metaKey) {
           if (e.key.toLowerCase() === 't') { e.preventDefault(); createNewTab(); }
           if (e.key.toLowerCase() === 'w') { e.preventDefault(); if (activeTabId) closeTab(activeTabId); }
@@ -1357,7 +1442,7 @@
     function showToast(msg, type = 'info') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
-      toast.className = `p-3.5 rounded-xl text-xs font-bold text-white shadow-2xl pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 flex items-center space-x-2 ${
+      toast.className = `p-3 rounded-xl text-xs font-mono font-bold text-white shadow-2xl pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 flex items-center space-x-2 ${
         type === 'danger' ? 'bg-red-600' : (type === 'success' ? 'bg-emerald-600' : 'bg-cyan-600')
       }`;
       toast.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${escapeHTML(msg)}</span>`;
@@ -1367,7 +1452,7 @@
       setTimeout(() => {
         toast.classList.add('opacity-0');
         setTimeout(() => toast.remove(), 300);
-      }, 2800);
+      }, 2500);
     }
 
     function escapeHTML(str) {
