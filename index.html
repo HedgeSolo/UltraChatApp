@@ -114,6 +114,17 @@
     </div>
   </div>
 
+  <!-- QUICK SWITCHER MODAL (Ctrl+K / Cmd+K) -->
+  <div id="quickSwitcherModal" class="hidden fixed inset-0 bg-black/80 z-[180] flex items-start justify-center pt-20 p-4 backdrop-blur-sm">
+    <div class="bg-discord-sidebar border border-discord-hover rounded-xl max-w-lg w-full p-4 shadow-2xl space-y-3">
+      <div class="relative">
+        <input type="text" id="quickSwitcherInput" oninput="handleQuickSwitcherSearch(this.value)" onkeydown="handleQuickSwitcherKeydown(event)" placeholder="Where would you like to go? (Ctrl+K)" class="w-full bg-discord-black text-sm text-discord-textHeader px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-discord-blurple" />
+        <span class="absolute right-3 top-3 text-xs bg-discord-hover text-discord-textMuted px-2 py-0.5 rounded font-mono">ESC</span>
+      </div>
+      <div id="quickSwitcherResultsList" class="space-y-1 max-h-64 overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
   <!-- CUSTOM RIGHT-CLICK CONTEXT MENU -->
   <div id="customContextMenu" class="hidden fixed bg-discord-black border border-discord-hover/80 rounded-lg p-1.5 shadow-2xl z-[150] text-sm w-48 space-y-0.5 font-medium">
     <button onclick="ctxViewProfile()" class="w-full text-left px-2.5 py-1.5 hover:bg-discord-blurple hover:text-white rounded flex items-center justify-between text-discord-textHeader transition-colors">
@@ -171,6 +182,16 @@
     <div id="serverListContainer" class="flex-1 w-full flex flex-col items-center space-y-2 overflow-y-auto no-scrollbar"></div>
 
     <div class="w-8 h-[2px] bg-discord-sidebar rounded my-1"></div>
+
+    <!-- Quick Switcher Button (Ctrl+K) -->
+    <div class="relative group flex items-center justify-center w-full">
+      <button onclick="openQuickSwitcher()" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-discord-sidebar hover:bg-discord-blurple flex items-center justify-center text-discord-textMuted hover:text-white transition-all duration-300">
+        <i class="fa-solid fa-bolt text-lg"></i>
+      </button>
+      <div class="absolute left-[80px] bg-discord-black text-white text-xs px-2.5 py-1.5 rounded-md font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+        Quick Switcher (Ctrl+K)
+      </div>
+    </div>
 
     <!-- Create Server Button -->
     <div id="createServerBtnWrapper" class="relative group flex items-center justify-center w-full">
@@ -249,7 +270,7 @@
       <div id="serverChannelsGroup" class="hidden space-y-4"></div>
     </div>
 
-    <!-- FEATURE 8: INTERACTIVE VOICE STAGE PANEL -->
+    <!-- VOICE STAGE PANEL -->
     <div id="voiceStagePanel" class="hidden bg-discord-black/90 p-3 border-t border-discord-hover flex flex-col space-y-2">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2 min-w-0">
@@ -309,13 +330,13 @@
       </div>
 
       <div class="flex items-center space-x-3 text-discord-textMuted">
-        <!-- FEATURE 6: GLOBAL / CHANNEL MESSAGE SEARCH -->
+        <!-- GLOBAL / CHANNEL MESSAGE SEARCH -->
         <div class="relative hidden sm:block">
           <input type="text" id="headerSearchInput" oninput="handleHeaderSearch(this.value)" placeholder="Search messages..." class="bg-discord-black text-xs text-discord-textHeader px-3 py-1.5 pr-7 rounded-md outline-none focus:ring-1 focus:ring-discord-blurple w-36 focus:w-48 transition-all" />
           <i class="fa-solid fa-magnifying-glass text-xs absolute right-2.5 top-2.5 text-discord-textMuted pointer-events-none"></i>
         </div>
 
-        <!-- FEATURE 1: PINNED MESSAGES DRAWER TOGGLE -->
+        <!-- PINNED MESSAGES DRAWER TOGGLE -->
         <button onclick="togglePinnedDrawer()" class="hover:text-discord-textHeader transition-colors text-lg relative" title="Pinned Messages">
           <i class="fa-solid fa-thumbtack"></i>
           <span id="pinnedCountBadge" class="hidden absolute -top-1 -right-1.5 bg-discord-blurple text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">0</span>
@@ -371,7 +392,7 @@
           </div>
         </div>
 
-        <!-- FEATURE 7: INLINE QUOTE REPLY PREVIEW BANNER -->
+        <!-- INLINE QUOTE REPLY PREVIEW BANNER -->
         <div id="replyBanner" class="hidden px-4 pt-2">
           <div class="bg-discord-sidebar border-l-4 border-discord-blurple rounded-r-lg p-2 flex items-center justify-between">
             <div class="flex items-center space-x-2 text-xs truncate">
@@ -388,7 +409,7 @@
           <!-- Mention Autocomplete Popup -->
           <div id="mentionAutocompletePopup" class="hidden absolute bottom-full left-4 right-4 mb-2 bg-discord-sidebar border border-discord-hover/80 rounded-lg shadow-2xl z-50 max-h-48 overflow-y-auto p-1.5 space-y-1"></div>
 
-          <!-- FEATURE 9: LIVE SLOWMODE COUNTDOWN OVERLAY -->
+          <!-- LIVE SLOWMODE COUNTDOWN OVERLAY -->
           <div id="slowmodeOverlay" class="hidden absolute inset-0 bg-discord-input/90 rounded-lg z-20 flex items-center justify-center space-x-2 text-xs font-bold text-amber-400 backdrop-blur-sm">
             <i class="fa-solid fa-clock animate-spin"></i>
             <span id="slowmodeCountdownText">Slowmode active: 5s remaining...</span>
@@ -405,7 +426,7 @@
         </div>
       </div>
 
-      <!-- FEATURE 1: PINNED MESSAGES DRAWER PANEL -->
+      <!-- PINNED MESSAGES DRAWER PANEL -->
       <aside id="pinnedDrawerPanel" class="w-80 bg-discord-sidebar border-l border-discord-black/40 flex flex-col hidden shrink-0 z-20">
         <div class="p-3 border-b border-discord-black/40 flex justify-between items-center bg-discord-chat">
           <div class="flex items-center space-x-2 font-bold text-sm text-discord-textHeader">
@@ -456,7 +477,7 @@
     </div>
   </div>
 
-  <!-- FEATURE 5: CREATE GROUP DM MODAL -->
+  <!-- CREATE GROUP DM MODAL -->
   <div id="createGroupDmModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-discord-sidebar w-full max-w-md rounded-xl shadow-2xl relative p-6 border border-discord-hover">
       <h2 class="text-xl font-bold text-discord-textHeader mb-2">Create Group DM</h2>
@@ -481,7 +502,7 @@
     </div>
   </div>
 
-  <!-- FEATURE 4: CREATE CATEGORY MODAL -->
+  <!-- CREATE CATEGORY MODAL -->
   <div id="createCategoryModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-discord-sidebar w-full max-w-sm rounded-lg shadow-2xl relative p-6 border border-discord-hover">
       <h2 class="text-xl font-bold text-discord-textHeader mb-4">Create Category</h2>
@@ -756,7 +777,7 @@
     </div>
   </div>
 
-  <!-- USER SETTINGS MODAL (PRESENCE & CUSTOM STATUS) -->
+  <!-- USER SETTINGS MODAL -->
   <div id="userSettingsModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-discord-sidebar w-full max-w-lg rounded-xl shadow-2xl relative flex flex-col overflow-hidden border border-discord-hover">
       <div class="bg-discord-chat p-4 border-b border-black/20 flex justify-between items-center">
@@ -770,7 +791,6 @@
           <input type="text" id="settingsUsername" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple" />
         </div>
         
-        <!-- FEATURE 3: PRESENCE & CUSTOM TEXT STATUS -->
         <div>
           <label class="block text-xs font-bold text-discord-textMuted uppercase mb-1">Online Presence Status</label>
           <select id="settingsPresence" class="w-full bg-discord-black border border-discord-hover rounded p-2 text-sm text-discord-textHeader outline-none focus:border-discord-blurple">
@@ -834,7 +854,7 @@
       <div class="mt-6 pt-4 border-t border-gray-200">
         <h3 class="text-sm font-bold text-gray-700 mb-2">Have an invite code?</h3>
         <div class="flex space-x-2">
-            <input type="text" id="joinInviteInput" placeholder="e.g. xY7z9AbC" class="flex-1 bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-discord-blurple" />
+            <input type="text" id="joinInviteInput" placeholder="e.g. srv_12345" class="flex-1 bg-gray-100 rounded p-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-discord-blurple" />
             <button onclick="handleJoinServerByCode()" class="bg-discord-sidebar hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-bold transition-colors">Join</button>
         </div>
       </div>
@@ -931,28 +951,21 @@
     let dms = [];
     let groupDms = [];
 
-    // Feature 7: Reply Target & Feature 8: Voice Stage state
     let replyingToMessage = null;
     let activeVoiceChannel = null;
     let isVoiceMuted = false;
     let isVoiceDeafened = false;
 
-    // Feature 9: Slowmode active timer interval
     let slowmodeIntervalTimer = null;
-
-    // Offline Persistent Unread & Mention Tracker
     let unreadState = {};
     let channelReads = {};
 
-    // Mention Autocomplete State
     let selectedMentionIndex = 0;
     let mentionFilteredMembers = [];
 
-    // Attachment State
     let attachedImageBase64 = null;
     let slowmodeTimers = {};
 
-    // Context Menu Target State
     let ctxTargetUser = null;
     let confirmCallback = null;
 
@@ -976,12 +989,13 @@
 
     window.addEventListener('load', async () => {
       setupImageFileListeners();
-      
+      setupGlobalKeybindings();
+
       const isBannedDevice = await checkDeviceFingerprintBan();
       if (isBannedDevice) {
         hideLoadingScreen();
         const banner = document.getElementById('authSuspendedBanner');
-        banner.innerText = "This device has been permanently blocked by the CEO.";
+        banner.innerText = "This device has been permanently blocked by CEO Moderation.";
         banner.classList.remove('hidden');
         openModal('authModal');
         return;
@@ -1004,15 +1018,23 @@
       });
     });
 
+    function setupGlobalKeybindings() {
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          openQuickSwitcher();
+        }
+      });
+    }
+
     async function initUserSession(authUser) {
       updateLoadingStatus("Checking Account Status...");
       currentUser.id = authUser.id;
       currentUser.email = authUser.email;
       currentUser.isCEO = (authUser.email.toLowerCase() === CEO_EMAIL.toLowerCase());
 
-      const { data: profile } = await client.from('profiles').select('*').eq('id', currentUser.id).single();
-      
-      // Check CEO User Suspension
+      const { data: profile } = await client.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+
       if (profile && profile.is_suspended && !currentUser.isCEO) {
         if (!profile.suspended_until || new Date(profile.suspended_until) > new Date()) {
           await client.auth.signOut();
@@ -1041,7 +1063,7 @@
         document.getElementById('ceoUserBadge').classList.remove('hidden');
       }
 
-      updateLoadingStatus("Syncing Offline Unreads...");
+      updateLoadingStatus("Syncing Persistent Unreads...");
       await loadChannelReadsFromDB();
 
       updateLoadingStatus("Fetching Servers...");
@@ -1076,7 +1098,7 @@
       if (!e || !p) return showToast("Please fill in email and password.", "danger");
 
       const isBanned = await checkDeviceFingerprintBan();
-      if (isBanned) return showToast("This device is blocked by the CEO.", "danger");
+      if (isBanned) return showToast("This device is blocked by CEO Moderation.", "danger");
 
       const { error } = await client.auth.signInWithPassword({ email: e, password: p });
       if (error) showToast(error.message, "danger");
@@ -1089,7 +1111,7 @@
       if (!e || !p || !u) return showToast("Email, password, and display name required.", "danger");
 
       const isBanned = await checkDeviceFingerprintBan();
-      if (isBanned) return showToast("This device is blocked by the CEO.", "danger");
+      if (isBanned) return showToast("This device is blocked by CEO Moderation.", "danger");
 
       const { data, error } = await client.auth.signUp({ email: e, password: p });
       if (error) return showToast(error.message, "danger");
@@ -1097,7 +1119,6 @@
       if (data.user) {
         await client.from('profiles').upsert({ id: data.user.id, username: u, status: 'online', device_fingerprint: getOrCreateDeviceFingerprint() });
         
-        // Auto-join CEO Default Servers
         const { data: defaultServers } = await client.from('servers').select('*').eq('is_default', true);
         if (defaultServers && defaultServers.length > 0) {
           for (let srv of defaultServers) {
@@ -1110,7 +1131,7 @@
             });
           }
         }
-        showToast("Account created successfully! Logging in...", "success");
+        showToast("Account created! Logging in...", "success");
       }
     }
 
@@ -1254,7 +1275,7 @@
     }
 
     // =========================================================================
-    // 4. ROLE MANAGEMENT & PERMISSION WEIGHTING
+    // 4. ROLES & PERMISSION WEIGHTING
     // =========================================================================
     async function getOrCreateDefaultRole(serverId, roleName, color) {
       const { data: existing } = await client.from('server_roles').select('*').eq('server_id', serverId).ilike('name', roleName).maybeSingle();
@@ -1320,7 +1341,7 @@
     }
 
     // =========================================================================
-    // 5. SERVER & CATEGORIES & CHANNEL SIDEBAR RENDERING
+    // 5. SERVER & CHANNEL SIDEBAR RENDERING
     // =========================================================================
     function renderServerSidebar() {
       const container = document.getElementById('serverListContainer');
@@ -1436,7 +1457,6 @@
 
       await loadServerRolesCache(currentServer.id);
       await loadMembersFromDB(currentServer.id);
-      await loadChannelPermissionsCache(currentServer.id);
       await loadServerChannels(currentServer.id);
 
       renderServerSidebar();
@@ -1454,11 +1474,6 @@
         currentChannel = null;
         renderMessages();
       }
-    }
-
-    async function loadChannelPermissionsCache(serverId) {
-      const { data: perms } = await client.from('channel_permissions').select('*');
-      channelPermissionsCache = perms || [];
     }
 
     function canRoleViewChannel(roleId, channel) {
@@ -1482,12 +1497,10 @@
       return canRoleViewChannel(member.role_id, channel);
     }
 
-    // FEATURE 4: CHANNEL CATEGORIES RENDERING
     function renderChannelsList() {
       const groupContainer = document.getElementById('serverChannelsGroup');
       groupContainer.innerHTML = '';
 
-      // Group channels by category_name
       const categories = {};
       currentServerChannels.forEach(chan => {
         if (!canUserViewChannel(currentUser.id, chan)) return;
@@ -1656,13 +1669,12 @@
     }
 
     // =========================================================================
-    // 7. FEATURE 10: MARKDOWN PARSER & RICH MESSAGES & FEATURE 2: EDIT/DELETE
+    // 7. MARKDOWN PARSER & RICH MESSAGES
     // =========================================================================
     function parseMarkdown(text) {
       if (!text) return '';
       let escaped = escapeHTML(text);
 
-      // ```code blocks```
       escaped = escaped.replace(/```([\s\S]*?)```/g, function(match, code) {
         const codeId = 'code_' + Math.random().toString(36).substr(2, 9);
         return `<div class="my-2 bg-discord-black rounded-lg border border-discord-hover overflow-hidden">
@@ -1674,19 +1686,10 @@
         </div>`;
       });
 
-      // Inline `code`
       escaped = escaped.replace(/`([^`]+)`/g, '<code class="bg-discord-black text-amber-300 font-mono text-xs px-1.5 py-0.5 rounded border border-discord-hover">$1</code>');
-
-      // **bold**
       escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-
-      // *italics*
       escaped = escaped.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-
-      // ~~strikethrough~~
       escaped = escaped.replace(/~~([^~]+)~~/g, '<del>$1</del>');
-
-      // @mentions
       escaped = escaped.replace(/@([a-zA-Z0-9_\-]+)/g, '<span class="bg-discord-blurple/30 text-discord-blurple px-1 py-0.5 rounded font-bold">@$1</span>');
 
       return escaped;
@@ -1753,7 +1756,6 @@
         msgDiv.innerHTML = `
           <img src="${senderAvatar}" onclick="openUserProfileModal('${msg.sender_id}')" class="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 shrink-0 mt-0.5" />
           <div class="flex-1 min-w-0">
-            <!-- FEATURE 7: INLINE QUOTE REFERENCE -->
             ${msg.reply_to_id ? `<div id="reply-quote-${msg.id}" class="text-xs text-discord-textMuted mb-1 flex items-center space-x-1 pl-2 border-l-2 border-discord-blurple"><i class="fa-solid fa-reply text-[10px]"></i><span>Replying to original message</span></div>` : ''}
 
             <div class="flex items-center space-x-2">
@@ -1779,7 +1781,6 @@
             </div>
           </div>
 
-          <!-- MESSAGE HOVER ACTION BAR (EDIT, DELETE, REPLY, PIN, REACT) -->
           <div class="absolute right-2 -top-3 hidden group-hover:flex bg-discord-sidebar border border-discord-hover rounded-md shadow-md p-0.5 space-x-1 z-10">
             <button onclick="startReplyToMessage('${msg.id}', '${escapeHTML(senderName)}', '${escapeHTML(msg.content.substring(0, 30))}')" class="px-2 py-1 text-xs hover:bg-discord-hover rounded text-discord-textMuted hover:text-white" title="Reply"><i class="fa-solid fa-reply"></i></button>
             <button onclick="togglePinMessage('${msg.id}', ${!!msg.is_pinned})" class="px-2 py-1 text-xs hover:bg-discord-hover rounded text-discord-textMuted hover:text-white" title="Pin Message"><i class="fa-solid fa-thumbtack"></i></button>
@@ -1837,7 +1838,6 @@
       renderMessages();
     }
 
-    // FEATURE 2: MESSAGE EDIT & DELETE
     async function editMessageInline(msgId, currentContent) {
       const newText = prompt("Edit message:", currentContent);
       if (newText === null || newText.trim() === '' || newText === currentContent) return;
@@ -1860,7 +1860,6 @@
       });
     }
 
-    // FEATURE 1: MESSAGE PINNING & PIN DRAWER
     async function togglePinMessage(msgId, currentPinState) {
       const { error } = await client.from('messages').update({ is_pinned: !currentPinState }).eq('id', msgId);
       if (error) return showToast(error.message, "danger");
@@ -1902,7 +1901,6 @@
       document.getElementById('pinnedDrawerPanel').classList.toggle('hidden');
     }
 
-    // FEATURE 7: INLINE QUOTE REPLIES
     function startReplyToMessage(msgId, authorName, excerpt) {
       replyingToMessage = { id: msgId, author: authorName, excerpt: excerpt };
       document.getElementById('replyAuthorName').innerText = `@${authorName}`;
@@ -1915,7 +1913,70 @@
       document.getElementById('replyBanner').classList.add('hidden');
     }
 
-    // FEATURE 6: SEARCH MESSAGES
+    // =========================================================================
+    // 8. QUICK SWITCHER (Ctrl+K) & SEARCH
+    // =========================================================================
+    function openQuickSwitcher() {
+      document.getElementById('quickSwitcherInput').value = '';
+      handleQuickSwitcherSearch('');
+      openModal('quickSwitcherModal');
+      document.getElementById('quickSwitcherInput').focus();
+    }
+
+    function handleQuickSwitcherSearch(query) {
+      const list = document.getElementById('quickSwitcherResultsList');
+      list.innerHTML = '';
+      const q = query.toLowerCase().trim();
+
+      const items = [];
+
+      servers.forEach(s => {
+        if (!q || s.name.toLowerCase().includes(q)) {
+          items.push({ type: 'server', id: s.id, name: s.name, icon: 'fa-server' });
+        }
+      });
+
+      currentServerChannels.forEach(c => {
+        if (!q || c.name.toLowerCase().includes(q)) {
+          items.push({ type: 'channel', id: c.id, name: `# ${c.name}`, icon: 'fa-hashtag' });
+        }
+      });
+
+      dms.forEach(d => {
+        if (!q || 'direct message'.includes(q)) {
+          items.push({ type: 'dm', id: d.partnerId, name: 'Direct Message', icon: 'fa-at' });
+        }
+      });
+
+      if (items.length === 0) {
+        list.innerHTML = `<div class="p-3 text-xs text-discord-textMuted text-center">No matching channels or servers found.</div>`;
+        return;
+      }
+
+      items.forEach(it => {
+        const btn = document.createElement('button');
+        btn.onclick = () => {
+          closeModal('quickSwitcherModal');
+          if (it.type === 'server') switchServer(it.id);
+          if (it.type === 'channel') switchChannel(it.id);
+          if (it.type === 'dm') openDMChannel(it.id);
+        };
+        btn.className = 'w-full text-left px-3 py-2 rounded-lg hover:bg-discord-blurple hover:text-white flex items-center justify-between text-xs text-discord-textHeader transition-colors';
+        btn.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid ${it.icon}"></i>
+            <span class="font-bold">${escapeHTML(it.name)}</span>
+          </div>
+          <span class="text-[10px] uppercase font-bold text-discord-textMuted">${it.type}</span>
+        `;
+        list.appendChild(btn);
+      });
+    }
+
+    function handleQuickSwitcherKeydown(e) {
+      if (e.key === 'Escape') closeModal('quickSwitcherModal');
+    }
+
     async function handleHeaderSearch(query) {
       const panel = document.getElementById('searchResultsPanel');
       const list = document.getElementById('searchResultsList');
@@ -1961,7 +2022,9 @@
       document.getElementById('searchResultsPanel').classList.add('hidden');
     }
 
-    // FEATURE 8: INTERACTIVE VOICE CHANNELS
+    // =========================================================================
+    // 9. VOICE & SLOWMODE & INPUT MENTIONS
+    // =========================================================================
     function connectVoice(chan) {
       activeVoiceChannel = chan;
       document.getElementById('voiceChannelStageName').innerText = chan.name;
@@ -1987,7 +2050,6 @@
       btn.className = `p-1.5 rounded transition-colors ${isVoiceDeafened ? 'bg-red-600 text-white' : 'hover:bg-discord-hover text-discord-textMuted hover:text-white'}`;
     }
 
-    // FEATURE 9: LIVE SLOWMODE COUNTDOWN TIMER
     function triggerSlowmodeCountdown(duration) {
       const overlay = document.getElementById('slowmodeOverlay');
       const text = document.getElementById('slowmodeCountdownText');
@@ -2009,9 +2071,6 @@
       }, 1000);
     }
 
-    // =========================================================================
-    // 8. INPUT HANDLING & CHANNEL-RESTRICTED @MENTIONS
-    // =========================================================================
     function handleInputKeydown(e) {
       const popup = document.getElementById('mentionAutocompletePopup');
       const isPopupVisible = !popup.classList.contains('hidden');
@@ -2174,7 +2233,7 @@
     }
 
     // =========================================================================
-    // 9. CEO MODERATION TOOLS (DELETE, SUSPEND, DEVICE FINGERPRINT BLOCK)
+    // 10. CEO MODERATION SUITE
     // =========================================================================
     function openCeoModal() {
       if (!currentUser.isCEO) return;
@@ -2312,7 +2371,230 @@
     }
 
     // =========================================================================
-    // 10. FEATURE 5: GROUP DMS & FRIENDS
+    // 11. SERVER CREATION & JOINING & SETTINGS
+    // =========================================================================
+    async function handleCreateServer() {
+      const name = document.getElementById('newServerName').value.trim();
+      if (!name) return showToast("Server name is required.", "danger");
+
+      if (!currentUser.isCEO) {
+        const ownedPublic = servers.filter(s => s.owner_id === currentUser.id && !s.is_private);
+        if (ownedPublic.length >= 3) {
+          return showToast("Non-CEO users are limited to 3 public servers maximum.", "danger");
+        }
+      }
+
+      const iconUrl = document.getElementById('newServerIcon').value;
+
+      const { data: srv, error } = await client.from('servers').insert({
+        name: name,
+        icon_url: iconUrl,
+        owner_id: currentUser.id,
+        is_private: true
+      }).select().single();
+
+      if (error) return showToast(error.message, "danger");
+
+      const ownerRole = await getOrCreateDefaultRole(srv.id, 'Owner', '#f1c40f');
+      await getOrCreateDefaultRole(srv.id, 'Member', '#949ba4');
+
+      await client.from('server_members').insert({
+        server_id: srv.id,
+        user_id: currentUser.id,
+        role: 'owner',
+        role_id: ownerRole ? ownerRole.id : null
+      });
+
+      await client.from('channels').insert({
+        server_id: srv.id,
+        name: 'general',
+        category_name: 'Text Channels',
+        type: 'text'
+      });
+
+      showToast("Server created successfully!", "success");
+      closeModal('createServerModal');
+      await loadServersFromDB();
+      switchServer(srv.id);
+    }
+
+    async function handleJoinServerByCode() {
+      const code = document.getElementById('joinInviteInput').value.trim();
+      if (!code) return showToast("Enter a valid server invite code.", "danger");
+
+      const { data: srv } = await client.from('servers').select('*').eq('id', code).maybeSingle();
+      if (!srv) return showToast("Server not found.", "danger");
+
+      const defRole = await getOrCreateDefaultRole(srv.id, 'Member', '#949ba4');
+
+      await client.from('server_members').upsert({
+        server_id: srv.id,
+        user_id: currentUser.id,
+        role: 'member',
+        role_id: defRole ? defRole.id : null
+      });
+
+      showToast(`Joined ${srv.name}!`, "success");
+      closeModal('createServerModal');
+      await loadServersFromDB();
+      switchServer(srv.id);
+    }
+
+    function openPublicExplorer() {
+      renderPublicExplorer();
+      openModal('discoverModal');
+    }
+
+    async function renderPublicExplorer() {
+      const container = document.getElementById('publicServersContainer');
+      container.innerHTML = '';
+      const filter = (document.getElementById('publicSearchInput').value || '').toLowerCase();
+
+      const { data: pubServers } = await client.from('servers').select('*').eq('is_private', false);
+      const filtered = (pubServers || []).filter(s => s.name.toLowerCase().includes(filter));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center text-discord-textMuted py-8 text-sm">No public servers found.</div>`;
+        return;
+      }
+
+      filtered.forEach(srv => {
+        const item = document.createElement('div');
+        item.className = 'p-3 bg-discord-black rounded-lg border border-discord-hover/60 flex items-center justify-between';
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-discord-blurple flex items-center justify-center font-bold text-white">${escapeHTML(getInitials(srv.name))}</div>
+            <div>
+              <div class="font-bold text-sm text-discord-textHeader">${escapeHTML(srv.name)}</div>
+              <div class="text-xs text-discord-textMuted">Public Server</div>
+            </div>
+          </div>
+          <button onclick="joinPublicServer('${srv.id}')" class="bg-discord-blurple hover:bg-discord-blurpleHover text-white px-4 py-1.5 rounded-md text-xs font-bold transition-colors">Join Server</button>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    async function joinPublicServer(serverId) {
+      const defRole = await getOrCreateDefaultRole(serverId, 'Member', '#949ba4');
+      await client.from('server_members').upsert({
+        server_id: serverId,
+        user_id: currentUser.id,
+        role: 'member',
+        role_id: defRole ? defRole.id : null
+      });
+
+      showToast("Joined server!", "success");
+      closeModal('discoverModal');
+      await loadServersFromDB();
+      switchServer(serverId);
+    }
+
+    function openServerSettings() {
+      if (!currentServer) return;
+      document.getElementById('ssInputName').value = currentServer.name;
+      document.getElementById('ssCheckNeedsInvite').checked = !!currentServer.is_private;
+
+      if (currentUser.isCEO) {
+        document.getElementById('ssCeoAutoJoinGroup').classList.remove('hidden');
+        document.getElementById('ssCheckIsDefault').checked = !!currentServer.is_default;
+      } else {
+        document.getElementById('ssCeoAutoJoinGroup').classList.add('hidden');
+      }
+
+      setServerSettingsTab('overview');
+      openModal('serverSettingsModal');
+    }
+
+    function setServerSettingsTab(tab) {
+      ['overview', 'roles', 'mod'].forEach(t => {
+        document.getElementById(`ssContent-${t}`).classList.add('hidden');
+        document.getElementById(`sstab-${t}`).className = 'w-full text-left px-3 py-2 rounded text-discord-textMuted hover:bg-discord-hover hover:text-white';
+      });
+
+      document.getElementById(`ssContent-${tab}`).classList.remove('hidden');
+      document.getElementById(`sstab-${tab}`).className = 'w-full text-left px-3 py-2 rounded bg-discord-hover text-white';
+
+      if (tab === 'roles') renderRolesManagerList();
+    }
+
+    function renderRolesManagerList() {
+      const container = document.getElementById('rolesListContainer');
+      container.innerHTML = '';
+
+      currentRolesCache.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'p-3 bg-discord-black rounded-lg border border-discord-hover space-y-2';
+        const isDefault = ['owner', 'member'].includes(r.name.toLowerCase());
+
+        item.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <input type="color" value="${r.color || '#949ba4'}" onchange="updateRoleColor('${r.id}', this.value)" class="w-6 h-6 rounded cursor-pointer border-0 bg-transparent" />
+              <span class="font-bold text-sm text-discord-textHeader">${escapeHTML(r.name)}</span>
+            </div>
+            ${!isDefault ? `<button onclick="deleteCustomRole('${r.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold">Delete</button>` : `<span class="text-[10px] text-discord-textMuted uppercase font-bold">Default Role</span>`}
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    async function updateRoleColor(roleId, newColor) {
+      await client.from('server_roles').update({ color: newColor }).eq('id', roleId);
+      await loadServerRolesCache(currentServer.id);
+      renderMessages();
+      renderMemberSidebar();
+    }
+
+    async function addCustomRole() {
+      const name = prompt("Enter role name:", "Moderator");
+      if (!name) return;
+
+      await client.from('server_roles').insert({
+        server_id: currentServer.id,
+        name: name,
+        color: '#3498db'
+      });
+
+      await loadServerRolesCache(currentServer.id);
+      renderRolesManagerList();
+    }
+
+    async function deleteCustomRole(roleId) {
+      await client.from('server_roles').delete().eq('id', roleId);
+      await loadServerRolesCache(currentServer.id);
+      renderRolesManagerList();
+    }
+
+    async function saveServerSettings() {
+      const name = document.getElementById('ssInputName').value.trim();
+      const isPrivate = document.getElementById('ssCheckNeedsInvite').checked;
+      const isDefault = currentUser.isCEO ? document.getElementById('ssCheckIsDefault').checked : currentServer.is_default;
+
+      await client.from('servers').update({
+        name: name,
+        is_private: isPrivate,
+        is_default: isDefault
+      }).eq('id', currentServer.id);
+
+      showToast("Server settings saved!", "success");
+      closeModal('serverSettingsModal');
+      await loadServersFromDB();
+    }
+
+    async function deleteCurrentServer() {
+      openConfirmModal("Delete Server", "This action cannot be undone. Delete server?", async () => {
+        await client.from('servers').delete().eq('id', currentServer.id);
+        showToast("Server deleted.", "success");
+        closeModal('serverSettingsModal');
+        await loadServersFromDB();
+        switchServer('home');
+      });
+    }
+
+    // =========================================================================
+    // 12. GROUP DMS & FRIENDS
     // =========================================================================
     async function handleCreateGroupDM() {
       const name = document.getElementById('groupDmNameInput').value.trim() || 'Group DM';
@@ -2363,7 +2645,6 @@
       const container = document.getElementById('dmList');
       container.innerHTML = '';
 
-      // Group DMs
       groupDms.forEach(g => {
         const item = document.createElement('div');
         item.onclick = () => openGroupDMChannel(g.id, g.name);
@@ -2377,7 +2658,6 @@
         container.appendChild(item);
       });
 
-      // Individual DMs
       dms.forEach(d => {
         const item = document.createElement('div');
         item.onclick = () => openDMChannel(d.partnerId);
@@ -2389,7 +2669,7 @@
               <div class="w-8 h-8 rounded-full bg-discord-blurple flex items-center justify-center font-bold text-white text-xs">DM</div>
               <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-discord-green border-2 border-discord-sidebar"></div>
             </div>
-            <span class="text-sm font-bold text-discord-textHeader truncate">User DM</span>
+            <span class="text-sm font-bold text-discord-textHeader truncate">Direct Message</span>
           </div>
           ${d.unreadCount > 0 ? `<span class="bg-red-600 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full">${d.unreadCount}</span>` : ''}
         `;
@@ -2450,7 +2730,7 @@
     }
 
     // =========================================================================
-    // 11. CONTEXT MENU & USER PROFILE & CATEGORY MODAL
+    // 13. CONTEXT MENU & MODALS & UTILITY FUNCTIONS
     // =========================================================================
     function showContextMenu(e, member) {
       e.preventDefault();
@@ -2475,13 +2755,8 @@
       document.getElementById('customContextMenu').classList.add('hidden');
     });
 
-    function ctxViewProfile() {
-      if (ctxTargetUser) openUserProfileModal(ctxTargetUser.user_id);
-    }
-
-    function ctxMessageUser() {
-      if (ctxTargetUser) openDMChannel(ctxTargetUser.user_id);
-    }
+    function ctxViewProfile() { if (ctxTargetUser) openUserProfileModal(ctxTargetUser.user_id); }
+    function ctxMessageUser() { if (ctxTargetUser) openDMChannel(ctxTargetUser.user_id); }
 
     async function openUserProfileModal(userId) {
       const { data: profile } = await client.from('profiles').select('*').eq('id', userId).single();
@@ -2494,7 +2769,7 @@
       const dot = document.getElementById('profileModalStatusDot');
       dot.className = `absolute bottom-1 right-1 w-4 h-4 rounded-full ${getPresenceDotClass(profile.presence)} border-2 border-discord-sidebar`;
 
-      if (profile.username === 'CEO' || userId === currentUser.id && currentUser.isCEO) {
+      if (profile.username === 'CEO' || (userId === currentUser.id && currentUser.isCEO)) {
         document.getElementById('profileModalCeoBadge').classList.remove('hidden');
       } else {
         document.getElementById('profileModalCeoBadge').classList.add('hidden');
@@ -2514,9 +2789,67 @@
         type: 'text'
       });
 
-      showToast("Category & channel created!", "success");
+      showToast("Category created!", "success");
       closeModal('createCategoryModal');
       await loadServerChannels(currentServer.id);
+    }
+
+    async function handleCreateChannel() {
+      const name = document.getElementById('newChannelName').value.trim();
+      const type = document.getElementById('newChannelType').value;
+      const cat = document.getElementById('newChannelCategory').value.trim() || 'Text Channels';
+      const slowmode = parseInt(document.getElementById('newChannelSlowmode').value) || 0;
+
+      if (!name || !currentServer) return showToast("Channel name required.", "danger");
+
+      await client.from('channels').insert({
+        server_id: currentServer.id,
+        name: name,
+        type: type,
+        category_name: cat,
+        slowmode: slowmode
+      });
+
+      showToast("Channel created!", "success");
+      closeModal('createChannelModal');
+      await loadServerChannels(currentServer.id);
+    }
+
+    function openChannelSettings(chanId) {
+      const chan = currentServerChannels.find(c => c.id === chanId);
+      if (!chan) return;
+
+      document.getElementById('csInputName').value = chan.name;
+      document.getElementById('csInputCategory').value = chan.category_name || 'Text Channels';
+      document.getElementById('csSelectSlowmode').value = chan.slowmode || 0;
+
+      openModal('channelSettingsModal');
+    }
+
+    async function handleSaveChannelSettings() {
+      if (!currentChannel) return;
+      const name = document.getElementById('csInputName').value.trim();
+      const cat = document.getElementById('csInputCategory').value.trim();
+      const slow = parseInt(document.getElementById('csSelectSlowmode').value) || 0;
+
+      await client.from('channels').update({
+        name: name,
+        category_name: cat,
+        slowmode: slow
+      }).eq('id', currentChannel.id);
+
+      showToast("Channel settings saved!", "success");
+      closeModal('channelSettingsModal');
+      await loadServerChannels(currentServer.id);
+    }
+
+    async function handleDeleteChannel() {
+      openConfirmModal("Delete Channel", "Are you sure you want to delete this channel?", async () => {
+        await client.from('channels').delete().eq('id', currentChannel.id);
+        showToast("Channel deleted.", "success");
+        closeModal('channelSettingsModal');
+        await loadServerChannels(currentServer.id);
+      });
     }
 
     async function saveUserSettings() {
@@ -2542,9 +2875,6 @@
       closeModal('userSettingsModal');
     }
 
-    // =========================================================================
-    // 12. UTILITY & HELPER FUNCTIONS
-    // =========================================================================
     function setupImageFileListeners() {
       document.getElementById('msgImageFileInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -2624,6 +2954,23 @@
 
     function toggleMemberList() {
       document.getElementById('memberSidebar').classList.toggle('hidden');
+    }
+
+    function openInviteModal() {
+      if (!currentServer) return;
+      document.getElementById('inviteCodeInput').value = currentServer.id;
+      openModal('inviteModal');
+    }
+
+    function copyInviteCode() {
+      const val = document.getElementById('inviteCodeInput').value;
+      const dummy = document.createElement('textarea');
+      dummy.value = val;
+      document.body.appendChild(dummy);
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+      showToast("Invite code copied to clipboard!", "success");
     }
 
     function escapeHTML(str) {
